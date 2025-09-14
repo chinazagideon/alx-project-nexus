@@ -1,4 +1,4 @@
-# Project Nexus: Job Portal For Recruiters and Talents🚀
+# Project Nexus: Job Portal For Recruiters and Talents
 
 ## Overview
 
@@ -71,4 +71,4 @@ The API endpoints are fully documented using **Swagger/OpenAPI**. You can access
 <!-- A huge thank you to my mentors: **Cole, Faith, and Amanuel**, for their invaluable guidance and feedback throughout the program. Their support was instrumental in the successful completion of this project. -->
 
 * **Project Review Dates:** August 11th – 18th, 2025
-* **Mentor Contact:** @Cohort 1-TL-ProDev-BE Mentor on Discord
+<!-- * **Mentor Contact:** @Cohort 1-TL-ProDev-BE Mentor on Discord -->
