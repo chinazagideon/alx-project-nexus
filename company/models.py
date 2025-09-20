@@ -2,7 +2,7 @@
 Models for the company
 """
 from django.db import models
-from user.models import User
+from user.models.models import User
 from address.models import Address
 
 class Company(models.Model):
@@ -11,8 +11,8 @@ class Company(models.Model):
     """
     name = models.CharField(max_length=255, null=False, blank=False)
     description = models.TextField(null=True, blank=True)
-    user_id = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
-    address_id = models.ForeignKey(Address, on_delete=models.CASCADE, null=False, blank=False)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
+    # address = models.ForeignKey(Address, on_delete=models.CASCADE, null=False, blank=False)
     website = models.URLField(null=True, blank=True)
     contact_details = models.CharField(max_length=255, null=True, blank=True)
     status = models.BooleanField(default=True)
