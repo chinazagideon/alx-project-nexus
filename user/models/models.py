@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from enum import Enum
 from django.core.validators import validate_email
+from promotion.models import register_promotable, PromotionType
 
 class UserRole(models.TextChoices):
     """
@@ -19,6 +20,7 @@ class UserStatus(models.TextChoices):
     INACTIVE = 'inactive', 'Inactive'
     PENDING = 'pending', 'Pending'
 
+@register_promotable(PromotionType.TALENT, 'user', 'user')
 class User(AbstractUser):
     """
     User model for the job portal
@@ -30,6 +32,8 @@ class User(AbstractUser):
     role = models.CharField(max_length=30, choices=UserRole.choices, null=False, blank=False)
     phone = models.CharField(max_length=30, null=True, blank=True)
     status = models.CharField(max_length=30, choices=UserStatus.choices, default=UserStatus.PENDING)
+    created_at = models.DateTimeField(auto_now_add=True,)
+    updated_at = models.DateTimeField(auto_now=True,)
 
     USERNAME_FIELD = 'username'
     REQUIRED_FIELDS = ['first_name', 'last_name', 'role', 'phone']
