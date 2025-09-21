@@ -19,7 +19,7 @@ services:
       - key: REDIS_URL
         fromService:
           type: redis
-          name: redis-service
+          name: redis-service-6sf2
           property: connectionString
       - key: DB_NAME
         fromDatabase:
@@ -44,12 +44,12 @@ services:
       - key: CELERY_BROKER_URL
         fromService:
           type: redis
-          name: redis-service
+          name: redis-service-6sf2
           property: connectionString
       - key: CELERY_RESULT_BACKEND
         fromService:
           type: redis
-          name: redis-service
+          name: redis-service-6sf2
           property: connectionString
       - key: DATABASE_URL
         fromDatabase:
@@ -77,17 +77,17 @@ services:
       - key: REDIS_URL
         fromService:
           type: redis
-          name: redis-service
+          name: redis-service-6sf2
           property: connectionString
       - key: CELERY_BROKER_URL
         fromService:
           type: redis
-          name: redis-service
+          name: redis-service-6sf2
           property: connectionString
       - key: CELERY_RESULT_BACKEND
         fromService:
           type: redis
-          name: redis-service
+          name: redis-service-6sf2
           property: connectionString
       - key: DB_NAME
         fromDatabase:
@@ -115,7 +115,7 @@ services:
       - source: 10.0.0.0/8
       - source: 0.0.0.0/0
       - source: 192.168.0.0/16
-    name: redis-service
+    name: redis-service-6sf2
     plan: free
 
 databases:
