@@ -31,6 +31,9 @@ UPLOAD_MODEL = "upload.Upload"
 DJANGO_SETTINGS_MODULE="job_portal.settings_test"
 
 SPECTACULAR_SETTINGS = {
+    'TITLE': 'Connect Hire API Documentation',
+    'DESCRIPTION': 'API documentation for Connect Hire endpoints and usage.  (ALX PROJECT NEXUS)',
+    'VERSION': 'v1',
     'COMPONENT_SPLIT_REQUEST': True,
     'SORT_OPERATIONS': False,
     'TAGS': [
@@ -44,6 +47,12 @@ SPECTACULAR_SETTINGS = {
     ]
 }
 
+# REST_FRAMEWORK.update({
+#     "DEFAULT_VERSIONING_CLASS": "rest_framework.versioning.URLPathVersioning",
+#     "DEFAULT_VERSION": "v1",
+#     "ALLOWED_VERSIONS": ["v1"],
+#     "VERSION_PARAM": "version",  # matches the <version> URL kwarg
+# })
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
