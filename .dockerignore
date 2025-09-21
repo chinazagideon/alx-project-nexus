@@ -1,0 +1,17 @@
+venv/
+.git/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.sqlite3
+*.log
+node_modules/
+.env
+.env.*
+.idea/
+.vscode/
+.coverage
+htmlcov/
+staticfiles/
+media/

@@ -1,0 +1,79 @@
+version: "3.9"
+
+services:
+  connect-api:
+    build: .
+    # image: bill25concept/connect-hire:1.0.0  
+    container_name: connect-api
+    # command: /entrypoint.sh
+    env_file:
+      - ./.env
+    volumes:
+      - ./:/app:delegated
+    environment:
+      DJANGO_DEBUG: "true"
+      DB_NAME: ${DB_NAME:-connecthire}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_HOST: ${DB_HOST:-pgsql}
+      DB_PORT: ${DB_PORT:-5432}
+      REDIS_URL: redis://redis:6379/1
+      DJANGO_SETTINGS_MODULE: job_portal.settings
+    command: sh -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
+    ports:
+      - "8000:8000"
+    depends_on:
+      - pgsql
+      - redis
+    networks:
+      - connect-hire-network
+  pgsql:
+    image: postgres:16-alpine
+    container_name: pgsql_db
+    environment:
+      POSTGRES_DB: ${DB_NAME:-connecthire} 
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-postgres}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      connect-hire-network:
+        aliases:
+          -  db
+  redis:
+    image: redis:7-alpine
+    container_name: redis-server
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redisdata:/data
+    networks:
+      - connect-hire-network
+  db-seed:
+    build: .
+    container_name: seed-server
+    command: /docker/seed-data.sh
+    env_file:
+      - ./.env
+    environment:
+      DJANGO_DEBUG: "false"
+      DB_NAME: ${DB_NAME:-connecthire}
+      DB_USER: ${DB_USER:-postgres}
+      DB_PASSWORD: ${DB_PASSWORD:-postgres}
+      DB_HOST: ${DB_HOST:-pgsql}
+      DB_PORT: ${DB_PORT:-5432}
+      REDIS_URL: redis://redis:6379/1
+      RESET_DATA: ${RESET_DATA:-false}
+    depends_on:
+      - pgsql
+      - redis
+    profiles:
+      - db-seed
+    networks:
+      - connect-hire-network
+
+volumes:
+  pgdata:
+  redisdata:
+networks:
+  connect-hire-network:
+    driver: bridge
