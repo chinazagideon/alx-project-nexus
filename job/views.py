@@ -73,8 +73,67 @@ class JobViewSet(viewsets.ModelViewSet):
 
 # Search API endpoints
 @extend_schema(
-    operation_id='job_search',
-    summary='Advanced Job Search',
+    operation_id='job_search_get',
+    summary='Advanced Job Search (GET)',
+    description='Search jobs with advanced filtering, sorting, and pagination options using query parameters',
+    responses={
+        200: JobSearchResponseSerializer,
+        400: OpenApiTypes.OBJECT,
+    },
+    parameters=[
+        OpenApiParameter(
+            name='query',
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.QUERY,
+            description='Search query for title, description, company, location',
+            examples=[
+                OpenApiExample('Basic search', value='python developer'),
+                OpenApiExample('Location search', value='remote python developer'),
+            ]
+        ),
+        OpenApiParameter(
+            name='location',
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.QUERY,
+            description='Filter by location',
+            examples=[OpenApiExample('Location filter', value='San Francisco')]
+        ),
+        OpenApiParameter(
+            name='company',
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.QUERY,
+            description='Filter by company name',
+            examples=[OpenApiExample('Company filter', value='Google')]
+        ),
+        OpenApiParameter(
+            name='sort_by',
+            type=OpenApiTypes.STR,
+            location=OpenApiParameter.QUERY,
+            description='Sort results by',
+            enum=['relevance', 'date_posted', 'salary', 'company', 'title'],
+            default='relevance'
+        ),
+        OpenApiParameter(
+            name='page',
+            type=OpenApiTypes.INT,
+            location=OpenApiParameter.QUERY,
+            description='Page number',
+            default=1
+        ),
+        OpenApiParameter(
+            name='page_size',
+            type=OpenApiTypes.INT,
+            location=OpenApiParameter.QUERY,
+            description='Results per page (max 100)',
+            default=20
+        ),
+    ],
+    tags=['jobs'],
+    methods=['GET']
+)
+@extend_schema(
+    operation_id='job_search_post',
+    summary='Advanced Job Search (POST)',
     description='Search jobs with advanced filtering, sorting, and pagination options',
     request=JobSearchSerializer,
     responses={
@@ -161,10 +220,11 @@ class JobViewSet(viewsets.ModelViewSet):
             request_only=True,
         ),
     ],
-    tags=['Job Search']
+    tags=['jobs'],
+    methods=['POST']
 )
 @api_view(['GET', 'POST'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def job_search(request):
     """
     Advanced job search endpoint with comprehensive filtering and sorting options.
@@ -196,7 +256,7 @@ def job_search(request):
 
 
 @extend_schema(
-    operation_id='search_suggestions',
+    operation_id='job_search_suggestions',
     summary='Get Search Suggestions',
     description='Get auto-complete suggestions based on partial query input',
     parameters=[
@@ -242,10 +302,10 @@ def job_search(request):
             }
         }
     },
-    tags=['Job Search']
+    tags=['jobs']
 )
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def search_suggestions(request):
     """
     Get auto-complete search suggestions based on partial query input.
@@ -265,7 +325,7 @@ def search_suggestions(request):
 
 
 @extend_schema(
-    operation_id='search_facets',
+    operation_id='job_search_facets',
     summary='Get Search Facets',
     description='Get available filter options and their counts for search refinement',
     responses={
@@ -334,10 +394,10 @@ def search_suggestions(request):
             }
         }
     },
-    tags=['Job Search']
+    tags=['jobs']
 )
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def search_facets(request):
     """
     Get available filter options and their counts for search refinement.
@@ -362,7 +422,7 @@ def search_facets(request):
 
 
 @extend_schema(
-    operation_id='job_stats',
+    operation_id='job_statistics',
     summary='Get Job Statistics',
     description='Get overall job portal statistics and metrics',
     responses={
@@ -404,10 +464,10 @@ def search_facets(request):
             }
         }
     },
-    tags=['Job Search']
+    tags=['jobs']
 )
 @api_view(['GET'])
-@permission_classes([AllowAny])
+@permission_classes([IsAuthenticated])
 def job_stats(request):
     """
     Get overall job portal statistics and metrics.
