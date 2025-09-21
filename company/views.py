@@ -4,6 +4,7 @@ from .models import Company
 from .serializers import CompanySerializer
 from rest_framework.permissions import IsAuthenticated
 from core.pagination import DefaultPagination
+from drf_spectacular.utils import extend_schema
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
@@ -21,3 +22,15 @@ class CompanyViewSet(viewsets.ModelViewSet):
         """
 
         return super().get_queryset()
+    
+    @extend_schema(
+        summary="Create company",
+        description="Create a new company",
+        responses={200: CompanySerializer},
+        request=CompanySerializer,
+    )
+    def create(self, request, *args, **kwargs):
+        """
+        Create a company
+        """
+        pass

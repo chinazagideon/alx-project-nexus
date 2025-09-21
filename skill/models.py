@@ -30,6 +30,7 @@ class UserSkill(models.Model):
     """
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE, null=False, blank=False)
+    # experience = models.IntegerField()
 
     def __str__(self):
         return self.user.username

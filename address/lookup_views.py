@@ -23,7 +23,7 @@ from drf_spectacular.types import OpenApiTypes
     responses={
         200: CountryLookupSerializer(many=True),
     },
-    tags=['Address Lookup']
+    tags=['addresses']
 )
 @api_view(['GET'])
 @permission_classes([IsAuthenticated])
@@ -51,7 +51,7 @@ def get_countries(request):
     responses={
         200: StateLookupSerializer(many=True),
     },
-    tags=['Address Lookup']
+    tags=['addresses']
 )
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -92,7 +92,7 @@ def get_states_by_country(request):
     responses={
         200: CityLookupSerializer(many=True),
     },
-    tags=['Address Lookup']
+    tags=['addresses']
 )
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -157,7 +157,7 @@ def get_cities_by_state(request):
             }
         }
     },
-    tags=['Address Lookup']
+    tags=['addresses']
 )
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -200,7 +200,7 @@ def search_locations(request):
             }
         }
     },
-    tags=['Address Validation']
+    tags=['addresses']
 )
 @api_view(['POST'])
 @permission_classes([AllowAny])
@@ -276,7 +276,7 @@ def validate_address(request):
             }
         }
     },
-    tags=['Address Lookup']
+    tags=['addresses']
 )
 @api_view(['GET'])
 @permission_classes([AllowAny])
@@ -313,7 +313,7 @@ def get_address_hierarchy(request):
             }
         }
     },
-    tags=['Address Statistics']
+    tags=['addresses']
 )
 @api_view(['GET'])
 @permission_classes([AllowAny])
