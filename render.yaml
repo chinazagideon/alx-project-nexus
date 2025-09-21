@@ -64,27 +64,16 @@ services:
       - key: GEO_RESPONSE_HEADER
         value: "X-IP-Geolocation"
 
-  # The Background Worker for Celery
-  - type: worker
-    name: celery-worker
-    plan: free
-    env: python
+  # Scheduled background tasks
+  - type: cron
+    name: scheduled-tasks
+    schedule: "0 */6 * * *"  # Every 6 hours
     buildCommand: "./build.sh"
-    startCommand: "celery -A job_portal worker --loglevel=info"
+    startCommand: "python manage.py your_management_command"
     envVars:
       - key: DJANGO_SETTINGS_MODULE
         value: "job_portal.settings"
       - key: REDIS_URL
-        fromService:
-          type: redis
-          name: redis-service-6sf2
-          property: connectionString
-      - key: CELERY_BROKER_URL
-        fromService:
-          type: redis
-          name: redis-service-6sf2
-          property: connectionString
-      - key: CELERY_RESULT_BACKEND
         fromService:
           type: redis
           name: redis-service-6sf2
