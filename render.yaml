@@ -64,40 +64,6 @@ services:
       - key: GEO_RESPONSE_HEADER
         value: "X-IP-Geolocation"
 
-  # Scheduled background tasks
-  - type: cron
-    name: scheduled-tasks
-    schedule: "0 */6 * * *"  # Every 6 hours
-    buildCommand: "./build.sh"
-    startCommand: "python manage.py your_management_command"
-    envVars:
-      - key: DJANGO_SETTINGS_MODULE
-        value: "job_portal.settings"
-      - key: REDIS_URL
-        fromService:
-          type: redis
-          name: redis-service-6sf2
-          property: connectionString
-      - key: DB_NAME
-        fromDatabase:
-          name: iptracking-postgre-db
-          property: database
-      - key: DB_USER
-        fromDatabase:
-          name: iptracking-postgre-db
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: iptracking-postgre-db
-          property: password
-      - key: DB_HOST
-        fromDatabase:
-          name: iptracking-postgre-db
-          property: host
-      - key: DB_PORT
-        fromDatabase:
-          name: iptracking-postgre-db
-          property: port
   # The Redis Key-Value store as a message broker
   - type: redis
     ipAllowList:
