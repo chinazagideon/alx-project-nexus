@@ -23,23 +23,23 @@ services:
           property: connectionString
       - key: DB_NAME
         fromDatabase:
-          name: connect-hire-postgre-db
+          name: iptracking-postgre-db
           property: database
       - key: DB_USER
         fromDatabase:
-          name: connect-hire-postgre-db
+          name: iptracking-postgre-db
           property: user
       - key: DB_PASSWORD
         fromDatabase:
-          name: connect-hire-postgre-db
+          name: iptracking-postgre-db
           property: password
       - key: DB_HOST
         fromDatabase:
-          name: connect-hire-postgre-db
+          name: iptracking-postgre-db
           property: host
       - key: DB_PORT
         fromDatabase:
-          name: connect-hire-postgre-db
+          name: iptracking-postgre-db
           property: port
       - key: CELERY_BROKER_URL
         fromService:
@@ -53,7 +53,7 @@ services:
           property: connectionString
       - key: DATABASE_URL
         fromDatabase:
-          name: connect-hire-postgre-db
+          name: iptracking-postgre-db
           property: connectionString
       - key: GEO_BACKEND
         value: "django_ip_geolocation.backends.IPGeolocationAPI"
@@ -91,23 +91,23 @@ services:
           property: connectionString
       - key: DB_NAME
         fromDatabase:
-          name: connect-hire-postgre-db
+          name: iptracking-postgre-db
           property: database
       - key: DB_USER
         fromDatabase:
-          name: connect-hire-postgre-db
+          name: iptracking-postgre-db
           property: user
       - key: DB_PASSWORD
         fromDatabase:
-          name: connect-hire-postgre-db
+          name: iptracking-postgre-db
           property: password
       - key: DB_HOST
         fromDatabase:
-          name: connect-hire-postgre-db
+          name: iptracking-postgre-db
           property: host
       - key: DB_PORT
         fromDatabase:
-          name: connect-hire-postgre-db
+          name: iptracking-postgre-db
           property: port
   # The Redis Key-Value store as a message broker
   - type: redis
@@ -119,5 +119,5 @@ services:
     plan: free
 
 databases:
-  - name: connect-hire-postgre-db
+  - name: iptracking-postgre-db
     plan: free

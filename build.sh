@@ -1,6 +1,16 @@
 #!/usr/bin/env bash
-set -e
+# exit on error
+set -o errexit
 
-python --version
-pip install --upgrade pip
+# Create logs directory
+mkdir -p logs
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Collect static files
+python manage.py collectstatic --noinput
+
+# Run database migrations
+python manage.py migrate
+
