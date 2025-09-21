@@ -2,7 +2,7 @@
 Models for the address
 """
 from django.db import models
-from user.models.models import User
+from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 

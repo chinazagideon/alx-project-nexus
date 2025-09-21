@@ -1,6 +1,6 @@
 from django.db import models
 from job.models import Job
-from user.models.models import User
+from django.conf import settings
 
 class Skill(models.Model):
     """
@@ -28,7 +28,7 @@ class UserSkill(models.Model):
     """
     User skill model for the job portal
     """
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False, blank=False)
     skill = models.ForeignKey(Skill, on_delete=models.CASCADE, null=False, blank=False)
     # experience = models.IntegerField()
 

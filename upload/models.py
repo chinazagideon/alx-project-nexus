@@ -2,7 +2,7 @@ from django.db import models
 from django.contrib.contenttypes.models import ContentType
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.core.validators import FileExtensionValidator, ValidationError
-from user.models.models import User
+from django.conf import settings
 
 
 def validate_file_size(value):
@@ -61,7 +61,7 @@ class Upload(models.Model):
     )
 
     # User that uploaded the upload
-    uploaded_by = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False, related_name="uploads")
+    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False, blank=False, related_name="uploads")
 
     # Generic target uploaded to (Job, User profile, etc.)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)

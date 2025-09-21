@@ -1,6 +1,6 @@
 from django.db import models
 from job.models import Job
-from user.models.models import User
+from django.conf import settings
 from upload.models import Upload
 
 class ApplicationStatus(models.TextChoices):
@@ -18,7 +18,7 @@ class Application(models.Model):
     Application model for the job portal
     """
     job = models.ForeignKey(Job, on_delete=models.CASCADE, null=False, blank=False)
-    user = models.ForeignKey(User, on_delete=models.CASCADE, null=False, blank=False)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False, blank=False)
     status = models.CharField(max_length=30, choices=ApplicationStatus.choices, default=ApplicationStatus.APPLIED)
     date_applied = models.DateTimeField(auto_now_add=True)
     cover_letter = models.TextField(null=True, blank=True)

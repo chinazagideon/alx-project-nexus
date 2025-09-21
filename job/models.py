@@ -3,7 +3,7 @@ Models for the job portal
 """
 
 from django.db import models
-from user.models.models import User
+from django.conf import settings
 from company.models import Company
 from address.models import Address
 from promotion.models import register_promotable, PromotionType

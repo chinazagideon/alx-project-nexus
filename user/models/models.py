@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from enum import Enum
 from django.core.validators import validate_email
-from promotion.models import register_promotable, PromotionType
 
 class UserRole(models.TextChoices):
     """
@@ -20,7 +19,6 @@ class UserStatus(models.TextChoices):
     INACTIVE = 'inactive', 'Inactive'
     PENDING = 'pending', 'Pending'
 
-@register_promotable(PromotionType.TALENT, 'user', 'user')
 class User(AbstractUser):
     """
     User model for the job portal
