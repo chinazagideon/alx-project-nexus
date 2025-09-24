@@ -29,6 +29,6 @@ USER appuser
 # Environment defaults for production
 ENV DJANGO_DEBUG=false
 
-EXPOSE 8000
+EXPOSE 8001
 
 CMD ["/entrypoint.sh"]

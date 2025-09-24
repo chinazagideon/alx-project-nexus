@@ -30,6 +30,7 @@ class User(AbstractUser):
     role = models.CharField(max_length=30, choices=UserRole.choices, null=False, blank=False)
     phone = models.CharField(max_length=30, null=True, blank=True)
     status = models.CharField(max_length=30, choices=UserStatus.choices, default=UserStatus.PENDING)
+    is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True,)
     updated_at = models.DateTimeField(auto_now=True,)
 

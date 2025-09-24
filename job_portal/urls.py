@@ -19,6 +19,8 @@ from django.urls import path, include
 from django.views.generic import RedirectView
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView, SpectacularRedocView
 from core.views import health
+from two_factor.urls import urlpatterns as two_factor_patterns
+
 urlpatterns = [
     # Root -> ReDoc
     path('', RedirectView.as_view(pattern_name='redoc', permanent=False)),
@@ -37,4 +39,7 @@ urlpatterns = [
 
     # Health check
     path('health/', health, name='health'),
+
+    path("mfa/", include(two_factor_patterns[0])),
+
 ]
