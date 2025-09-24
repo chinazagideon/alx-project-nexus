@@ -3,15 +3,16 @@ version: "3.9"
 services:
   connect-api:
     build: .
-    # image: bill25concept/connect-hire:1.0.0  
     container_name: connect-api
     # command: /entrypoint.sh
+    
+    ports:
+      - "${APP_PORT:-8001}:8001"
     env_file:
       - ./.env
       - ./.env.prod
-    volumes:
-      - ./:/app:delegated
     environment:
+      APP_PORT: ${APP_PORT:-8001}
       DJANGO_DEBUG: "true"
       DB_NAME: ${DB_NAME:-connecthire}
       DB_USER: ${DB_USER:-postgres}
@@ -20,14 +21,14 @@ services:
       DB_PORT: ${DB_PORT:-5432}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/1}
       DJANGO_SETTINGS_MODULE: job_portal.settings
-    command: sh -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8000"
-    ports:
-      - "8000:8000"
+    command: sh -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8001"
     depends_on:
       - pgsql
       - redis
     networks:
       - connect-hire-network
+    volumes:
+      - ./:/app:delegated
   pgsql:
     image: postgres:16-alpine
     container_name: pgsql_db
@@ -69,6 +70,34 @@ services:
       - redis
     profiles:
       - db-seed
+    networks:
+      - connect-hire-network
+    
+  celery-worker:
+    build: .
+    command: sh -c "celery -A job_portal worker -l info"
+    depends_on:
+      - connect-api
+      - redis
+    env_file:
+      - ./.env
+      - ./.env.prod
+    volumes:
+      - ./:/app:delegated
+    networks:
+      - connect-hire-network
+
+  celery-beat:
+    build: .
+    command: sh -c "celery -A job_portal beat -l info"
+    depends_on:
+      - connect-api
+      - redis
+    env_file:
+      - ./.env
+      - ./.env.prod
+    volumes:
+      - ./:/app:delegated
     networks:
       - connect-hire-network
 

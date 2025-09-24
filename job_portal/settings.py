@@ -86,9 +86,13 @@ INSTALLED_APPS = [
     "django_filters",
     "drf_spectacular",
     "corsheaders",
+    "django_otp",
+    "django_otp.plugins.otp_totp",
+    "two_factor",
+    "django_celery_beat",
+    "user.apps.UsersConfig",
 
     "core",
-    "user",
     "job",
     "api",
     "company",
@@ -103,6 +107,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "django_otp.middleware.OTPMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
     'core.middleware.RequestIDMiddleware',
@@ -234,6 +239,28 @@ SIMPLE_JWT = {
 CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", "false").lower() == "true"
 CORS_ALLOWED_ORIGINS = [o for o in os.getenv("CORS_ALLOWED_ORIGINS", "").split(",") if o]
 
+# CORS configuration for Next.js frontend
+CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOWED_ORIGIN_REGEXES = [
+    r"^http://localhost:\d+$",  # Next.js dev server
+    r"^http://127\.0\.0\.1:\d+$",  # Next.js dev server alternative
+    r"^https://.*\.vercel\.app$",  # Vercel deployments
+    r"^https://.*\.netlify\.app$",  # Netlify deployments
+]
+
+# Additional CORS headers for Next.js
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
+]
+
 # Redis cache (optional in dev)
 CACHES = {
     "default": {
@@ -291,3 +318,11 @@ LOGGING = {
     },
     "root": {"handlers": ["console"], "level": LOG_LEVEL},
 }
+
+
+CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", default="redis://redis:6379/0")
+CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", default="redis://redis:6379/0")
+CELERY_TASK_ALWAYS_EAGER = os.getenv("CELERY_TASK_ALWAYS_EAGER", default=False)
+CELERY_TIMEZONE = TIME_ZONE
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 30 * 60
