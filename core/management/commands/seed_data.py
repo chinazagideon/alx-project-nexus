@@ -296,26 +296,37 @@ class Command(BaseCommand):
             'Machine Learning Engineer', 'Cloud Architect', 'Security Engineer'
         ]
         
-        job_types = ['Full-time', 'Part-time', 'Contract', 'Internship']
-        experience_levels = ['Entry', 'Mid', 'Senior', 'Lead', 'Principal']
-        
         companies = list(Company.objects.all())
-        addresses = list(Address.objects.all())
+        cities = list(City.objects.all())
         
         for _ in range(count):
             company = random.choice(companies) if companies else None
-            address = random.choice(addresses) if addresses else None
+            city = random.choice(cities) if cities else None
             
-            if not company or not address:
+            if not company or not city:
                 continue  # Skip if we don't have required fields
+            
+            # Create realistic salary ranges
+            salary_min = random.randint(50000, 80000)
+            salary_max = random.randint(salary_min + 10000, 200000)
+            
+            # Create physical address as JSON
+            physical_address = {
+                'street': fake.street_address(),
+                'city': city.name,
+                'state': city.state.name,
+                'country': city.state.country.name,
+                'zip_code': fake.postcode()
+            }
                 
             Job.objects.create(
                 title=random.choice(job_titles),
                 description=fake.text(max_nb_chars=1000),
                 company=company,
-                address=address,
-                location=fake.city(),
-                salary_range=f"{random.randint(50000, 80000)}-{random.randint(80000, 200000)}",
+                city=city,
+                physical_address=physical_address,
+                salary_min=salary_min,
+                salary_max=salary_max,
                 close_date=timezone.make_aware(fake.date_time_between(start_date='now', end_date='+30d'))
             )
 

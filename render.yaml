@@ -5,7 +5,7 @@ services:
     plan: free
     env: python
     buildCommand: "./build.sh"
-    startCommand: "python manage.py migrate --noinput --run-syncdb && python manage.py collectstatic --noinput && gunicorn job_portal.wsgi:application --bind 0.0.0.0:$PORT --workers=3 --timeout=60"
+    startCommand: "python manage.py migrate --noinput --run-syncdb && python manage.py fix_city_nulls && python manage.py collectstatic --noinput && gunicorn job_portal.wsgi:application --bind 0.0.0.0:$PORT --workers=3 --timeout=60"
     healthCheckPath: "/health/"
     envVars:
       - key: DJANGO_DEBUG
