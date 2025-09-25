@@ -1,0 +1,25 @@
+[flake8]
+max-line-length = 127
+exclude = 
+    .git,
+    __pycache__,
+    .venv,
+    venv,
+    .env,
+    migrations,
+    .pytest_cache,
+    .coverage,
+    htmlcov,
+    .tox,
+    .mypy_cache,
+    .DS_Store
+ignore = 
+    E203,  # whitespace before ':'
+    E501,  # line too long (handled by black)
+    W503,  # line break before binary operator
+    E402,  # module level import not at top of file
+    F401,  # imported but unused (handled by isort)
+per-file-ignores =
+    __init__.py:F401
+    migrations/*:E501
+max-complexity = 10
