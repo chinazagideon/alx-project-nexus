@@ -38,7 +38,7 @@ class JobSerializer(serializers.ModelSerializer):
             'city',
             'city_name',
             'salary_min',
-            'salary_macontx',
+            'salary_max',
             'date_posted',
             'close_date',
             'updated_at',
