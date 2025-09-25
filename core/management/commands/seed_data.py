@@ -47,6 +47,12 @@ class Command(BaseCommand):
             default=50,
             help='Number of users to create (default: 50)',
         )
+        parser.add_argument(
+            '--admins',
+            type=int,
+            default=1,
+            help='Number of admins to create (default: 1)',
+        )
 
     def handle(self, *args, **options):
         if options['reset']:
@@ -59,7 +65,7 @@ class Command(BaseCommand):
         
         with transaction.atomic():
             # Create in dependency order
-            self.create_admin_account()
+            self.create_admin_account(options['admins'])
             self.create_skills(options['sample_size'])
             self.create_addresses(options['sample_size'])
             self.create_companies(options['companies'])
@@ -87,7 +93,7 @@ class Command(BaseCommand):
         Skill.objects.all().delete()
         User.objects.filter(is_superuser=False).delete()
 
-    def create_admin_account(self):
+    def create_admin_account(self, count):
         """Create a default admin account for testing"""
         admin_username = 'admin'
         admin_email = 'admin@example.com'
