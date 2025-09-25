@@ -40,7 +40,7 @@ This project is built on a modern, scalable backend stack. The architecture is d
 
 1.  **Clone the repository:**
     ```bash
-    git clone [https://github.com/your-username/your-repo-name.git](https://github.com/your-username/your-repo-name.git)
+    git clone [https://github.com/chinazagideon/alx-project-nexus.git](https://github.com/chinazagideon/alx-project-nexus.git)
     cd your-repo-name
     ```
 2.  **Set up the environment:**
