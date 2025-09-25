@@ -4,6 +4,45 @@ import django.db.models.deletion
 from django.db import migrations, models
 
 
+def populate_city_data(apps, schema_editor):
+    """Populate city_id for existing jobs"""
+    Job = apps.get_model('job', 'Job')
+    City = apps.get_model('address', 'City')
+    State = apps.get_model('address', 'State')
+    Country = apps.get_model('address', 'Country')
+    
+    # Get or create a default city
+    default_city = City.objects.first()
+    
+    if not default_city:
+        # Create a default country, state, and city if none exist
+        default_country, created = Country.objects.get_or_create(
+            name='United States',
+            defaults={'code': 'US'}
+        )
+        
+        default_state, created = State.objects.get_or_create(
+            name='Unknown State',
+            defaults={'country': default_country}
+        )
+        
+        default_city, created = City.objects.get_or_create(
+            name='Unknown City',
+            defaults={'state': default_state}
+        )
+    
+    # Update all jobs with null city_id
+    jobs_with_null_city = Job.objects.filter(city__isnull=True)
+    updated_count = jobs_with_null_city.update(city=default_city)
+    
+    print(f"Updated {updated_count} jobs with city_id")
+
+
+def reverse_populate_city_data(apps, schema_editor):
+    """Reverse migration - no-op"""
+    pass
+
+
 class Migration(migrations.Migration):
 
     dependencies = [
@@ -27,7 +66,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='job',
             name='city',
-            field=models.ForeignKey(default=None, on_delete=django.db.models.deletion.CASCADE, to='address.city'),
+            field=models.ForeignKey(null=True, blank=True, on_delete=django.db.models.deletion.CASCADE, to='address.city'),
         ),
         migrations.AddField(
             model_name='job',
@@ -44,4 +83,5 @@ class Migration(migrations.Migration):
             name='salary_min',
             field=models.DecimalField(blank=True, decimal_places=2, max_digits=10, null=True),
         ),
+        migrations.RunPython(populate_city_data, reverse_populate_city_data),
     ]
