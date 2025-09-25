@@ -98,7 +98,7 @@ jobs:
         REDIS_URL: redis://localhost:6379/0
 
     - name: Upload coverage reports
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v5
       with:
         file: ./coverage.xml
         flags: unittests
