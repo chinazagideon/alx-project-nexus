@@ -59,6 +59,7 @@ class Command(BaseCommand):
         
         with transaction.atomic():
             # Create in dependency order
+            self.create_admin_account()
             self.create_skills(options['sample_size'])
             self.create_addresses(options['sample_size'])
             self.create_companies(options['companies'])
@@ -85,6 +86,30 @@ class Command(BaseCommand):
         Country.objects.all().delete()
         Skill.objects.all().delete()
         User.objects.filter(is_superuser=False).delete()
+
+    def create_admin_account(self):
+        """Create a default admin account for testing"""
+        admin_username = 'admin'
+        admin_email = 'admin@example.com'
+        admin_password = 'admin123'
+        
+        if User.objects.filter(username=admin_username).exists():
+            self.stdout.write(self.style.WARNING(f'Admin account "{admin_username}" already exists'))
+            return
+        
+        User.objects.create_superuser(
+            username=admin_username,
+            email=admin_email,
+            password=admin_password,
+            first_name='Admin',
+            last_name='User',
+            role='admin',
+            phone='1234567890'
+        )
+        
+        self.stdout.write(
+            self.style.SUCCESS(f'Admin created: {admin_username}/{admin_password}')
+        )
 
     def create_skills(self, count):
         """Create realistic skills"""

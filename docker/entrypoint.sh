@@ -1,7 +1,8 @@
 #!/usr/bin/env sh
 set -e
 
-python manage.py migrate --noinput
+echo "Running database migrations..."
+python manage.py migrate --noinput --run-syncdb
 python manage.py collectstatic --noinput || true
 
 exec gunicorn job_portal.wsgi:application \
