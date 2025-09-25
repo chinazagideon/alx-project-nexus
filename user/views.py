@@ -8,11 +8,13 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from core.pagination import DefaultPagination
 from core.permissions import IsOwnerOrStaffForList, IsAdminOnly
+from core.response import APIResponse, SuccessResponseSerializer, ErrorResponseSerializer, ValidationErrorResponseSerializer
+from core.mixins import StandardResponseMixin
 from drf_spectacular.utils import extend_schema
 from drf_spectacular.types import OpenApiTypes
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class UserViewSet(StandardResponseMixin, viewsets.ModelViewSet):
     """
     User viewset for both public registration and authenticated operations
     """
@@ -56,8 +58,8 @@ class UserViewSet(viewsets.ModelViewSet):
         tags=["Auth"],
         request=UserRegistrationSerializer,
         responses={
-            201: UserSerializer,
-            400: OpenApiTypes.OBJECT,
+            201: SuccessResponseSerializer,
+            400: ValidationErrorResponseSerializer,
         },
     )
     def create(self, request, *args, **kwargs):
@@ -69,14 +71,20 @@ class UserViewSet(viewsets.ModelViewSet):
         user = serializer.save()
         # Return user data without password
         response_serializer = UserSerializer(user)
-        return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+        return APIResponse.created(
+            data=response_serializer.data,
+            message="User registered successfully"
+        )
 
     @extend_schema(
         operation_id="user_profile_get",
         summary="Get current user profile",
         description="Get the current authenticated user's profile",
         tags=["users"],
-        responses={200: UserSerializer},
+        responses={
+            200: SuccessResponseSerializer,
+            401: ErrorResponseSerializer,
+        },
     )
     @action(detail=False, methods=['get'], url_path='profile')
     def profile(self, request):
@@ -84,7 +92,10 @@ class UserViewSet(viewsets.ModelViewSet):
         Get current user's profile
         """
         serializer = self.get_serializer(request.user)
-        return Response(serializer.data)
+        return APIResponse.success(
+            data=serializer.data,
+            message="User profile retrieved successfully"
+        )
 
     @extend_schema(
         operation_id="user_profile_update_put",
@@ -92,7 +103,11 @@ class UserViewSet(viewsets.ModelViewSet):
         description="Update the current authenticated user's profile (full update)",
         tags=["users"],
         request=UserSerializer,
-        responses={200: UserSerializer, 400: OpenApiTypes.OBJECT},
+        responses={
+            200: SuccessResponseSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponseSerializer,
+        },
     )
     @action(detail=False, methods=['put'], url_path='profile')
     def update_profile_put(self, request):
@@ -102,7 +117,10 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(request.user, data=request.data, partial=False)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        return APIResponse.success(
+            data=serializer.data,
+            message="User profile updated successfully"
+        )
 
     @extend_schema(
         operation_id="user_profile_update_patch",
@@ -110,7 +128,11 @@ class UserViewSet(viewsets.ModelViewSet):
         description="Update the current authenticated user's profile (partial update)",
         tags=["users"],
         request=UserSerializer,
-        responses={200: UserSerializer, 400: OpenApiTypes.OBJECT},
+        responses={
+            200: SuccessResponseSerializer,
+            400: ValidationErrorResponseSerializer,
+            401: ErrorResponseSerializer,
+        },
     )
     @action(detail=False, methods=['patch'], url_path='profile')
     def update_profile_patch(self, request):
@@ -120,14 +142,20 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return Response(serializer.data)
+        return APIResponse.success(
+            data=serializer.data,
+            message="User profile updated successfully"
+        )
     
     @extend_schema(
         # exclude=True,
         summary="List users",
         description="List users (admin only)",
         tags=["users"],
-        responses={200: UserSerializer(many=True)},
+        responses={
+            200: SuccessResponseSerializer,
+            403: ErrorResponseSerializer,
+        },
     )
     def list(self, request, *args, **kwargs):
         """

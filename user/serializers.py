@@ -60,6 +60,7 @@ class UserSerializer(serializers.ModelSerializer):
 
         return attrs
         
+    
     def create(self, validated_data):
         """
         Create a new user with hashed password

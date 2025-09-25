@@ -11,6 +11,8 @@ from rest_framework.filters import SearchFilter, OrderingFilter
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
+from core.response import APIResponse
+from core.mixins import StandardAPIViewMixin
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from rest_framework.pagination import PageNumberPagination
@@ -246,12 +248,16 @@ def job_search(request):
         
         # Serialize response
         serializer = JobSearchResponseSerializer(results)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        return APIResponse.success(
+            data=serializer.data,
+            message="Job search completed successfully"
+        )
     
     except Exception as e:
-        return Response(
-            {'error': str(e), 'message': 'Search failed'},
-            status=status.HTTP_400_BAD_REQUEST
+        return APIResponse.error(
+            message="Job search failed",
+            errors={"search_error": str(e)},
+            status_code=status.HTTP_400_BAD_REQUEST
         )
 
 

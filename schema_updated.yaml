@@ -1,0 +1,5214 @@
+openapi: 3.0.3
+info:
+  title: Connect Hire API Documentation
+  version: v1
+  description: API documentation for Connect Hire endpoints and usage.  (ALX PROJECT
+    NEXUS)
+paths:
+  /api/auth/login/:
+    post:
+      operationId: auth_login
+      description: |-
+        Takes a set of user credentials and returns an access and refresh JSON web
+        token pair to prove the authentication of those credentials.
+      summary: Login (obtain access & refresh)
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenObtainPairRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenObtainPair'
+          description: ''
+  /api/auth/refresh/:
+    post:
+      operationId: auth_refresh
+      description: |-
+        Takes a refresh type JSON web token and returns an access type JSON web
+        token if the refresh token is valid.
+      summary: Refresh access token
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenRefreshRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenRefresh'
+          description: ''
+  /api/auth/logout/:
+    post:
+      operationId: auth_logout
+      description: |-
+        Takes a token and blacklists it. Must be used with the
+        `rest_framework_simplejwt.token_blacklist` app installed.
+      summary: Logout (blacklist refresh token)
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TokenBlacklistRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/TokenBlacklistRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/TokenBlacklistRequest'
+        required: true
+      responses:
+        '200':
+          description: No response body
+  /api/auth/logout-all/:
+    post:
+      operationId: auth_logout_all
+      description: Logout all devices for the user
+      summary: Logout from all devices
+      tags:
+      - Auth
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: ''
+  /api/admin/users/:
+    get:
+      operationId: admin_user_list
+      description: Get all users in the system (admin only)
+      summary: List all users (Admin only)
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - Admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAdminUserList'
+          description: ''
+    post:
+      operationId: admin_user_create
+      description: Create a new user with any role including admin (admin only)
+      summary: Create user (Admin only)
+      tags:
+      - Admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUserCreateRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AdminUserCreateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdminUserCreateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUser'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/admin/users/{id}/:
+    put:
+      operationId: admin_user_update
+      description: Update user information including role assignment (admin only)
+      summary: Update user (Admin only)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - Admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AdminUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdminUserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUser'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    patch:
+      operationId: admin_user_partial_update
+      description: Partially update user information including role assignment (admin
+        only)
+      summary: Partially update user (Admin only)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - Admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminUserRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUser'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    get:
+      operationId: admin_user_retrieve
+      description: Get detailed information about a specific user (admin only)
+      summary: Get user details (Admin only)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - Admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUser'
+          description: ''
+    delete:
+      operationId: admin_user_destroy
+      description: Delete a user from the system (admin only)
+      summary: Delete user (Admin only)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - Admin
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/admin/users/{id}/assign-role/:
+    patch:
+      operationId: admin_user_assign_admin_role
+      description: Assign admin role to a specific user (admin only)
+      summary: Assign admin role to user
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - Admin
+      requestBody:
+        content:
+          type:
+            schema:
+              type: object
+              additionalProperties: {}
+              description: Unspecified request body
+          properties:
+            schema:
+              role:
+                type: string
+                enum:
+                - admin
+                - recruiter
+                - talent
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUser'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/admin/users/{id}/toggle-status/:
+    patch:
+      operationId: admin_user_toggle_status
+      description: Toggle user active/inactive status (admin only)
+      summary: Toggle user status
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - Admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAdminUserRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUser'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/users/:
+    get:
+      operationId: users_list
+      description: List users (admin only)
+      summary: List users
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSuccessResponseList'
+          description: ''
+        '403':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: ''
+    post:
+      operationId: user_register
+      description: 'Create a new user account '
+      summary: Register new user
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+          description: ''
+  /api/users/profile/:
+    get:
+      operationId: user_profile_get
+      description: Get the current authenticated user's profile
+      summary: Get current user profile
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: ''
+    patch:
+      operationId: user_profile_update_patch
+      description: Update the current authenticated user's profile (partial update)
+      summary: Update current user profile (PATCH)
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: ''
+    put:
+      operationId: user_profile_update_put
+      description: Update the current authenticated user's profile (full update)
+      summary: Update current user profile (PUT)
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationErrorResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: ''
+  /api/users/{id}/:
+    put:
+      operationId: users_update
+      description: Update an instance with standardized response
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    patch:
+      operationId: users_partial_update
+      description: User viewset for both public registration and authenticated operations
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    get:
+      operationId: users_retrieve
+      description: Retrieve an instance with standardized response
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: users_destroy
+      description: Delete an instance with standardized response
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/skills/:
+    get:
+      operationId: skills_list
+      description: Viewset for the skill model
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - skills
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSkillList'
+          description: ''
+    post:
+      operationId: skills_create
+      description: Viewset for the skill model
+      tags:
+      - skills
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SkillRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SkillRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SkillRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Skill'
+          description: ''
+  /api/skills/{id}/:
+    put:
+      operationId: skills_update
+      description: Viewset for the skill model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this skill.
+        required: true
+      tags:
+      - skills
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SkillRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/SkillRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/SkillRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Skill'
+          description: ''
+    patch:
+      operationId: skills_partial_update
+      description: Viewset for the skill model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this skill.
+        required: true
+      tags:
+      - skills
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSkillRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSkillRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSkillRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Skill'
+          description: ''
+    get:
+      operationId: skills_retrieve
+      description: Viewset for the skill model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this skill.
+        required: true
+      tags:
+      - skills
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Skill'
+          description: ''
+    delete:
+      operationId: skills_destroy
+      description: Viewset for the skill model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this skill.
+        required: true
+      tags:
+      - skills
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/skills/user/:
+    get:
+      operationId: user_skills_list
+      description: Get all skills associated with the current user
+      summary: List current user's skills
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - User Skill
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUserSkillsListResponseList'
+          description: ''
+    post:
+      operationId: user_skills_add
+      description: Adds provided skills to the current user (no removal).
+      summary: Add skills to current user
+      tags:
+      - User Skill
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSkillsUpdateRequest'
+            examples:
+              AddSkillsExample:
+                value:
+                  skills:
+                  - 1
+                  - 2
+                  - 3
+                summary: Add skills example
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserSkillsUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserSkillsUpdateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSkillsResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/skills/user/delete/:
+    post:
+      operationId: skills_user_delete_create
+      description: Delete skills from current user
+      tags:
+      - skills
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSkillRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserSkillRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserSkillRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSkill'
+          description: ''
+  /api/skills/user/{id}/:
+    put:
+      operationId: user_skills_replace
+      description: Sets the user's skills to exactly the provided list (adds missing,
+        removes others).
+      summary: Replace current user's skills
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user skill.
+        required: true
+      tags:
+      - User Skill
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserSkillsUpdateRequest'
+            examples:
+              ReplaceSkillsExample:
+                value:
+                  skills:
+                  - 2
+                  - 4
+                  - 5
+                summary: Replace skills example
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UserSkillsUpdateRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UserSkillsUpdateRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSkillsResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    patch:
+      operationId: skills_user_partial_update
+      description: 'Viewset for user skill model: UserSkill related to User model'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user skill.
+        required: true
+      tags:
+      - skills
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserSkillRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserSkillRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserSkillRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSkill'
+          description: ''
+    get:
+      operationId: skills_user_retrieve
+      description: 'Viewset for user skill model: UserSkill related to User model'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user skill.
+        required: true
+      tags:
+      - skills
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSkill'
+          description: ''
+    delete:
+      operationId: skills_user_destroy
+      description: 'Viewset for user skill model: UserSkill related to User model'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user skill.
+        required: true
+      tags:
+      - skills
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/companies/:
+    get:
+      operationId: companies_list
+      description: Viewset for the company model
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - companies
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCompanyList'
+          description: ''
+    post:
+      operationId: companies_create
+      description: Create a new company
+      summary: Create company
+      tags:
+      - companies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CompanyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CompanyRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+          description: ''
+  /api/companies/{id}/:
+    put:
+      operationId: companies_update
+      description: Viewset for the company model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this company.
+        required: true
+      tags:
+      - companies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CompanyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CompanyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CompanyRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+          description: ''
+    patch:
+      operationId: companies_partial_update
+      description: Viewset for the company model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this company.
+        required: true
+      tags:
+      - companies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCompanyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCompanyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCompanyRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+          description: ''
+    get:
+      operationId: companies_retrieve
+      description: Viewset for the company model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this company.
+        required: true
+      tags:
+      - companies
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+          description: ''
+    delete:
+      operationId: companies_destroy
+      description: Viewset for the company model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this company.
+        required: true
+      tags:
+      - companies
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/jobs/search/:
+    post:
+      operationId: job_search_post
+      description: Search jobs with advanced filtering, sorting, and pagination options
+      summary: Advanced Job Search (POST)
+      parameters:
+      - in: query
+        name: company
+        schema:
+          type: string
+        description: Filter by company name
+        examples:
+          CompanyFilter:
+            value: Google
+            summary: Company filter
+      - in: query
+        name: location
+        schema:
+          type: string
+        description: Filter by location
+        examples:
+          LocationFilter:
+            value: San Francisco
+            summary: Location filter
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+        description: Page number
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+          default: 20
+        description: Results per page (max 100)
+      - in: query
+        name: query
+        schema:
+          type: string
+        description: Search query for title, description, company, location
+        examples:
+          BasicSearch:
+            value: python developer
+            summary: Basic search
+          LocationSearch:
+            value: remote python developer
+            summary: Location search
+      - in: query
+        name: sort_by
+        schema:
+          type: string
+          enum:
+          - company
+          - date_posted
+          - relevance
+          - salary
+          - title
+          default: relevance
+        description: Sort results by
+      tags:
+      - jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobSearchRequest'
+            examples:
+              BasicGETSearch:
+                value:
+                  query: python developer
+                  location: remote
+                  sort_by: relevance
+                  page: 1
+                  page_size: 20
+                summary: Basic GET Search
+              AdvancedPOSTSearch:
+                value:
+                  query: senior python developer
+                  location: San Francisco
+                  company: Google
+                  category: Software Engineering
+                  salary_min: 100000
+                  salary_max: 200000
+                  date_posted: month
+                  sort_by: relevance
+                  sort_order: desc
+                  promoted_only: false
+                  remote_only: true
+                  page: 1
+                  page_size: 20
+                summary: Advanced POST Search
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JobSearchRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JobSearchRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobSearchResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    get:
+      operationId: job_search_get
+      description: Search jobs with advanced filtering, sorting, and pagination options
+        using query parameters
+      summary: Advanced Job Search (GET)
+      parameters:
+      - in: query
+        name: company
+        schema:
+          type: string
+        description: Filter by company name
+        examples:
+          CompanyFilter:
+            value: Google
+            summary: Company filter
+      - in: query
+        name: location
+        schema:
+          type: string
+        description: Filter by location
+        examples:
+          LocationFilter:
+            value: San Francisco
+            summary: Location filter
+      - in: query
+        name: page
+        schema:
+          type: integer
+          default: 1
+        description: Page number
+      - in: query
+        name: page_size
+        schema:
+          type: integer
+          default: 20
+        description: Results per page (max 100)
+      - in: query
+        name: query
+        schema:
+          type: string
+        description: Search query for title, description, company, location
+        examples:
+          BasicSearch:
+            value: python developer
+            summary: Basic search
+          LocationSearch:
+            value: remote python developer
+            summary: Location search
+      - in: query
+        name: sort_by
+        schema:
+          type: string
+          enum:
+          - company
+          - date_posted
+          - relevance
+          - salary
+          - title
+          default: relevance
+        description: Sort results by
+      tags:
+      - jobs
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobSearchResponse'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/jobs/search/suggestions/:
+    get:
+      operationId: job_search_suggestions
+      description: Get auto-complete suggestions based on partial query input
+      summary: Get Search Suggestions
+      parameters:
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 10
+        description: Maximum number of suggestions to return
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Partial search query (minimum 2 characters)
+        required: true
+        examples:
+          JobTitle:
+            value: python
+            summary: Job title
+          Company:
+            value: goog
+          Location:
+            value: san
+      tags:
+      - jobs
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  suggestions:
+                    type: array
+                    items:
+                      type: string
+                    description: List of search suggestions
+                example:
+                  suggestions:
+                  - Python Developer
+                  - Python Engineer
+                  - Senior Python Developer
+                  - Python Backend Developer
+                  - Google
+                  - San Francisco
+          description: ''
+  /api/jobs/search/facets/:
+    get:
+      operationId: job_search_facets
+      description: Get available filter options and their counts for search refinement
+      summary: Get Search Facets
+      tags:
+      - jobs
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  locations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        count:
+                          type: integer
+                  companies:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        count:
+                          type: integer
+                  categories:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        name:
+                          type: string
+                        count:
+                          type: integer
+                  salary_ranges:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        range:
+                          type: string
+                        count:
+                          type: integer
+                example:
+                  locations:
+                  - name: San Francisco
+                    count: 125
+                  - name: New York
+                    count: 98
+                  - name: Remote
+                    count: 87
+                  companies:
+                  - name: Google
+                    count: 45
+                  - name: Apple
+                    count: 32
+                  categories:
+                  - name: Software Engineering
+                    count: 156
+                  - name: Data Science
+                    count: 89
+                  salary_ranges:
+                  - range: $100k-$150k
+                    count: 78
+                  - range: $150k+
+                    count: 45
+          description: ''
+  /api/jobs/stats/:
+    get:
+      operationId: job_statistics
+      description: Get overall job portal statistics and metrics
+      summary: Get Job Statistics
+      tags:
+      - jobs
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_jobs:
+                    type: integer
+                    description: Total number of jobs in the system
+                  jobs_today:
+                    type: integer
+                    description: Jobs posted today
+                  jobs_this_week:
+                    type: integer
+                    description: Jobs posted in the last 7 days
+                  jobs_this_month:
+                    type: integer
+                    description: Jobs posted in the last 30 days
+                  companies_count:
+                    type: integer
+                    description: Number of unique companies
+                  locations_count:
+                    type: integer
+                    description: Number of unique job locations
+                example:
+                  total_jobs: 1250
+                  jobs_today: 15
+                  jobs_this_week: 87
+                  jobs_this_month: 342
+                  companies_count: 156
+                  locations_count: 89
+          description: ''
+  /api/jobs/:
+    get:
+      operationId: jobs_list
+      description: View for listing and creating jobs
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - jobs
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedJobList'
+          description: ''
+    post:
+      operationId: jobs_create
+      description: View for listing and creating jobs
+      tags:
+      - jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JobRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JobRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+  /api/jobs/{id}/:
+    put:
+      operationId: jobs_update
+      description: View for listing and creating jobs
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this job.
+        required: true
+      tags:
+      - jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JobRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JobRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+    patch:
+      operationId: jobs_partial_update
+      description: View for listing and creating jobs
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this job.
+        required: true
+      tags:
+      - jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedJobRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedJobRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedJobRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+    get:
+      operationId: jobs_retrieve
+      description: View for listing and creating jobs
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this job.
+        required: true
+      tags:
+      - jobs
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+    delete:
+      operationId: jobs_destroy
+      description: View for listing and creating jobs
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this job.
+        required: true
+      tags:
+      - jobs
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/jobs/skill/:
+    get:
+      operationId: job_skill_list
+      description: Create Job Skill
+      summary: List Skills (Job)
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - jobs
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedJobSkillList'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    post:
+      operationId: job_skill_create
+      description: Create Job Skill
+      summary: Create Job Skill
+      tags:
+      - jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobSkillRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JobSkillRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JobSkillRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobSkill'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+  /api/jobs/skill/{id}/:
+    put:
+      operationId: jobs_skill_update
+      description: 'Viewset for job skill model: JobSkill related to Job model'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this job skill.
+        required: true
+      tags:
+      - jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/JobSkillRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/JobSkillRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/JobSkillRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobSkill'
+          description: ''
+    patch:
+      operationId: jobs_skill_partial_update
+      description: 'Viewset for job skill model: JobSkill related to Job model'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this job skill.
+        required: true
+      tags:
+      - jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedJobSkillRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedJobSkillRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedJobSkillRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobSkill'
+          description: ''
+    get:
+      operationId: jobs_skill_retrieve
+      description: 'Viewset for job skill model: JobSkill related to Job model'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this job skill.
+        required: true
+      tags:
+      - jobs
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobSkill'
+          description: ''
+    delete:
+      operationId: job_skill_delete
+      description: Delete Job Skill
+      summary: Delete Job Skill
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this job skill.
+        required: true
+      tags:
+      - jobs
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/uploads/:
+    get:
+      operationId: uploads_list
+      description: View for listing and creating files
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - uploads
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedUploadList'
+          description: ''
+    post:
+      operationId: uploads_create
+      description: View for listing and creating files
+      tags:
+      - uploads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Upload'
+          description: ''
+  /api/uploads/{id}/:
+    put:
+      operationId: uploads_update
+      description: View for listing and creating files
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this upload.
+        required: true
+      tags:
+      - uploads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/UploadRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Upload'
+          description: ''
+    patch:
+      operationId: uploads_partial_update
+      description: View for listing and creating files
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this upload.
+        required: true
+      tags:
+      - uploads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUploadRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUploadRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Upload'
+          description: ''
+    get:
+      operationId: uploads_retrieve
+      description: View for listing and creating files
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this upload.
+        required: true
+      tags:
+      - uploads
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Upload'
+          description: ''
+    delete:
+      operationId: uploads_destroy
+      description: View for listing and creating files
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this upload.
+        required: true
+      tags:
+      - uploads
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/promotions/:
+    get:
+      operationId: promotions_list
+      description: View for listing promotions
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - promotions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPromotionList'
+          description: ''
+    post:
+      operationId: promotions_create
+      description: View for listing promotions
+      tags:
+      - promotions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PromotionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PromotionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PromotionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Promotion'
+          description: ''
+  /api/promotions/{id}/:
+    put:
+      operationId: promotions_update
+      description: View for listing promotions
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this promotion.
+        required: true
+      tags:
+      - promotions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PromotionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PromotionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PromotionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Promotion'
+          description: ''
+    patch:
+      operationId: promotions_partial_update
+      description: View for listing promotions
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this promotion.
+        required: true
+      tags:
+      - promotions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPromotionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPromotionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPromotionRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Promotion'
+          description: ''
+    get:
+      operationId: promotions_retrieve
+      description: View for listing promotions
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this promotion.
+        required: true
+      tags:
+      - promotions
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Promotion'
+          description: ''
+    delete:
+      operationId: promotions_destroy
+      description: View for listing promotions
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this promotion.
+        required: true
+      tags:
+      - promotions
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/promotions/{id}/activate/:
+    post:
+      operationId: promotions_activate_create
+      description: Activate the promotion
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this promotion.
+        required: true
+      tags:
+      - promotions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PromotionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PromotionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PromotionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Promotion'
+          description: ''
+  /api/promotions/{id}/cancel/:
+    post:
+      operationId: promotions_cancel_create
+      description: Cancel the promotion
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this promotion.
+        required: true
+      tags:
+      - promotions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PromotionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PromotionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PromotionRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Promotion'
+          description: ''
+  /api/promotions/packages/:
+    get:
+      operationId: promotions_packages_list
+      description: View for listing promotion packages
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - promotions
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPromotionPackageList'
+          description: ''
+  /api/applications/:
+    get:
+      operationId: applications_list
+      description: viewset for application model
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedApplicationList'
+          description: ''
+    post:
+      operationId: applications_create
+      description: viewset for application model
+      tags:
+      - applications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ApplicationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/ApplicationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/ApplicationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+          description: ''
+  /api/applications/{id}/:
+    get:
+      operationId: applications_retrieve
+      description: viewset for application model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this application.
+        required: true
+      tags:
+      - applications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Application'
+          description: ''
+  /api/addresses/lookup/countries/:
+    get:
+      operationId: address_lookup_countries
+      description: Get list of all countries for address lookups
+      summary: Get Countries
+      tags:
+      - addresses
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CountryLookup'
+          description: ''
+  /api/addresses/lookup/states/:
+    get:
+      operationId: address_lookup_states
+      description: Get list of states for a specific country
+      summary: Get States by Country
+      parameters:
+      - in: query
+        name: country_id
+        schema:
+          type: integer
+        description: Country ID to filter states
+        required: true
+      tags:
+      - addresses
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/StateLookup'
+          description: ''
+  /api/addresses/lookup/cities/:
+    get:
+      operationId: address_lookup_cities
+      description: Get list of cities for a specific state
+      summary: Get Cities by State
+      parameters:
+      - in: query
+        name: state_id
+        schema:
+          type: integer
+        description: State ID to filter cities
+        required: true
+      tags:
+      - addresses
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CityLookup'
+          description: ''
+  /api/addresses/lookup/search/:
+    get:
+      operationId: address_search_locations
+      description: Search across countries, states, and cities
+      summary: Search Locations
+      parameters:
+      - in: query
+        name: limit
+        schema:
+          type: integer
+          default: 20
+        description: Maximum number of results
+      - in: query
+        name: q
+        schema:
+          type: string
+        description: Search query
+        required: true
+      tags:
+      - addresses
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  results:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          enum:
+                          - country
+                          - state
+                          - city
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        parent:
+                          type: string
+                        full_name:
+                          type: string
+          description: ''
+  /api/addresses/lookup/hierarchy/:
+    get:
+      operationId: address_hierarchy
+      description: Get complete address hierarchy for cascading dropdowns
+      summary: Get Address Hierarchy
+      parameters:
+      - in: query
+        name: country_id
+        schema:
+          type: integer
+        description: Optional country ID to filter states
+      - in: query
+        name: state_id
+        schema:
+          type: integer
+        description: Optional state ID to filter cities
+      tags:
+      - addresses
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  countries:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        code:
+                          type: string
+                  states:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        country_id:
+                          type: integer
+                  cities:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: integer
+                        name:
+                          type: string
+                        state_id:
+                          type: integer
+          description: ''
+  /api/addresses/validate/:
+    post:
+      operationId: address_validate
+      description: Validate address data and get suggestions
+      summary: Validate Address
+      tags:
+      - addresses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressValidationRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AddressValidationRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AddressValidationRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  is_valid:
+                    type: boolean
+                  errors:
+                    type: array
+                    items:
+                      type: string
+                  suggestions:
+                    type: array
+                    items:
+                      type: string
+                  normalized_address:
+                    type: object
+                    properties:
+                      location:
+                        type: string
+                      city:
+                        type: string
+                      state:
+                        type: string
+                      country:
+                        type: string
+                      zip_code:
+                        type: string
+          description: ''
+  /api/addresses/statistics/:
+    get:
+      operationId: address_statistics
+      description: Get address-related statistics
+      summary: Get Address Statistics
+      tags:
+      - addresses
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  total_addresses:
+                    type: integer
+                  total_cities:
+                    type: integer
+                  total_states:
+                    type: integer
+                  total_countries:
+                    type: integer
+                  countries_with_addresses:
+                    type: integer
+          description: ''
+  /api/addresses/:
+    get:
+      operationId: addresses_list
+      description: Viewset for the address model
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: page_size
+        required: false
+        in: query
+        description: Number of results to return per page.
+        schema:
+          type: integer
+      tags:
+      - addresses
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAddressList'
+          description: ''
+    post:
+      operationId: addresses_create
+      description: Viewset for the address model
+      tags:
+      - addresses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+          description: ''
+  /api/addresses/{id}/:
+    put:
+      operationId: addresses_update
+      description: Viewset for the address model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this address.
+        required: true
+      tags:
+      - addresses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AddressRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+          description: ''
+    patch:
+      operationId: addresses_partial_update
+      description: Viewset for the address model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this address.
+        required: true
+      tags:
+      - addresses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAddressRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAddressRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAddressRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+          description: ''
+    get:
+      operationId: addresses_retrieve
+      description: Viewset for the address model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this address.
+        required: true
+      tags:
+      - addresses
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+          description: ''
+    delete:
+      operationId: addresses_destroy
+      description: Viewset for the address model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this address.
+        required: true
+      tags:
+      - addresses
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/notifications/:
+    get:
+      operationId: notifications_list
+      description: Get the notification list
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Notification'
+          description: ''
+  /api/notifications/unread_count/:
+    get:
+      operationId: notifications_unread_count_retrieve
+      description: Viewset for the notification unread count
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  count:
+                    type: integer
+          description: ''
+  /api/notifications/mark-read/:
+    post:
+      operationId: notification_mark_read
+      description: Mark the notification as read
+      summary: Mark notifications as read
+      tags:
+      - notifications
+      requestBody:
+        content:
+          type:
+            schema:
+              type: object
+              additionalProperties: {}
+              description: Unspecified request body
+          properties:
+            schema:
+              ids:
+                type: array
+                items:
+                  type: integer
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+          description: ''
+  /api/notifications/preferences/:
+    get:
+      operationId: notifications_preferences_retrieve
+      description: Get the notification preference
+      tags:
+      - notifications
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreference'
+          description: ''
+    put:
+      operationId: notifications_preferences_update
+      description: Update the notification preference
+      tags:
+      - notifications
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/NotificationPreferenceRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/NotificationPreferenceRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/NotificationPreferenceRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotificationPreference'
+          description: ''
+  /api/feed/:
+    get:
+      operationId: feed_retrieve
+      description: Get the feed list
+      summary: Get global feed
+      parameters:
+      - in: query
+        name: cursor
+        schema:
+          type: string
+        description: Pagination cursor
+      - in: query
+        name: limit
+        schema:
+          type: integer
+        description: Page size (default 20)
+      - in: query
+        name: types
+        schema:
+          type: string
+        description: 'Comma list: job_posted,company_joined,promotion_active'
+      tags:
+      - feed
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FeedListResponse'
+          description: ''
+  /api/schema/:
+    get:
+      operationId: schema_retrieve
+      description: |-
+        OpenApi3 schema for this API. Format can be selected via content negotiation.
+
+        - YAML: application/vnd.oai.openapi
+        - JSON: application/vnd.oai.openapi+json
+      parameters:
+      - in: query
+        name: format
+        schema:
+          type: string
+          enum:
+          - json
+          - yaml
+      - in: query
+        name: lang
+        schema:
+          type: string
+          enum:
+          - af
+          - ar
+          - ar-dz
+          - ast
+          - az
+          - be
+          - bg
+          - bn
+          - br
+          - bs
+          - ca
+          - ckb
+          - cs
+          - cy
+          - da
+          - de
+          - dsb
+          - el
+          - en
+          - en-au
+          - en-gb
+          - eo
+          - es
+          - es-ar
+          - es-co
+          - es-mx
+          - es-ni
+          - es-ve
+          - et
+          - eu
+          - fa
+          - fi
+          - fr
+          - fy
+          - ga
+          - gd
+          - gl
+          - he
+          - hi
+          - hr
+          - hsb
+          - hu
+          - hy
+          - ia
+          - id
+          - ig
+          - io
+          - is
+          - it
+          - ja
+          - ka
+          - kab
+          - kk
+          - km
+          - kn
+          - ko
+          - ky
+          - lb
+          - lt
+          - lv
+          - mk
+          - ml
+          - mn
+          - mr
+          - ms
+          - my
+          - nb
+          - ne
+          - nl
+          - nn
+          - os
+          - pa
+          - pl
+          - pt
+          - pt-br
+          - ro
+          - ru
+          - sk
+          - sl
+          - sq
+          - sr
+          - sr-latn
+          - sv
+          - sw
+          - ta
+          - te
+          - tg
+          - th
+          - tk
+          - tr
+          - tt
+          - udm
+          - ug
+          - uk
+          - ur
+          - uz
+          - vi
+          - zh-hans
+          - zh-hant
+      tags:
+      - schema
+      security:
+      - jwtAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/vnd.oai.openapi:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/yaml:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/vnd.oai.openapi+json:
+              schema:
+                type: object
+                additionalProperties: {}
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+components:
+  schemas:
+    Address:
+      type: object
+      description: Full address serializer with nested relationships
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        location:
+          type: string
+        city:
+          allOf:
+          - $ref: '#/components/schemas/City'
+          readOnly: true
+        content_type:
+          type: string
+          title: Python model class name
+        object_id:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        zip_code:
+          type: string
+          maxLength: 20
+        status:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - city
+      - content_type
+      - created_at
+      - id
+      - location
+      - object_id
+      - status
+      - updated_at
+      - zip_code
+    AddressNested:
+      type: object
+      description: Nested address serializer for use in other entities
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        location:
+          type: string
+          readOnly: true
+        city_name:
+          type: string
+          readOnly: true
+        state_name:
+          type: string
+          readOnly: true
+        country_name:
+          type: string
+          readOnly: true
+        country_code:
+          type: string
+          readOnly: true
+        zip_code:
+          type: string
+          readOnly: true
+      required:
+      - city_name
+      - country_code
+      - country_name
+      - id
+      - location
+      - state_name
+      - zip_code
+    AddressRequest:
+      type: object
+      description: Full address serializer with nested relationships
+      properties:
+        location:
+          type: string
+          minLength: 1
+        country_id:
+          type: integer
+          writeOnly: true
+        state_id:
+          type: integer
+          writeOnly: true
+        content_type:
+          type: string
+          minLength: 1
+          title: Python model class name
+        object_id:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        zip_code:
+          type: string
+          minLength: 1
+          maxLength: 20
+      required:
+      - content_type
+      - country_id
+      - location
+      - object_id
+      - state_id
+      - zip_code
+    AddressValidationRequest:
+      type: object
+      description: Serializer for validating address data
+      properties:
+        location:
+          type: string
+          minLength: 1
+          maxLength: 500
+        city_id:
+          type: integer
+        zip_code:
+          type: string
+          minLength: 1
+          maxLength: 20
+      required:
+      - city_id
+      - location
+      - zip_code
+    AdminUser:
+      type: object
+      description: Admin-only serializer for user management including admin role
+        assignment
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 30
+        last_name:
+          type: string
+          maxLength: 30
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        phone:
+          type: string
+          nullable: true
+          maxLength: 30
+        status:
+          $ref: '#/components/schemas/Status86aEnum'
+        is_active:
+          type: boolean
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        is_superuser:
+          type: boolean
+          title: Superuser status
+          description: Designates that this user has all permissions without explicitly
+            assigning them.
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - first_name
+      - id
+      - last_name
+      - role
+      - updated_at
+      - username
+    AdminUserCreateRequest:
+      type: object
+      description: Admin serializer for creating users with password
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        phone:
+          type: string
+          nullable: true
+          maxLength: 30
+        status:
+          $ref: '#/components/schemas/Status86aEnum'
+        is_active:
+          type: boolean
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        is_superuser:
+          type: boolean
+          title: Superuser status
+          description: Designates that this user has all permissions without explicitly
+            assigning them.
+        password:
+          type: string
+          writeOnly: true
+          minLength: 8
+      required:
+      - email
+      - first_name
+      - last_name
+      - password
+      - role
+      - username
+    AdminUserRequest:
+      type: object
+      description: Admin-only serializer for user management including admin role
+        assignment
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        phone:
+          type: string
+          nullable: true
+          maxLength: 30
+        status:
+          $ref: '#/components/schemas/Status86aEnum'
+        is_active:
+          type: boolean
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        is_superuser:
+          type: boolean
+          title: Superuser status
+          description: Designates that this user has all permissions without explicitly
+            assigning them.
+      required:
+      - email
+      - first_name
+      - last_name
+      - role
+      - username
+    Application:
+      type: object
+      description: Serializer for the application model
+      properties:
+        job:
+          type: integer
+        user:
+          type: integer
+        status:
+          allOf:
+          - $ref: '#/components/schemas/ApplicationStatusEnum'
+          readOnly: true
+        date_applied:
+          type: string
+          format: date-time
+          readOnly: true
+        cover_letter:
+          type: string
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - date_applied
+      - job
+      - status
+      - updated_at
+      - user
+    ApplicationRequest:
+      type: object
+      description: Serializer for the application model
+      properties:
+        job:
+          type: integer
+        user:
+          type: integer
+        cover_letter:
+          type: string
+          nullable: true
+      required:
+      - job
+      - user
+    ApplicationStatusEnum:
+      enum:
+      - applied
+      - interview
+      - approved
+      - pending
+      - rejected
+      type: string
+      description: |-
+        * `applied` - Applied
+        * `interview` - Interview
+        * `approved` - Approved
+        * `pending` - Pending
+        * `rejected` - Rejected
+    City:
+      type: object
+      description: Serializer for the city model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        state:
+          allOf:
+          - $ref: '#/components/schemas/State'
+          readOnly: true
+      required:
+      - id
+      - name
+      - state
+    CityLookup:
+      type: object
+      description: Simplified city serializer for lookups
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        state_name:
+          type: string
+          readOnly: true
+        country_name:
+          type: string
+          readOnly: true
+      required:
+      - country_name
+      - id
+      - name
+      - state_name
+    CityRequest:
+      type: object
+      description: Serializer for the city model
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        state_id:
+          type: integer
+          writeOnly: true
+      required:
+      - name
+      - state_id
+    Company:
+      type: object
+      description: Serializer for the company model with address support
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+          nullable: true
+        address:
+          allOf:
+          - $ref: '#/components/schemas/AddressNested'
+          readOnly: true
+        full_address:
+          type: string
+          readOnly: true
+        short_address:
+          type: string
+          readOnly: true
+        city_state:
+          type: string
+          readOnly: true
+        country_code:
+          type: string
+          readOnly: true
+        contact_details:
+          type: string
+          nullable: true
+          maxLength: 255
+        website:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+        status:
+          type: boolean
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - address
+      - city_state
+      - country_code
+      - created_at
+      - full_address
+      - id
+      - name
+      - short_address
+      - status
+      - updated_at
+    CompanyRequest:
+      type: object
+      description: Serializer for the company model with address support
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          nullable: true
+        address_id:
+          type: integer
+          writeOnly: true
+        contact_details:
+          type: string
+          nullable: true
+          maxLength: 255
+        website:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+      required:
+      - name
+    Country:
+      type: object
+      description: Serializer for the country model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          readOnly: true
+      required:
+      - code
+      - id
+      - name
+    CountryLookup:
+      type: object
+      description: Simplified country serializer for lookups
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        code:
+          type: string
+          maxLength: 50
+      required:
+      - code
+      - id
+      - name
+    CountryRequest:
+      type: object
+      description: Serializer for the country model
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+      required:
+      - name
+    DatePostedEnum:
+      enum:
+      - today
+      - week
+      - month
+      - all
+      type: string
+      description: |-
+        * `today` - Today
+        * `week` - This Week
+        * `month` - This Month
+        * `all` - All Time
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: false
+          description: Always false for error responses
+        message:
+          type: string
+          default: Authentication required
+          description: Error message
+        data:
+          description: Always null for error responses
+        status_code:
+          type: integer
+          default: 401
+          description: HTTP status code
+        errors:
+          type: object
+          additionalProperties: {}
+          description: Detailed error information
+    EventTypeEnum:
+      enum:
+      - job_posted
+      - company_joined
+      - promotion_active
+      type: string
+      description: |-
+        * `job_posted` - Job Posted
+        * `company_joined` - Company Joined
+        * `promotion_active` - Promotion Active
+    FeedItem:
+      type: object
+      description: Serializer for the feed item model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        event_type:
+          $ref: '#/components/schemas/EventTypeEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        score:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,14}(?:\.\d{0,6})?$
+        payload:
+          type: string
+      required:
+      - created_at
+      - event_type
+      - id
+      - payload
+      - score
+    FeedListResponse:
+      type: object
+      description: Serializer for the feed list response
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FeedItem'
+        next_cursor:
+          type: string
+          nullable: true
+      required:
+      - next_cursor
+      - results
+    Job:
+      type: object
+      description: Serializer for the job listing model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        title:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+        company:
+          type: integer
+        company_name:
+          type: string
+          readOnly: true
+        company_description:
+          type: string
+          readOnly: true
+        address:
+          type: integer
+        address_city:
+          type: string
+          readOnly: true
+        address_state:
+          type: string
+          readOnly: true
+        address_country:
+          type: string
+          readOnly: true
+        location:
+          type: string
+          maxLength: 255
+        salary_range:
+          type: string
+          maxLength: 255
+        date_posted:
+          type: string
+          format: date-time
+          readOnly: true
+        close_date:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+        categories:
+          type: array
+          items:
+            type: string
+          readOnly: true
+        is_promoted:
+          type: boolean
+          readOnly: true
+        promotion_priority:
+          type: integer
+          readOnly: true
+      required:
+      - address
+      - address_city
+      - address_country
+      - address_state
+      - categories
+      - close_date
+      - company
+      - company_description
+      - company_name
+      - date_posted
+      - description
+      - id
+      - is_promoted
+      - location
+      - promotion_priority
+      - salary_range
+      - title
+      - updated_at
+    JobRequest:
+      type: object
+      description: Serializer for the job listing model
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          minLength: 1
+        company:
+          type: integer
+        address:
+          type: integer
+        location:
+          type: string
+          minLength: 1
+          maxLength: 255
+        salary_range:
+          type: string
+          minLength: 1
+          maxLength: 255
+      required:
+      - address
+      - company
+      - description
+      - location
+      - salary_range
+      - title
+    JobSearchRequest:
+      type: object
+      description: Serializer for job search requests
+      properties:
+        query:
+          type: string
+          minLength: 1
+          description: Search query for title, description, company, location
+          maxLength: 500
+        location:
+          type: string
+          minLength: 1
+          description: Filter by location
+          maxLength: 255
+        company:
+          type: string
+          minLength: 1
+          description: Filter by company name
+          maxLength: 255
+        category:
+          type: string
+          minLength: 1
+          description: Filter by category name
+          maxLength: 255
+        salary_min:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          description: Minimum salary
+        salary_max:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          description: Maximum salary
+        date_posted:
+          allOf:
+          - $ref: '#/components/schemas/DatePostedEnum'
+          description: |-
+            Filter by posting date
+
+            * `today` - Today
+            * `week` - This Week
+            * `month` - This Month
+            * `all` - All Time
+        sort_by:
+          allOf:
+          - $ref: '#/components/schemas/SortByEnum'
+          default: relevance
+          description: |-
+            Sort results by
+
+            * `relevance` - Relevance
+            * `date_posted` - Date Posted
+            * `salary` - Salary
+            * `company` - Company Name
+            * `title` - Job Title
+        sort_order:
+          allOf:
+          - $ref: '#/components/schemas/SortOrderEnum'
+          default: desc
+          description: |-
+            Sort order
+
+            * `asc` - Ascending
+            * `desc` - Descending
+        page:
+          type: integer
+          minimum: 1
+          default: 1
+          description: Page number
+        page_size:
+          type: integer
+          maximum: 100
+          minimum: 1
+          default: 20
+          description: Results per page
+        promoted_only:
+          type: boolean
+          default: false
+          description: Show only promoted jobs
+        remote_only:
+          type: boolean
+          default: false
+          description: Show only remote jobs
+    JobSearchResponse:
+      type: object
+      description: Serializer for job search responses
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Job'
+        total_count:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer
+        total_pages:
+          type: integer
+        has_next:
+          type: boolean
+        has_previous:
+          type: boolean
+        search_time:
+          type: number
+          format: double
+          description: Search execution time in seconds
+        search_query:
+          type: string
+          description: The search query used
+        filters_applied:
+          type: object
+          additionalProperties: {}
+          description: Filters that were applied
+      required:
+      - filters_applied
+      - has_next
+      - has_previous
+      - page
+      - page_size
+      - results
+      - search_query
+      - search_time
+      - total_count
+      - total_pages
+    JobSkill:
+      type: object
+      description: Serializer for the job skill model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        job:
+          type: integer
+        skill:
+          type: integer
+      required:
+      - id
+      - job
+      - skill
+    JobSkillRequest:
+      type: object
+      description: Serializer for the job skill model
+      properties:
+        job:
+          type: integer
+        skill:
+          type: integer
+      required:
+      - job
+      - skill
+    Notification:
+      type: object
+      description: Serializer for the notification model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        event_type:
+          type: string
+          readOnly: true
+        title:
+          type: string
+          readOnly: true
+        body:
+          type: string
+          readOnly: true
+        data:
+          readOnly: true
+        status:
+          allOf:
+          - $ref: '#/components/schemas/NotificationStatusEnum'
+          readOnly: true
+        channels:
+          type: integer
+          readOnly: true
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        read_at:
+          type: string
+          format: date-time
+          readOnly: true
+          nullable: true
+      required:
+      - body
+      - channels
+      - created_at
+      - data
+      - event_type
+      - id
+      - read_at
+      - status
+      - title
+    NotificationPreference:
+      type: object
+      description: Serializer for the notification preference model
+      properties:
+        in_app_enabled:
+          type: boolean
+        email_enabled:
+          type: boolean
+        push_enabled:
+          type: boolean
+        quiet_hours_start:
+          type: string
+          format: time
+          nullable: true
+        quiet_hours_end:
+          type: string
+          format: time
+          nullable: true
+        timezone:
+          type: string
+          maxLength: 64
+    NotificationPreferenceRequest:
+      type: object
+      description: Serializer for the notification preference model
+      properties:
+        in_app_enabled:
+          type: boolean
+        email_enabled:
+          type: boolean
+        push_enabled:
+          type: boolean
+        quiet_hours_start:
+          type: string
+          format: time
+          nullable: true
+        quiet_hours_end:
+          type: string
+          format: time
+          nullable: true
+        timezone:
+          type: string
+          minLength: 1
+          maxLength: 64
+    NotificationStatusEnum:
+      enum:
+      - pending
+      - sent
+      - read
+      - dismissed
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `sent` - Sent
+        * `read` - Read
+        * `dismissed` - Dismissed
+    PaginatedAddressList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Address'
+    PaginatedAdminUserList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/AdminUser'
+    PaginatedApplicationList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Application'
+    PaginatedCompanyList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Company'
+    PaginatedJobList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Job'
+    PaginatedJobSkillList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/JobSkill'
+    PaginatedPromotionList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Promotion'
+    PaginatedPromotionPackageList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/PromotionPackage'
+    PaginatedSkillList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Skill'
+    PaginatedSuccessResponseList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/SuccessResponse'
+    PaginatedUploadList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Upload'
+    PaginatedUserSkillsListResponseList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserSkillsListResponse'
+    PatchedAddressRequest:
+      type: object
+      description: Full address serializer with nested relationships
+      properties:
+        location:
+          type: string
+          minLength: 1
+        country_id:
+          type: integer
+          writeOnly: true
+        state_id:
+          type: integer
+          writeOnly: true
+        content_type:
+          type: string
+          minLength: 1
+          title: Python model class name
+        object_id:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        zip_code:
+          type: string
+          minLength: 1
+          maxLength: 20
+    PatchedAdminUserRequest:
+      type: object
+      description: Admin-only serializer for user management including admin role
+        assignment
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        phone:
+          type: string
+          nullable: true
+          maxLength: 30
+        status:
+          $ref: '#/components/schemas/Status86aEnum'
+        is_active:
+          type: boolean
+        is_staff:
+          type: boolean
+          title: Staff status
+          description: Designates whether the user can log into this admin site.
+        is_superuser:
+          type: boolean
+          title: Superuser status
+          description: Designates that this user has all permissions without explicitly
+            assigning them.
+    PatchedCompanyRequest:
+      type: object
+      description: Serializer for the company model with address support
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          nullable: true
+        address_id:
+          type: integer
+          writeOnly: true
+        contact_details:
+          type: string
+          nullable: true
+          maxLength: 255
+        website:
+          type: string
+          format: uri
+          nullable: true
+          maxLength: 200
+    PatchedJobRequest:
+      type: object
+      description: Serializer for the job listing model
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+        description:
+          type: string
+          minLength: 1
+        company:
+          type: integer
+        address:
+          type: integer
+        location:
+          type: string
+          minLength: 1
+          maxLength: 255
+        salary_range:
+          type: string
+          minLength: 1
+          maxLength: 255
+    PatchedJobSkillRequest:
+      type: object
+      description: Serializer for the job skill model
+      properties:
+        job:
+          type: integer
+        skill:
+          type: integer
+    PatchedPromotionRequest:
+      type: object
+      description: Serializer for the promotion model
+      properties:
+        type:
+          $ref: '#/components/schemas/PromotionTypeEnum'
+        content_type:
+          type: string
+          minLength: 1
+          title: Python model class name
+        object_id:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        package:
+          type: integer
+        placement:
+          $ref: '#/components/schemas/PlacementEnum'
+        start_at:
+          type: string
+          format: date-time
+        end_at:
+          type: string
+          format: date-time
+        payment_reference:
+          type: string
+          nullable: true
+          maxLength: 100
+    PatchedSkillRequest:
+      type: object
+      description: Serializer for the skill model
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+    PatchedUploadRequest:
+      type: object
+      description: Serializer for the upload model
+      properties:
+        file_path:
+          type: string
+          format: binary
+        name:
+          type: string
+          minLength: 1
+          pattern: (?:pdf|doc|docx|txt|csv|xls|xlsx|ppt|pptx)$
+          maxLength: 255
+        thumbnail:
+          type: string
+          format: binary
+          nullable: true
+        content_type:
+          type: string
+          minLength: 1
+          title: Python model class name
+        object_id:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        type:
+          $ref: '#/components/schemas/UploadTypeEnum'
+    PatchedUserRequest:
+      type: object
+      description: Serializer for the user model
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+        phone:
+          type: string
+          nullable: true
+          maxLength: 30
+        status:
+          $ref: '#/components/schemas/Status86aEnum'
+    PatchedUserSkillRequest:
+      type: object
+      description: Serializer for the user skill model
+      properties:
+        user:
+          type: integer
+        skill:
+          type: integer
+    PlacementEnum:
+      enum:
+      - feed
+      - homepage
+      - list
+      type: string
+      description: |-
+        * `feed` - Feed
+        * `homepage` - Homepage
+        * `list` - List
+    Promotion:
+      type: object
+      description: Serializer for the promotion model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        owner:
+          type: integer
+          readOnly: true
+        type:
+          $ref: '#/components/schemas/PromotionTypeEnum'
+        content_type:
+          type: string
+          title: Python model class name
+        object_id:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        package:
+          type: integer
+        placement:
+          $ref: '#/components/schemas/PlacementEnum'
+        start_at:
+          type: string
+          format: date-time
+        end_at:
+          type: string
+          format: date-time
+        status:
+          allOf:
+          - $ref: '#/components/schemas/PromotionStatusEnum'
+          readOnly: true
+          default: pending
+        payment_reference:
+          type: string
+          nullable: true
+          maxLength: 100
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - content_type
+      - created_at
+      - end_at
+      - id
+      - object_id
+      - owner
+      - package
+      - start_at
+      - status
+      - type
+      - updated_at
+    PromotionPackage:
+      type: object
+      description: Serializer for the promotion package model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type: string
+          nullable: true
+        price:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        duration_days:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        priority_weight:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        placement:
+          $ref: '#/components/schemas/PlacementEnum'
+        is_active:
+          type: boolean
+      required:
+      - id
+      - name
+    PromotionRequest:
+      type: object
+      description: Serializer for the promotion model
+      properties:
+        type:
+          $ref: '#/components/schemas/PromotionTypeEnum'
+        content_type:
+          type: string
+          minLength: 1
+          title: Python model class name
+        object_id:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        package:
+          type: integer
+        placement:
+          $ref: '#/components/schemas/PlacementEnum'
+        start_at:
+          type: string
+          format: date-time
+        end_at:
+          type: string
+          format: date-time
+        payment_reference:
+          type: string
+          nullable: true
+          maxLength: 100
+      required:
+      - content_type
+      - end_at
+      - object_id
+      - package
+      - start_at
+      - type
+    PromotionStatusEnum:
+      enum:
+      - pending
+      - active
+      - expired
+      - cancelled
+      type: string
+      description: |-
+        * `pending` - Pending
+        * `active` - Active
+        * `expired` - Expired
+        * `cancelled` - Cancelled
+    PromotionTypeEnum:
+      enum:
+      - job
+      - talent
+      - company
+      - portfolio
+      type: string
+      description: |-
+        * `job` - Job
+        * `talent` - Talent
+        * `company` - Company
+        * `portfolio` - Portfolio
+    RoleEnum:
+      enum:
+      - admin
+      - recruiter
+      - talent
+      type: string
+      description: |-
+        * `admin` - Admin
+        * `recruiter` - Recruiter
+        * `talent` - Talent
+    Skill:
+      type: object
+      description: Serializer for the skill model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+      required:
+      - id
+      - name
+    SkillRequest:
+      type: object
+      description: Serializer for the skill model
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+      required:
+      - name
+    SortByEnum:
+      enum:
+      - relevance
+      - date_posted
+      - salary
+      - company
+      - title
+      type: string
+      description: |-
+        * `relevance` - Relevance
+        * `date_posted` - Date Posted
+        * `salary` - Salary
+        * `company` - Company Name
+        * `title` - Job Title
+    SortOrderEnum:
+      enum:
+      - asc
+      - desc
+      type: string
+      description: |-
+        * `asc` - Ascending
+        * `desc` - Descending
+    State:
+      type: object
+      description: Serializer for the state model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        country:
+          allOf:
+          - $ref: '#/components/schemas/Country'
+          readOnly: true
+      required:
+      - country
+      - id
+      - name
+    StateLookup:
+      type: object
+      description: Simplified state serializer for lookups
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        country_name:
+          type: string
+          readOnly: true
+      required:
+      - country_name
+      - id
+      - name
+    StateRequest:
+      type: object
+      description: Serializer for the state model
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 255
+        country_id:
+          type: integer
+          writeOnly: true
+      required:
+      - country_id
+      - name
+    Status86aEnum:
+      enum:
+      - active
+      - inactive
+      - pending
+      type: string
+      description: |-
+        * `active` - Active
+        * `inactive` - Inactive
+        * `pending` - Pending
+    SuccessResponse:
+      type: object
+      properties:
+        data:
+          nullable: true
+        success:
+          type: boolean
+          default: true
+          description: Always true for success responses
+        message:
+          type: string
+          default: Logged out from all devices successfully
+          description: Success message
+        status_code:
+          type: integer
+          default: 200
+          description: HTTP status code
+      required:
+      - data
+    TokenBlacklistRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - refresh
+    TokenObtainPair:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+        refresh:
+          type: string
+          readOnly: true
+      required:
+      - access
+      - refresh
+    TokenObtainPairRequest:
+      type: object
+      properties:
+        username:
+          type: string
+          writeOnly: true
+          minLength: 1
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - password
+      - username
+    TokenRefresh:
+      type: object
+      properties:
+        access:
+          type: string
+          readOnly: true
+      required:
+      - access
+    TokenRefreshRequest:
+      type: object
+      properties:
+        refresh:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - refresh
+    Upload:
+      type: object
+      description: Serializer for the upload model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        file_path:
+          type: string
+          format: uri
+        name:
+          type: string
+          pattern: (?:pdf|doc|docx|txt|csv|xls|xlsx|ppt|pptx)$
+          maxLength: 255
+        thumbnail:
+          type: string
+          format: uri
+          nullable: true
+        uploaded_by:
+          type: integer
+          readOnly: true
+        content_type:
+          type: string
+          title: Python model class name
+        object_id:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        type:
+          $ref: '#/components/schemas/UploadTypeEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - content_type
+      - created_at
+      - file_path
+      - id
+      - name
+      - object_id
+      - type
+      - uploaded_by
+    UploadRequest:
+      type: object
+      description: Serializer for the upload model
+      properties:
+        file_path:
+          type: string
+          format: binary
+        name:
+          type: string
+          minLength: 1
+          pattern: (?:pdf|doc|docx|txt|csv|xls|xlsx|ppt|pptx)$
+          maxLength: 255
+        thumbnail:
+          type: string
+          format: binary
+          nullable: true
+        content_type:
+          type: string
+          minLength: 1
+          title: Python model class name
+        object_id:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: 0
+          format: int64
+        type:
+          $ref: '#/components/schemas/UploadTypeEnum'
+      required:
+      - content_type
+      - file_path
+      - name
+      - object_id
+      - type
+    UploadTypeEnum:
+      enum:
+      - resume
+      - cover_letter
+      - profile_picture
+      - profile_cover
+      - certificate
+      - kyc
+      type: string
+      description: |-
+        * `resume` - Resume
+        * `cover_letter` - Cover Letter
+        * `profile_picture` - Profile Picture
+        * `profile_cover` - Profile Cover
+        * `certificate` - Certificate
+        * `kyc` - KYC
+    User:
+      type: object
+      description: Serializer for the user model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        username:
+          type: string
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          maxLength: 254
+        first_name:
+          type: string
+          maxLength: 30
+        last_name:
+          type: string
+          maxLength: 30
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        phone:
+          type: string
+          nullable: true
+          maxLength: 30
+        status:
+          $ref: '#/components/schemas/Status86aEnum'
+        created_at:
+          type: string
+          format: date-time
+          readOnly: true
+        updated_at:
+          type: string
+          format: date-time
+          readOnly: true
+      required:
+      - created_at
+      - email
+      - first_name
+      - id
+      - last_name
+      - role
+      - updated_at
+      - username
+    UserRegistrationRequest:
+      type: object
+      description: Serializer for user registration with password confirmation
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        phone:
+          type: string
+          nullable: true
+          maxLength: 30
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+        password_confirm:
+          type: string
+          writeOnly: true
+          minLength: 1
+      required:
+      - email
+      - first_name
+      - last_name
+      - password
+      - password_confirm
+      - role
+      - username
+    UserRequest:
+      type: object
+      description: Serializer for the user model
+      properties:
+        username:
+          type: string
+          minLength: 1
+          maxLength: 30
+        email:
+          type: string
+          format: email
+          minLength: 1
+          maxLength: 254
+        first_name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        last_name:
+          type: string
+          minLength: 1
+          maxLength: 30
+        role:
+          $ref: '#/components/schemas/RoleEnum'
+        password:
+          type: string
+          writeOnly: true
+          minLength: 1
+          maxLength: 128
+        phone:
+          type: string
+          nullable: true
+          maxLength: 30
+        status:
+          $ref: '#/components/schemas/Status86aEnum'
+      required:
+      - email
+      - first_name
+      - last_name
+      - password
+      - role
+      - username
+    UserSkill:
+      type: object
+      description: Serializer for the user skill model
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        user:
+          type: integer
+        skill:
+          type: integer
+      required:
+      - id
+      - skill
+      - user
+    UserSkillRequest:
+      type: object
+      description: Serializer for the user skill model
+      properties:
+        user:
+          type: integer
+        skill:
+          type: integer
+      required:
+      - skill
+      - user
+    UserSkillsListResponse:
+      type: object
+      description: Response serializer for listing user skills
+      properties:
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/UserSkill'
+      required:
+      - results
+    UserSkillsResponse:
+      type: object
+      description: Response serializer for user skills operations
+      properties:
+        added:
+          type: integer
+          description: Number of skills added
+        removed:
+          type: integer
+          description: Number of skills removed
+        deleted:
+          type: integer
+          description: Number of skills deleted
+    UserSkillsUpdateRequest:
+      type: object
+      description: Serializer to add/replace multiple skills for current user
+      properties:
+        skills:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          description: List of skill IDs to add/replace
+      required:
+      - skills
+    ValidationErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          default: false
+          description: Always false for validation errors
+        message:
+          type: string
+          default: Validation failed
+          description: Error message
+        data:
+          description: Always null for error responses
+        status_code:
+          type: integer
+          default: 400
+          description: HTTP status code
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Validation errors by field
+      required:
+      - errors
+  securitySchemes:
+    jwtAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
