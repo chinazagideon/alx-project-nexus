@@ -41,7 +41,7 @@ This project is built on a modern, scalable backend stack. The architecture is d
 1.  **Clone the repository:**
     ```bash
     git clone [https://github.com/chinazagideon/alx-project-nexus.git](https://github.com/chinazagideon/alx-project-nexus.git)
-    cd your-repo-name
+    cd alx-project-nexus
     ```
 2.  **Set up the environment:**
     Ensure you have Docker and Docker Compose installed.

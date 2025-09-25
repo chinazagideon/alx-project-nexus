@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from enum import Enum
 from django.core.validators import validate_email
+import uuid
 
 class UserRole(models.TextChoices):
     """
@@ -31,6 +32,12 @@ class User(AbstractUser):
     phone = models.CharField(max_length=30, null=True, blank=True)
     status = models.CharField(max_length=30, choices=UserStatus.choices, default=UserStatus.PENDING)
     is_active = models.BooleanField(default=True)
+    
+    # Email verification fields
+    is_email_verified = models.BooleanField(default=False)
+    email_verification_token = models.UUIDField(unique=True, null=True, blank=True)
+    email_verification_sent_at = models.DateTimeField(null=True, blank=True)
+    
     created_at = models.DateTimeField(auto_now_add=True,)
     updated_at = models.DateTimeField(auto_now=True,)
 
@@ -51,5 +58,14 @@ class User(AbstractUser):
     
     def get_email(self):
         return self.email
+    
+    def generate_email_verification_token(self):
+        """
+        Generate a new email verification token
+        """
+        if not self.email_verification_token:
+            self.email_verification_token = uuid.uuid4()
+            self.save(update_fields=['email_verification_token'])
+        return self.email_verification_token
 
     

@@ -24,10 +24,11 @@ class UserSerializer(serializers.ModelSerializer):
             'password',
             'phone',
             'status',
+            'is_email_verified',
             'created_at',
             'updated_at',
         )
-        read_only_fields = ('created_at', 'updated_at', 'id')
+        read_only_fields = ('created_at', 'updated_at', 'id', 'is_email_verified')
         required_fields = ('username', 'email', 'first_name', 'last_name', 'phone', 'password')
         extra_kwargs = {
             'password': {'write_only': True},

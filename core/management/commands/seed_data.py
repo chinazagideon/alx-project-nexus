@@ -9,6 +9,7 @@ from faker import Faker
 import random
 from datetime import datetime, timedelta
 from django.utils import timezone
+import os
 
 from company.models import Company
 from job.models import Job
@@ -95,9 +96,9 @@ class Command(BaseCommand):
 
     def create_admin_account(self, count):
         """Create a default admin account for testing"""
-        admin_username = 'admin'
-        admin_email = 'admin@example.com'
-        admin_password = 'admin123'
+        admin_username = os.getenv('ADMIN_DEFAULT_USERNAME', 'admin')
+        admin_email = os.getenv('ADMIN_DEFAULT_EMAIL', 'admin@example.com')
+        admin_password = os.getenv('ADMIN_DEFAULT_PASSWORD', 'admin123')
         
         if User.objects.filter(username=admin_username).exists():
             self.stdout.write(self.style.WARNING(f'Admin account "{admin_username}" already exists'))

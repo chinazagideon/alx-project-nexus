@@ -38,7 +38,7 @@ class JobSerializer(serializers.ModelSerializer):
             'city',
             'city_name',
             'salary_min',
-            'salary_max',
+            'salary_macontx',
             'date_posted',
             'close_date',
             'updated_at',
@@ -51,7 +51,7 @@ class JobSerializer(serializers.ModelSerializer):
     @extend_schema_field(serializers.ListField(child=serializers.CharField()))
     def get_categories(self, obj):
         """Get job categories"""
-        return [cat.name for cat in obj.categories.all()]
+        return [cat.category.name for cat in obj.jobcategory_set.all()]
 
 # Search request serializer
 class JobSearchSerializer(serializers.Serializer):

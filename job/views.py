@@ -68,9 +68,23 @@ class JobViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Get the queryset for the job list
+        Get the queryset for the job list with promotions
         """
-        return super().get_queryset()
+        base_qs = super().get_queryset()
+        job_ct = ContentType.objects.get_for_model(Job)
+        active_promotions = Promotion.objects.active().filter(content_type=job_ct, object_id=OuterRef('pk'))
+
+        priority_subquery = Subquery(
+            active_promotions.values('package__priority_weight')[:1],
+            output_field=IntegerField(),
+        )
+
+        annotated = base_qs.annotate(
+            is_promoted=Exists(active_promotions),
+            promotion_priority=Coalesce(priority_subquery, Value(0)),
+        )
+
+        return annotated.order_by('-is_promoted', '-promotion_priority', '-date_posted')
 
 
 # Search API endpoints
@@ -511,7 +525,7 @@ def job_stats(request):
             date_posted__gte=now - timedelta(days=30)
         ).count(),
         'companies_count': Job.objects.values('company').distinct().count(),
-        'locations_count': Job.objects.values('location').distinct().count(),
+        'locations_count': Job.objects.values('city').distinct().count(),
     }
     
     return Response(stats)

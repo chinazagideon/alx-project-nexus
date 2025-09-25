@@ -1,13 +1,18 @@
 from celery import shared_task
 from django.core.mail import send_mail
 from django.conf import settings
+from django.template.loader import render_to_string
+from django.utils import timezone
+from user.models.models import User
+import logging
+
+logger = logging.getLogger(__name__)
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def send_otp_notification(self, to_email, subject, message):
     """
     Send OTP notification
     """
-
     try: 
         send_mail(
             subject, 
@@ -18,3 +23,74 @@ def send_otp_notification(self, to_email, subject, message):
             )
     except Exception as exec:
         raise self.retry(exec=exec)
+
+@shared_task(bind=True, max_retries=3, default_retry_delay=60)
+def send_email_verification(self, user_id):
+    """
+    Send email verification to user
+    """
+    try:
+        user = User.objects.get(id=user_id)
+        
+        # Generate verification token if not exists
+        token = user.generate_email_verification_token()
+        
+        # Create verification URL
+        verification_url = f"{settings.EMAIL_VERIFICATION_URL}?token={token}"
+        
+        # Prepare email content
+        subject = "Verify Your Email - Connect Hire"
+        
+        # Simple HTML email template
+        html_message = f"""
+        <html>
+        <body>
+            <h2>Welcome to Connect Hire!</h2>
+            <p>Hi {user.get_full_name()},</p>
+            <p>Thank you for registering with Connect Hire. Please verify your email address to complete your registration.</p>
+            <p><a href="{verification_url}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Verify Email Address</a></p>
+            <p>If the button doesn't work, copy and paste this link into your browser:</p>
+            <p>{verification_url}</p>
+            <p>This link will expire in 24 hours.</p>
+            <p>Best regards,<br>The Connect Hire Team</p>
+        </body>
+        </html>
+        """
+        
+        # Plain text version
+        text_message = f"""
+        Welcome to Connect Hire!
+        
+        Hi {user.get_full_name()},
+        
+        Thank you for registering with Connect Hire. Please verify your email address to complete your registration.
+        
+        Click this link to verify: {verification_url}
+        
+        This link will expire in 24 hours.
+        
+        Best regards,
+        The Connect Hire Team
+        """
+        
+        # Send email
+        send_mail(
+            subject=subject,
+            message=text_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[user.email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        
+        # Update the sent timestamp
+        user.email_verification_sent_at = timezone.now()
+        user.save(update_fields=['email_verification_sent_at'])
+        
+        logger.info(f"Email verification sent to user {user.id} ({user.email})")
+        
+    except User.DoesNotExist:
+        logger.error(f"User with id {user_id} not found for email verification")
+    except Exception as exc:
+        logger.error(f"Failed to send email verification to user {user_id}: {str(exc)}")
+        raise self.retry(exc=exc)

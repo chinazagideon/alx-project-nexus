@@ -188,11 +188,21 @@ class RegistrationView(StandardAPIViewMixin, APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         
+        # Send email verification asynchronously
+        try:
+            from notification.tasks import send_email_verification
+            send_email_verification.delay(user.id)
+        except Exception as e:
+            # Log the error but don't fail registration
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Failed to queue email verification for user {user.id}: {str(e)}")
+        
         # Return user data without password
         response_serializer = UserSerializer(user)
         return self.success_response(
             data=response_serializer.data,
-            message="User registered successfully",
+            message="User registered successfully. Please check your email to verify your account.",
             status_code=201
         )
         

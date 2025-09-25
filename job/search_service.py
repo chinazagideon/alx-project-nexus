@@ -8,7 +8,7 @@ from typing import Dict, List, Optional, Tuple
 from datetime import datetime, timedelta
 from decimal import Decimal
 
-from django.db.models import Q, F, Case, When, Value, CharField, IntegerField
+from django.db.models import Q, F, Case, When, Value, CharField, IntegerField, OuterRef, Subquery, Exists
 from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
 from django.core.paginator import Paginator
 from django.core.cache import cache
@@ -43,12 +43,12 @@ class JobSearchService:
         serializer.is_valid(raise_exception=True)
         validated_data = serializer.validated_data
         
-        # Check cache first
-        cache_key = self._get_cache_key(validated_data)
-        cached_result = cache.get(cache_key)
-        if cached_result:
-            cached_result['search_time'] = time.time() - start_time
-            return cached_result
+        # Check cache first (disabled for testing)
+        # cache_key = self._get_cache_key(validated_data)
+        # cached_result = cache.get(cache_key)
+        # if cached_result:
+        #     cached_result['search_time'] = time.time() - start_time
+        #     return cached_result
         
         # Build base queryset
         queryset = self._build_base_queryset()
@@ -72,8 +72,8 @@ class JobSearchService:
         # Build response
         result = self._build_response(paginated_results, validated_data, search_time)
         
-        # Cache result for 5 minutes
-        cache.set(cache_key, result, 300)
+        # Cache result for 5 minutes (disabled for testing)
+        # cache.set(cache_key, result, 300)
         
         return result
     
@@ -95,15 +95,15 @@ class JobSearchService:
         job_ct = ContentType.objects.get_for_model(Job)
         active_promotions = Promotion.objects.active().filter(
             content_type=job_ct, 
-            object_id=F('job__id')
+            object_id=OuterRef('id')
         )
         
         priority_subquery = active_promotions.values('package__priority_weight')[:1]
         
         return Job.objects.select_related(
-            'company', 'address'
+            'company', 'city'
         ).prefetch_related(
-            'categories', 'jobcategory_set__category'
+            'jobcategory_set__category'
         ).annotate(
             is_promoted=Q(id__in=active_promotions.values('object_id')),
             promotion_priority=Case(
@@ -135,7 +135,7 @@ class JobSearchService:
         """
         # Create search vector
         search_vector = SearchVector(
-            'title', 'description', 'company__name', 'location', 'categories__name'
+            'title', 'description', 'company__name', 'city__name'
         )
         
         # Create search query
@@ -167,14 +167,14 @@ class JobSearchService:
             # Company name matches
             company_q = Q(company__name__icontains=term)
             
-            # Location matches
-            location_q = Q(location__icontains=term)
+            # City matches
+            city_q = Q(city__name__icontains=term)
             
             # Category matches
-            category_q = Q(categories__name__icontains=term)
+            category_q = Q(jobcategory_set__category__name__icontains=term)
             
             # Combine with OR
-            term_q = title_q | desc_q | company_q | location_q | category_q
+            term_q = title_q | desc_q | company_q | city_q | category_q
             q_objects |= term_q
         
         # Apply search and add relevance scoring
@@ -208,10 +208,10 @@ class JobSearchService:
             When(description__icontains=query, then=Value(30)),
             # Company matches
             When(company__name__icontains=query, then=Value(25)),
-            # Location matches
-            When(location__icontains=query, then=Value(20)),
+            # City matches
+            When(city__name__icontains=query, then=Value(20)),
             # Category matches
-            When(categories__name__icontains=query, then=Value(15)),
+            When(jobcategory_set__category__name__icontains=query, then=Value(15)),
             default=Value(0),
             output_field=IntegerField()
         )
@@ -226,10 +226,8 @@ class JobSearchService:
         if validated_data.get('location'):
             location = validated_data['location']
             queryset = queryset.filter(
-                Q(location__icontains=location) |
-                Q(address__city__icontains=location) |
-                Q(address__state__icontains=location) |
-                Q(address__country__icontains=location)
+                Q(city__name__icontains=location) |
+                Q(physical_address__icontains=location)
             )
         
         # Company filter
@@ -238,7 +236,7 @@ class JobSearchService:
         
         # Category filter
         if validated_data.get('category'):
-            queryset = queryset.filter(categories__name__icontains=validated_data['category'])
+            queryset = queryset.filter(jobcategory_set__category__name__icontains=validated_data['category'])
         
         # Salary range filter
         if validated_data.get('salary_min') or validated_data.get('salary_max'):
@@ -251,9 +249,10 @@ class JobSearchService:
         # Remote jobs filter
         if validated_data.get('remote_only'):
             queryset = queryset.filter(
-                Q(location__icontains='remote') |
-                Q(location__icontains='work from home') |
-                Q(location__icontains='wfh')
+                Q(city__name__icontains='remote') |
+                Q(physical_address__icontains='remote') |
+                Q(physical_address__icontains='work from home') |
+                Q(physical_address__icontains='wfh')
             )
         
         # Promoted jobs filter
@@ -266,23 +265,14 @@ class JobSearchService:
         """
         Apply salary range filtering
         """
-        # This is a simplified implementation
-        # In a real app, you'd need to parse salary_range field properly
         salary_min = validated_data.get('salary_min')
         salary_max = validated_data.get('salary_max')
         
         if salary_min:
-            # Extract numeric values from salary_range and compare
-            queryset = queryset.extra(
-                where=["CAST(REGEXP_REPLACE(salary_range, '[^0-9]', '', 'g') AS INTEGER) >= %s"],
-                params=[int(salary_min)]
-            )
+            queryset = queryset.filter(salary_min__gte=salary_min)
         
         if salary_max:
-            queryset = queryset.extra(
-                where=["CAST(REGEXP_REPLACE(salary_range, '[^0-9]', '', 'g') AS INTEGER) <= %s"],
-                params=[int(salary_max)]
-            )
+            queryset = queryset.filter(salary_max__lte=salary_max)
         
         return queryset
     
@@ -314,7 +304,7 @@ class JobSearchService:
         sort_fields = {
             'relevance': ['-is_promoted', '-promotion_priority', '-date_posted'],
             'date_posted': ['-date_posted'],
-            'salary': ['salary_range'],
+            'salary': ['salary_min', 'salary_max'],
             'company': ['company__name'],
             'title': ['title']
         }
@@ -385,9 +375,9 @@ class JobSearchService:
         
         # Location suggestions
         location_suggestions = Job.objects.filter(
-            Q(location__icontains=query) |
-            Q(address__city__icontains=query)
-        ).values_list('location', flat=True).distinct()[:limit//4]
+            Q(city__name__icontains=query) |
+            Q(physical_address__icontains=query)
+        ).values_list('city__name', flat=True).distinct()[:limit//4]
         
         suggestions.extend(title_suggestions)
         suggestions.extend(company_suggestions)
