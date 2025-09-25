@@ -8,12 +8,13 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenBlacklistView,
 )
-from .views import LogoutAllView, LoginView, RefreshView, LogoutView
+from .views import LogoutAllView, LoginView, RefreshView, LogoutView, RegistrationView
 from two_factor.urls import urlpatterns as two_factor_patterns
 
 
 # Authentication endpoints
 auth_patterns = [
+    path("auth/register/", RegistrationView.as_view(), name="auth_register"),
     path("auth/login/", LoginView.as_view(), name="token_obtain_pair"),
     path("auth/refresh/", RefreshView.as_view(), name="token_refresh"),
     path("auth/logout/", LogoutView.as_view(), name="token_logout"),

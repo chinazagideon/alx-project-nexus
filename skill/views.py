@@ -21,6 +21,7 @@ from .serializers import (
 from drf_spectacular.utils import extend_schema, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from enum import Enum
+from core.response import APIResponse
 
 
 class SkillApiEnum(Enum):
@@ -144,7 +145,11 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         """
         queryset = self.get_queryset()
         serializer = UserSkillSerializer(queryset, many=True)
-        return Response({"results": serializer.data})
+        # return Response({"results": serializer.data})
+        return APIResponse.created(
+            data=serializer.data,
+            message="User skills listed successfully"
+        )
 
     @extend_schema(
         operation_id="user_skills_add",
@@ -174,7 +179,11 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         to_create = [sid for sid in skills if sid not in existing]
         UserSkill.objects.bulk_create([UserSkill(user=request.user, skill_id=sid) for sid in to_create], ignore_conflicts=True)
         created = len(to_create)
-        return Response({"added": created})
+        # return Response({"added": created})
+        return APIResponse.created(
+            data={"added": created},
+            message="User skills added successfully"
+        )
 
     @extend_schema(
         operation_id="user_skills_replace",
@@ -205,7 +214,11 @@ class UserSkillViewSet(viewsets.ModelViewSet):
             UserSkill.objects.bulk_create([UserSkill(user=request.user, skill_id=sid) for sid in to_add], ignore_conflicts=True)
         if to_remove:
             UserSkill.objects.filter(user=request.user, skill_id__in=list(to_remove)).delete()
-        return Response({"added": len(to_add), "removed": len(to_remove)})
+        # return Response({"added": len(to_add), "removed": len(to_remove)})
+        return APIResponse.created(
+            data={"added": len(to_add), "removed": len(to_remove)},
+            message="User skills replaced successfully"
+        )
     
     @action(detail=False, methods=['post'], url_path='delete')
     @extend_schema(
@@ -234,4 +247,8 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         deleted_count = UserSkill.objects.filter(user=request.user, skill_id__in=skills).count()
         # Delete the skills
         UserSkill.objects.filter(user=request.user, skill_id__in=skills).delete()
-        return Response({"deleted": deleted_count})
+        # return Response({"deleted": deleted_count})
+        return APIResponse.created(
+            data={"deleted": deleted_count},
+            message="User skills deleted successfully"
+        )

@@ -15,10 +15,10 @@ from .lookup_views import (
 )
 
 router = DefaultRouter()
-router.register(r'', AddressViewSet, basename='address')
-# router.register(r'cities', CityViewSet, basename='city')
-# router.register(r'states', StateViewSet, basename='state')
-# router.register(r'countries', CountryViewSet, basename='country')
+router.register(r'addresses', AddressViewSet, basename='address')
+router.register(r'cities', CityViewSet, basename='city')
+router.register(r'states', StateViewSet, basename='state')
+router.register(r'countries', CountryViewSet, basename='country')
 
 urlpatterns = [
     # Lookup endpoints
@@ -30,6 +30,7 @@ urlpatterns = [
 
     path('validate/', validate_address, name='address-validate'),
     path('statistics/', get_address_statistics, name='address-statistics'),
+
     
     # CRUD endpoints
     path('', include(router.urls)),

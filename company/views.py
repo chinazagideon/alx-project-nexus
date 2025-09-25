@@ -1,10 +1,12 @@
 from django.shortcuts import render
-from rest_framework import viewsets
+from rest_framework import viewsets, status
+from rest_framework.response import Response
 from .models import Company
-from .serializers import CompanySerializer
+from .serializers import CompanySerializer, CompanyCreateSerializer
 from rest_framework.permissions import IsAuthenticated
 from core.pagination import DefaultPagination
 from drf_spectacular.utils import extend_schema
+from core.response import APIResponse
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
@@ -26,11 +28,25 @@ class CompanyViewSet(viewsets.ModelViewSet):
     @extend_schema(
         summary="Create company",
         description="Create a new company",
-        responses={200: CompanySerializer},
-        request=CompanySerializer,
+        responses={201: CompanySerializer},
+        request=CompanyCreateSerializer,
     )
     def create(self, request, *args, **kwargs):
         """
         Create a company
         """
-        pass
+        serializer = CompanyCreateSerializer(data=request.data)
+        if serializer.is_valid():
+            # Set the user to the current authenticated user
+            company = serializer.save(user=request.user)
+            response_serializer = CompanySerializer(company)
+            # return Response(response_serializer.data, status=status.HTTP_201_CREATED)
+            return APIResponse.created(
+                response_serializer.data,
+                message="Company created successfully"
+            )
+        return APIResponse.error(
+            message="Company creation failed",
+            errors=serializer.errors,
+            status_code=status.HTTP_400_BAD_REQUEST
+        )

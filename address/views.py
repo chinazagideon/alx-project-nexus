@@ -23,7 +23,6 @@ from core.pagination import DefaultPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 
-
 class AddressViewSet(viewsets.ModelViewSet):
     """
     Viewset for the address model

@@ -34,8 +34,8 @@ class JobListCreateView(generics.ListCreateAPIView):
 
     pagination_class = PageNumberPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['title', 'company', 'address', 'location']
-    search_fields = ['title', 'description', 'company__name', 'address__city', 'address__state', 'address__country']
+    filterset_fields = ['title', 'company', 'city', 'location']
+    search_fields = ['title', 'description', 'company__name']
     ordering_fields = ['date_posted', 'updated_at']
 
     def get_queryset(self):
@@ -208,6 +208,7 @@ class JobViewSet(viewsets.ModelViewSet):
                 'query': 'senior python developer',
                 'location': 'San Francisco',
                 'company': 'Google',
+                'physical_address': '225 San Francisco St, San Francisco, CA 94133',
                 'category': 'Software Engineering',
                 'salary_min': 100000,
                 'salary_max': 200000,
@@ -368,12 +369,22 @@ def search_suggestions(request):
                         }
                     }
                 },
-                'salary_ranges': {
+                'salary_min': {
                     'type': 'array',
                     'items': {
                         'type': 'object',
                         'properties': {
-                            'range': {'type': 'string'},
+                            'min': {'type': 'string'},
+                            'count': {'type': 'integer'}
+                        }
+                    }
+                },
+                'salary_max': {
+                    'type': 'array',
+                    'items': {
+                        'type': 'object',
+                        'properties': {
+                            'max': {'type': 'string'},
                             'count': {'type': 'integer'}
                         }
                     }
@@ -393,9 +404,13 @@ def search_suggestions(request):
                     {'name': 'Software Engineering', 'count': 156},
                     {'name': 'Data Science', 'count': 89}
                 ],
-                'salary_ranges': [
-                    {'range': '$100k-$150k', 'count': 78},
+                'salary_min': [
+                    {'min': '$100k', 'count': 78},
                     {'range': '$150k+', 'count': 45}
+                ],
+                'salary_max': [
+                    {'max': '$100k', 'count': 78},
+                    {'max': '$150k+', 'count': 45}
                 ]
             }
         }

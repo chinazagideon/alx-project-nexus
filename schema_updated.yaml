@@ -8,9 +8,7 @@ paths:
   /api/auth/login/:
     post:
       operationId: auth_login
-      description: |-
-        Takes a set of user credentials and returns an access and refresh JSON web
-        token pair to prove the authentication of those credentials.
+      description: Override post method to include user data in response
       summary: Login (obtain access & refresh)
       tags:
       - Auth
@@ -31,7 +29,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TokenObtainPair'
+                $ref: '#/components/schemas/DynamicSuccessResponse'
+          description: ''
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DynamicErrorResponse'
           description: ''
   /api/auth/refresh/:
     post:
@@ -99,13 +103,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/SuccessResponse'
+                $ref: '#/components/schemas/DynamicSuccessResponse'
           description: ''
         '401':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/DynamicErrorResponse'
           description: ''
   /api/admin/users/:
     get:
@@ -171,47 +175,6 @@ paths:
                 additionalProperties: {}
           description: ''
   /api/admin/users/{id}/:
-    put:
-      operationId: admin_user_update
-      description: Update user information including role assignment (admin only)
-      summary: Update user (Admin only)
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this user.
-        required: true
-      tags:
-      - Admin
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AdminUserRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/AdminUserRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/AdminUserRequest'
-        required: true
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminUser'
-          description: ''
-        '400':
-          content:
-            application/json:
-              schema:
-                type: object
-                additionalProperties: {}
-          description: ''
     patch:
       operationId: admin_user_partial_update
       description: Partially update user information including role assignment (admin
@@ -253,28 +216,6 @@ paths:
                 type: object
                 additionalProperties: {}
           description: ''
-    get:
-      operationId: admin_user_retrieve
-      description: Get detailed information about a specific user (admin only)
-      summary: Get user details (Admin only)
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this user.
-        required: true
-      tags:
-      - Admin
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AdminUser'
-          description: ''
     delete:
       operationId: admin_user_destroy
       description: Delete a user from the system (admin only)
@@ -297,6 +238,69 @@ paths:
               schema:
                 type: object
                 additionalProperties: {}
+          description: ''
+    put:
+      operationId: admin_user_update
+      description: Update user information including role assignment (admin only)
+      summary: Update user (Admin only)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - Admin
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AdminUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/AdminUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/AdminUserRequest'
+        required: true
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUser'
+          description: ''
+        '400':
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: {}
+          description: ''
+    get:
+      operationId: admin_user_retrieve
+      description: Get detailed information about a specific user (admin only)
+      summary: Get user details (Admin only)
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - Admin
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AdminUser'
           description: ''
   /api/admin/users/{id}/assign-role/:
     patch:
@@ -553,6 +557,55 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: ''
   /api/users/{id}/:
+    patch:
+      operationId: users_partial_update
+      description: User viewset for both public registration and authenticated operations
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - users
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+          description: ''
+    delete:
+      operationId: users_destroy
+      description: Delete an instance with standardized response
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user.
+        required: true
+      tags:
+      - users
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
     put:
       operationId: users_update
       description: Update an instance with standardized response
@@ -586,38 +639,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
           description: ''
-    patch:
-      operationId: users_partial_update
-      description: User viewset for both public registration and authenticated operations
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this user.
-        required: true
-      tags:
-      - users
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedUserRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedUserRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedUserRequest'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-          description: ''
     get:
       operationId: users_retrieve
       description: Retrieve an instance with standardized response
@@ -639,23 +660,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/User'
           description: ''
-    delete:
-      operationId: users_destroy
-      description: Delete an instance with standardized response
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this user.
-        required: true
-      tags:
-      - users
-      security:
-      - jwtAuth: []
-      responses:
-        '204':
-          description: No response body
   /api/skills/:
     get:
       operationId: skills_list
@@ -711,6 +715,55 @@ paths:
                 $ref: '#/components/schemas/Skill'
           description: ''
   /api/skills/{id}/:
+    patch:
+      operationId: skills_partial_update
+      description: Viewset for the skill model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this skill.
+        required: true
+      tags:
+      - skills
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedSkillRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedSkillRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedSkillRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Skill'
+          description: ''
+    delete:
+      operationId: skills_destroy
+      description: Viewset for the skill model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this skill.
+        required: true
+      tags:
+      - skills
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
     put:
       operationId: skills_update
       description: Viewset for the skill model
@@ -744,38 +797,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Skill'
           description: ''
-    patch:
-      operationId: skills_partial_update
-      description: Viewset for the skill model
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this skill.
-        required: true
-      tags:
-      - skills
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedSkillRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedSkillRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedSkillRequest'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Skill'
-          description: ''
     get:
       operationId: skills_retrieve
       description: Viewset for the skill model
@@ -797,23 +818,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Skill'
           description: ''
-    delete:
-      operationId: skills_destroy
-      description: Viewset for the skill model
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this skill.
-        required: true
-      tags:
-      - skills
-      security:
-      - jwtAuth: []
-      responses:
-        '204':
-          description: No response body
   /api/skills/user/:
     get:
       operationId: user_skills_list
@@ -913,6 +917,55 @@ paths:
                 $ref: '#/components/schemas/UserSkill'
           description: ''
   /api/skills/user/{id}/:
+    patch:
+      operationId: skills_user_partial_update
+      description: 'Viewset for user skill model: UserSkill related to User model'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user skill.
+        required: true
+      tags:
+      - skills
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUserSkillRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUserSkillRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUserSkillRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserSkill'
+          description: ''
+    delete:
+      operationId: skills_user_destroy
+      description: 'Viewset for user skill model: UserSkill related to User model'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this user skill.
+        required: true
+      tags:
+      - skills
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
     put:
       operationId: user_skills_replace
       description: Sets the user's skills to exactly the provided list (adds missing,
@@ -963,38 +1016,6 @@ paths:
                 type: object
                 additionalProperties: {}
           description: ''
-    patch:
-      operationId: skills_user_partial_update
-      description: 'Viewset for user skill model: UserSkill related to User model'
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this user skill.
-        required: true
-      tags:
-      - skills
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedUserSkillRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedUserSkillRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedUserSkillRequest'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserSkill'
-          description: ''
     get:
       operationId: skills_user_retrieve
       description: 'Viewset for user skill model: UserSkill related to User model'
@@ -1016,23 +1037,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/UserSkill'
           description: ''
-    delete:
-      operationId: skills_user_destroy
-      description: 'Viewset for user skill model: UserSkill related to User model'
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this user skill.
-        required: true
-      tags:
-      - skills
-      security:
-      - jwtAuth: []
-      responses:
-        '204':
-          description: No response body
   /api/companies/:
     get:
       operationId: companies_list
@@ -1089,6 +1093,55 @@ paths:
                 $ref: '#/components/schemas/Company'
           description: ''
   /api/companies/{id}/:
+    patch:
+      operationId: companies_partial_update
+      description: Viewset for the company model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this company.
+        required: true
+      tags:
+      - companies
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCompanyRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCompanyRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCompanyRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Company'
+          description: ''
+    delete:
+      operationId: companies_destroy
+      description: Viewset for the company model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this company.
+        required: true
+      tags:
+      - companies
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
     put:
       operationId: companies_update
       description: Viewset for the company model
@@ -1122,38 +1175,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Company'
           description: ''
-    patch:
-      operationId: companies_partial_update
-      description: Viewset for the company model
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this company.
-        required: true
-      tags:
-      - companies
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedCompanyRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedCompanyRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedCompanyRequest'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Company'
-          description: ''
     get:
       operationId: companies_retrieve
       description: Viewset for the company model
@@ -1175,23 +1196,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Company'
           description: ''
-    delete:
-      operationId: companies_destroy
-      description: Viewset for the company model
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this company.
-        required: true
-      tags:
-      - companies
-      security:
-      - jwtAuth: []
-      responses:
-        '204':
-          description: No response body
   /api/jobs/search/:
     post:
       operationId: job_search_post
@@ -1608,6 +1612,55 @@ paths:
                 $ref: '#/components/schemas/Job'
           description: ''
   /api/jobs/{id}/:
+    patch:
+      operationId: jobs_partial_update
+      description: View for listing and creating jobs
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this job.
+        required: true
+      tags:
+      - jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedJobRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedJobRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedJobRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Job'
+          description: ''
+    delete:
+      operationId: jobs_destroy
+      description: View for listing and creating jobs
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this job.
+        required: true
+      tags:
+      - jobs
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
     put:
       operationId: jobs_update
       description: View for listing and creating jobs
@@ -1641,38 +1694,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Job'
           description: ''
-    patch:
-      operationId: jobs_partial_update
-      description: View for listing and creating jobs
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this job.
-        required: true
-      tags:
-      - jobs
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedJobRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedJobRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedJobRequest'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Job'
-          description: ''
     get:
       operationId: jobs_retrieve
       description: View for listing and creating jobs
@@ -1694,23 +1715,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Job'
           description: ''
-    delete:
-      operationId: jobs_destroy
-      description: View for listing and creating jobs
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this job.
-        required: true
-      tags:
-      - jobs
-      security:
-      - jwtAuth: []
-      responses:
-        '204':
-          description: No response body
   /api/jobs/skill/:
     get:
       operationId: job_skill_list
@@ -1782,6 +1786,56 @@ paths:
                 additionalProperties: {}
           description: ''
   /api/jobs/skill/{id}/:
+    patch:
+      operationId: jobs_skill_partial_update
+      description: 'Viewset for job skill model: JobSkill related to Job model'
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this job skill.
+        required: true
+      tags:
+      - jobs
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedJobSkillRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedJobSkillRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedJobSkillRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/JobSkill'
+          description: ''
+    delete:
+      operationId: job_skill_delete
+      description: Delete Job Skill
+      summary: Delete Job Skill
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this job skill.
+        required: true
+      tags:
+      - jobs
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
     put:
       operationId: jobs_skill_update
       description: 'Viewset for job skill model: JobSkill related to Job model'
@@ -1815,38 +1869,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/JobSkill'
           description: ''
-    patch:
-      operationId: jobs_skill_partial_update
-      description: 'Viewset for job skill model: JobSkill related to Job model'
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this job skill.
-        required: true
-      tags:
-      - jobs
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedJobSkillRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedJobSkillRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedJobSkillRequest'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/JobSkill'
-          description: ''
     get:
       operationId: jobs_skill_retrieve
       description: 'Viewset for job skill model: JobSkill related to Job model'
@@ -1868,24 +1890,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/JobSkill'
           description: ''
-    delete:
-      operationId: job_skill_delete
-      description: Delete Job Skill
-      summary: Delete Job Skill
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this job skill.
-        required: true
-      tags:
-      - jobs
-      security:
-      - jwtAuth: []
-      responses:
-        '204':
-          description: No response body
   /api/uploads/:
     get:
       operationId: uploads_list
@@ -1941,6 +1945,55 @@ paths:
                 $ref: '#/components/schemas/Upload'
           description: ''
   /api/uploads/{id}/:
+    patch:
+      operationId: uploads_partial_update
+      description: View for listing and creating files
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this upload.
+        required: true
+      tags:
+      - uploads
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedUploadRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedUploadRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedUploadRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Upload'
+          description: ''
+    delete:
+      operationId: uploads_destroy
+      description: View for listing and creating files
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this upload.
+        required: true
+      tags:
+      - uploads
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
     put:
       operationId: uploads_update
       description: View for listing and creating files
@@ -1974,38 +2027,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Upload'
           description: ''
-    patch:
-      operationId: uploads_partial_update
-      description: View for listing and creating files
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this upload.
-        required: true
-      tags:
-      - uploads
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedUploadRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedUploadRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedUploadRequest'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Upload'
-          description: ''
     get:
       operationId: uploads_retrieve
       description: View for listing and creating files
@@ -2027,23 +2048,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Upload'
           description: ''
-    delete:
-      operationId: uploads_destroy
-      description: View for listing and creating files
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this upload.
-        required: true
-      tags:
-      - uploads
-      security:
-      - jwtAuth: []
-      responses:
-        '204':
-          description: No response body
   /api/promotions/:
     get:
       operationId: promotions_list
@@ -2099,6 +2103,55 @@ paths:
                 $ref: '#/components/schemas/Promotion'
           description: ''
   /api/promotions/{id}/:
+    patch:
+      operationId: promotions_partial_update
+      description: View for listing promotions
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this promotion.
+        required: true
+      tags:
+      - promotions
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedPromotionRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedPromotionRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedPromotionRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Promotion'
+          description: ''
+    delete:
+      operationId: promotions_destroy
+      description: View for listing promotions
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this promotion.
+        required: true
+      tags:
+      - promotions
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
     put:
       operationId: promotions_update
       description: View for listing promotions
@@ -2132,38 +2185,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Promotion'
           description: ''
-    patch:
-      operationId: promotions_partial_update
-      description: View for listing promotions
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this promotion.
-        required: true
-      tags:
-      - promotions
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedPromotionRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedPromotionRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedPromotionRequest'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Promotion'
-          description: ''
     get:
       operationId: promotions_retrieve
       description: View for listing promotions
@@ -2185,23 +2206,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Promotion'
           description: ''
-    delete:
-      operationId: promotions_destroy
-      description: View for listing promotions
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this promotion.
-        required: true
-      tags:
-      - promotions
-      security:
-      - jwtAuth: []
-      responses:
-        '204':
-          description: No response body
   /api/promotions/{id}/activate/:
     post:
       operationId: promotions_activate_create
@@ -2693,6 +2697,55 @@ paths:
                 $ref: '#/components/schemas/Address'
           description: ''
   /api/addresses/{id}/:
+    patch:
+      operationId: addresses_partial_update
+      description: Viewset for the address model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this address.
+        required: true
+      tags:
+      - addresses
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedAddressRequest'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedAddressRequest'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedAddressRequest'
+      security:
+      - jwtAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Address'
+          description: ''
+    delete:
+      operationId: addresses_destroy
+      description: Viewset for the address model
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        description: A unique integer value identifying this address.
+        required: true
+      tags:
+      - addresses
+      security:
+      - jwtAuth: []
+      responses:
+        '204':
+          description: No response body
     put:
       operationId: addresses_update
       description: Viewset for the address model
@@ -2726,38 +2779,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Address'
           description: ''
-    patch:
-      operationId: addresses_partial_update
-      description: Viewset for the address model
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this address.
-        required: true
-      tags:
-      - addresses
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/PatchedAddressRequest'
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/PatchedAddressRequest'
-          multipart/form-data:
-            schema:
-              $ref: '#/components/schemas/PatchedAddressRequest'
-      security:
-      - jwtAuth: []
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Address'
-          description: ''
     get:
       operationId: addresses_retrieve
       description: Viewset for the address model
@@ -2779,23 +2800,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/Address'
           description: ''
-    delete:
-      operationId: addresses_destroy
-      description: Viewset for the address model
-      parameters:
-      - in: path
-        name: id
-        schema:
-          type: integer
-        description: A unique integer value identifying this address.
-        required: true
-      tags:
-      - addresses
-      security:
-      - jwtAuth: []
-      responses:
-        '204':
-          description: No response body
   /api/notifications/:
     get:
       operationId: notifications_list
@@ -3615,7 +3619,7 @@ components:
         * `week` - This Week
         * `month` - This Month
         * `all` - All Time
-    ErrorResponse:
+    DynamicErrorResponse:
       type: object
       properties:
         success:
@@ -3624,7 +3628,7 @@ components:
           description: Always false for error responses
         message:
           type: string
-          default: Authentication required
+          default: Invalid credentials
           description: Error message
         data:
           description: Always null for error responses
@@ -3636,6 +3640,48 @@ components:
           type: object
           additionalProperties: {}
           description: Detailed error information
+    DynamicSuccessResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/LoginResponse'
+        success:
+          type: boolean
+          default: true
+          description: Always true for success responses
+        message:
+          type: string
+          default: Login successful
+          description: Success message
+        status_code:
+          type: integer
+          default: 200
+          description: HTTP status code
+      required:
+      - data
+    ErrorResponse:
+      type: object
+      description: Standardized error response serializer for DRF documentation
+      properties:
+        success:
+          type: boolean
+          default: false
+          description: Always false for error responses
+        message:
+          type: string
+          description: Error message
+        data:
+          description: Always null for error responses
+        status_code:
+          type: integer
+          description: HTTP status code
+        errors:
+          type: object
+          additionalProperties: {}
+          description: Detailed error information
+      required:
+      - message
+      - status_code
     EventTypeEnum:
       enum:
       - job_posted
@@ -3947,6 +3993,24 @@ components:
       required:
       - job
       - skill
+    LoginResponse:
+      type: object
+      description: Serializer for login response that includes tokens and user data
+      properties:
+        access:
+          type: string
+          description: JWT access token
+        refresh:
+          type: string
+          description: JWT refresh token
+        user:
+          allOf:
+          - $ref: '#/components/schemas/User'
+          description: User profile data
+      required:
+      - access
+      - refresh
+      - user
     Notification:
       type: object
       description: Serializer for the notification model
@@ -4828,23 +4892,25 @@ components:
         * `pending` - Pending
     SuccessResponse:
       type: object
+      description: Standardized success response serializer for DRF documentation
       properties:
-        data:
-          nullable: true
         success:
           type: boolean
           default: true
           description: Always true for success responses
         message:
           type: string
-          default: Logged out from all devices successfully
           description: Success message
+        data:
+          nullable: true
+          description: Response data payload
         status_code:
           type: integer
-          default: 200
           description: HTTP status code
       required:
       - data
+      - message
+      - status_code
     TokenBlacklistRequest:
       type: object
       properties:
@@ -4853,18 +4919,6 @@ components:
           writeOnly: true
           minLength: 1
       required:
-      - refresh
-    TokenObtainPair:
-      type: object
-      properties:
-        access:
-          type: string
-          readOnly: true
-        refresh:
-          type: string
-          readOnly: true
-      required:
-      - access
       - refresh
     TokenObtainPairRequest:
       type: object
@@ -5183,6 +5237,7 @@ components:
       - skills
     ValidationErrorResponse:
       type: object
+      description: Standardized validation error response serializer for DRF documentation
       properties:
         success:
           type: boolean

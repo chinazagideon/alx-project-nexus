@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
-from .serializers import UserSerializer, UserRegistrationSerializer
+from .serializers import UserSerializer
 from .models.models import User
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.authentication import JWTAuthentication
@@ -30,10 +30,7 @@ class UserViewSet(StandardResponseMixin, viewsets.ModelViewSet):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'create':
-            # Allow public registration
-            permission_classes = [AllowAny]
-        elif self.action == 'list':
+        if self.action == 'list':
             # Only admin can list all users
             permission_classes = [IsAdminOnly]
         else:
@@ -51,30 +48,6 @@ class UserViewSet(StandardResponseMixin, viewsets.ModelViewSet):
                 return User.objects.filter(id=self.request.user.id)
         return super().get_queryset()
 
-    @extend_schema(
-        operation_id="user_register",
-        summary="Register new user",
-        description="Create a new user account ",
-        tags=["Auth"],
-        request=UserRegistrationSerializer,
-        responses={
-            201: SuccessResponseSerializer,
-            400: ValidationErrorResponseSerializer,
-        },
-    )
-    def create(self, request, *args, **kwargs):
-        """
-        Register new user account
-        """
-        serializer = UserRegistrationSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user = serializer.save()
-        # Return user data without password
-        response_serializer = UserSerializer(user)
-        return APIResponse.created(
-            data=response_serializer.data,
-            message="User registered successfully"
-        )
 
     @extend_schema(
         operation_id="user_profile_get",

@@ -10,11 +10,11 @@ class Company(models.Model):
     Company model for the company
     """
     name = models.CharField(max_length=255, null=False, blank=False)
-    description = models.TextField(null=True, blank=True)
+    description = models.TextField(null=False, blank=False, default="")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False, blank=False)
     # address = models.ForeignKey(Address, on_delete=models.CASCADE, null=False, blank=False)
-    website = models.URLField(null=True, blank=True)
-    contact_details = models.CharField(max_length=255, null=True, blank=True)
+    website = models.URLField(null=True, blank=True, default="")
+    contact_details = models.CharField(max_length=255, null=False, blank=False, default="")
     status = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)

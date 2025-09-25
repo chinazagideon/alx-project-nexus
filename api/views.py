@@ -7,10 +7,11 @@ from rest_framework import status
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
 from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
 from rest_framework import serializers
+from rest_framework.permissions import AllowAny
 from core.response import APIResponse, create_success_response_serializer, create_error_response_serializer
 from core.mixins import StandardAPIViewMixin
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from user.serializers import UserSerializer
+from user.serializers import UserSerializer, UserRegistrationSerializer
 
 
 class LoginResponseSerializer(serializers.Serializer):
@@ -154,4 +155,44 @@ class RefreshView(TokenRefreshView):
 )
 class LogoutView(TokenBlacklistView):
     pass
+
+
+class RegistrationView(StandardAPIViewMixin, APIView):
+    """
+    Public user registration view
+    """
+    permission_classes = [AllowAny]
+
+    @extend_schema(
+        operation_id='auth_register',
+        summary='Register new user',
+        description='Create a new user account (public endpoint)',
+        tags=['Auth'],
+        request=UserRegistrationSerializer,
+        responses={
+            201: create_success_response_serializer(
+                data_serializer=UserSerializer(),
+                message="User registered successfully"
+            ),
+            400: create_error_response_serializer(
+                message="Validation error",
+                status_code=400
+            ),
+        }
+    )
+    def post(self, request):
+        """
+        Register a new user account
+        """
+        serializer = UserRegistrationSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = serializer.save()
+        
+        # Return user data without password
+        response_serializer = UserSerializer(user)
+        return self.success_response(
+            data=response_serializer.data,
+            message="User registered successfully",
+            status_code=201
+        )
         

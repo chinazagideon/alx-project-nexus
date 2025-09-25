@@ -3239,8 +3239,18 @@ components:
         location:
           type: string
           maxLength: 255
+        salary_min:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        salary_max:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         salary_range:
           type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
           maxLength: 255
         date_posted:
           type: string
@@ -3282,6 +3292,8 @@ components:
       - is_promoted
       - location
       - promotion_priority
+      - salary_max
+      - salary_min
       - salary_range
       - title
       - updated_at
@@ -3304,15 +3316,27 @@ components:
           type: string
           minLength: 1
           maxLength: 255
+        salary_min:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+        salary_max:
+          type: string
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
         salary_range:
           type: string
           minLength: 1
           maxLength: 255
+          format: decimal
+          pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
       required:
       - address
       - company
       - description
       - location
+      - salary_max
+      - salary_min
       - salary_range
       - title
     JobSearchRequest:

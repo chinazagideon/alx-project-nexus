@@ -14,9 +14,10 @@ class JobSerializer(serializers.ModelSerializer):
     """
     company_name = serializers.CharField(source='company.name', read_only=True)
     company_description = serializers.CharField(source='company.description', read_only=True)
-    address_city = serializers.CharField(source='address.city', read_only=True)
-    address_state = serializers.CharField(source='address.state', read_only=True)
-    address_country = serializers.CharField(source='address.country', read_only=True)
+    city_name = serializers.CharField(source='city.name', read_only=True)
+    # address_city = serializers.CharField(source='address.city', read_only=True)
+    # address_state = serializers.CharField(source='address.state', read_only=True)
+    # address_country = serializers.CharField(source='address.country', read_only=True)
     categories = serializers.SerializerMethodField()
     is_promoted = serializers.BooleanField(read_only=True)
     promotion_priority = serializers.IntegerField(read_only=True)
@@ -33,12 +34,11 @@ class JobSerializer(serializers.ModelSerializer):
             'company',
             'company_name',
             'company_description',
-            'address',
-            'address_city',
-            'address_state',
-            'address_country',
-            'location',
-            'salary_range',
+            'physical_address',
+            'city',
+            'city_name',
+            'salary_min',
+            'salary_max',
             'date_posted',
             'close_date',
             'updated_at',
