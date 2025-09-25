@@ -2,7 +2,7 @@ services:
   # The Web Service for your Django app
   - type: web
     name: connect-hire
-    plan: free
+    plan: starter
     env: python
     buildCommand: "./build.sh"
     startCommand: "./start.sh"
