@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import AbstractUser
 from enum import Enum
 from django.core.validators import validate_email
-import uuid
 
 class UserRole(models.TextChoices):
     """
@@ -35,7 +34,7 @@ class User(AbstractUser):
     
     # Email verification fields
     is_email_verified = models.BooleanField(default=False)
-    email_verification_token = models.UUIDField(unique=True, null=True, blank=True)
+    email_verification_token = models.CharField(max_length=6, unique=True, null=True, blank=True)
     email_verification_sent_at = models.DateTimeField(null=True, blank=True)
     
     created_at = models.DateTimeField(auto_now_add=True,)
@@ -61,11 +60,13 @@ class User(AbstractUser):
     
     def generate_email_verification_token(self):
         """
-        Generate a new email verification token
+        Generate a new 6-digit email verification token
         """
-        if not self.email_verification_token:
-            self.email_verification_token = uuid.uuid4()
-            self.save(update_fields=['email_verification_token'])
+        import random
+        
+        # Generate a new 6-digit token
+        self.email_verification_token = f"{random.randint(100000, 999999):06d}"
+        self.save(update_fields=['email_verification_token'])
         return self.email_verification_token
 
     

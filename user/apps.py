@@ -12,7 +12,6 @@ def notify_two_factor_setup(sender, request, user, device, **kwargs):
     """
     Notify User when two factor is setup
     """
-    # Import here to avoid circular imports
     from notification.tasks import send_otp_notification
     
     send_otp_notification.delay(

@@ -8,21 +8,23 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def send_otp_notification(self, to_email, subject, message):
     """
     Send OTP notification
     """
-    try: 
+    try:
         send_mail(
-            subject, 
-            message, 
-            settings.DEFAULT_FROM_EMAIL, 
+            subject,
+            message,
+            settings.DEFAULT_FROM_EMAIL,
             [to_email],
             fail_silently=False,
-            )
+        )
     except Exception as exec:
         raise self.retry(exec=exec)
+
 
 @shared_task(bind=True, max_retries=3, default_retry_delay=60)
 def send_email_verification(self, user_id):
@@ -31,16 +33,13 @@ def send_email_verification(self, user_id):
     """
     try:
         user = User.objects.get(id=user_id)
-        
+
         # Generate verification token if not exists
         token = user.generate_email_verification_token()
-        
-        # Create verification URL
-        verification_url = f"{settings.EMAIL_VERIFICATION_URL}?token={token}"
-        
+
         # Prepare email content
         subject = "Verify Your Email - Connect Hire"
-        
+
         # Simple HTML email template
         html_message = f"""
         <html>
@@ -48,15 +47,16 @@ def send_email_verification(self, user_id):
             <h2>Welcome to Connect Hire!</h2>
             <p>Hi {user.get_full_name()},</p>
             <p>Thank you for registering with Connect Hire. Please verify your email address to complete your registration.</p>
-            <p><a href="{verification_url}" style="background-color: #007bff; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px;">Verify Email Address</a></p>
-            <p>If the button doesn't work, copy and paste this link into your browser:</p>
-            <p>{verification_url}</p>
-            <p>This link will expire in 24 hours.</p>
+            
+            <p>Your Verification Token is:</p>
+            <p>{token}</p>
+           
+            <p>This token will expire in 24 hours.</p>
             <p>Best regards,<br>The Connect Hire Team</p>
         </body>
         </html>
         """
-        
+
         # Plain text version
         text_message = f"""
         Welcome to Connect Hire!
@@ -65,14 +65,14 @@ def send_email_verification(self, user_id):
         
         Thank you for registering with Connect Hire. Please verify your email address to complete your registration.
         
-        Click this link to verify: {verification_url}
+        Your Verification Token is: {token}
         
-        This link will expire in 24 hours.
+        This token will expire in 24 hours.
         
         Best regards,
         The Connect Hire Team
         """
-        
+
         # Send email
         send_mail(
             subject=subject,
@@ -82,13 +82,13 @@ def send_email_verification(self, user_id):
             html_message=html_message,
             fail_silently=False,
         )
-        
+
         # Update the sent timestamp
         user.email_verification_sent_at = timezone.now()
-        user.save(update_fields=['email_verification_sent_at'])
-        
+        user.save(update_fields=["email_verification_sent_at"])
+
         logger.info(f"Email verification sent to user {user.id} ({user.email})")
-        
+
     except User.DoesNotExist:
         logger.error(f"User with id {user_id} not found for email verification")
     except Exception as exc:

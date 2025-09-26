@@ -12,6 +12,7 @@ from core.response import APIResponse, create_success_response_serializer, creat
 from core.mixins import StandardAPIViewMixin
 from drf_spectacular.utils import extend_schema, extend_schema_view
 from user.serializers import UserSerializer, UserRegistrationSerializer
+from upload.serializers import UploadSerializer
 
 
 class LoginResponseSerializer(serializers.Serializer):
@@ -21,6 +22,7 @@ class LoginResponseSerializer(serializers.Serializer):
     access = serializers.CharField(help_text="JWT access token")
     refresh = serializers.CharField(help_text="JWT refresh token")
     user = UserSerializer(help_text="User profile data")
+    uploads = UploadSerializer(many=True, help_text="User uploads", required=False)
 
 
 class ProtectedView(StandardAPIViewMixin, APIView):
@@ -95,10 +97,55 @@ class LogoutAllView(StandardAPIViewMixin, APIView):
         summary='Login (obtain access & refresh)', 
         tags=['Auth'],
         responses={
-            200: create_success_response_serializer(
-                data_serializer=LoginResponseSerializer(),
-                message="Login successful"
-            ),
+            200: {
+                'description': 'Login successful',
+                'content': {
+                    'application/json': {
+                        'schema': {
+                            'type': 'object',
+                            'properties': {
+                                'success': {'type': 'boolean'},
+                                'message': {'type': 'string'},
+                                'data': {
+                                    'type': 'object',
+                                    'properties': {
+                                        'access': {'type': 'string', 'description': 'JWT access token'},
+                                        'refresh': {'type': 'string', 'description': 'JWT refresh token'},
+                                        'user': {
+                                            'type': 'object',
+                                            'description': 'User profile data',
+                                            'properties': {
+                                                'id': {'type': 'integer'},
+                                                'username': {'type': 'string'},
+                                                'email': {'type': 'string'},
+                                                'first_name': {'type': 'string'},
+                                                'last_name': {'type': 'string'},
+                                                'role': {'type': 'string'},
+                                                'is_email_verified': {'type': 'boolean'}
+                                            }
+                                        },
+                                        'uploads': {
+                                            'type': 'array',
+                                            'description': 'User uploads (if any)',
+                                            'items': {
+                                                'type': 'object',
+                                                'properties': {
+                                                    'id': {'type': 'integer'},
+                                                    'name': {'type': 'string'},
+                                                    'type': {'type': 'string'},
+                                                    'file_url': {'type': 'string'},
+                                                    'file_size': {'type': 'integer'},
+                                                    'created_at': {'type': 'string', 'format': 'date-time'}
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
             401: create_error_response_serializer(
                 message="Invalid credentials",
                 status_code=401
@@ -129,9 +176,15 @@ class LoginView(TokenObtainPairView):
             # Serialize user data
             user_serializer = UserSerializer(user)
             
-            # Create new response data with user information
+            # Get user uploads
+            from upload.models import Upload
+            user_uploads = Upload.objects.filter(uploaded_by=user).order_by('-created_at')
+            uploads_serializer = UploadSerializer(user_uploads, many=True, context={'request': request})
+            
+            # Create new response data with user information and uploads
             response_data = response.data.copy()
             response_data['user'] = user_serializer.data
+            response_data['uploads'] = uploads_serializer.data
             
             # Return standardized API response
             return APIResponse.success(

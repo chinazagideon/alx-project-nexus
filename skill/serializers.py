@@ -19,21 +19,30 @@ class JobSkillSerializer(serializers.ModelSerializer):
     """
     Serializer for the job skill model
     """
-    
+    skill_name = serializers.SerializerMethodField()
+    def get_skill_name(self, obj):
+        return obj.skill.name
+
     class Meta:
         model = JobSkill
-        fields = ("id", "job", "skill")
+        fields = ("id", "job", "skill", "skill_name")
         # read_only_fields = ("id")
+
         
 
 class UserSkillSerializer(serializers.ModelSerializer):
     """
     Serializer for the user skill model
     """ 
+    skill_name = serializers.SerializerMethodField()
+
+    def get_skill_name(self, obj):
+        return obj.skill.name
+
     class Meta:
         model = UserSkill
-        fields = ("id", "user", "skill")
-        # read_only_fields = ("id")
+        fields = ("id", "user", "skill", "skill_name")
+        read_only_fields = ("id", "skill_name", "user")
 
 
 class UserSkillsUpdateSerializer(serializers.Serializer):

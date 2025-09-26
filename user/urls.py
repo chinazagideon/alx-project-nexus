@@ -12,7 +12,7 @@ router = DefaultRouter()
 router.register(r'', UserViewSet, basename='user')
 
 urlpatterns = [
-    path('', include(router.urls)),
     path('verify-email/', EmailVerificationView.as_view(), name='verify-email'),
     path('resend-verification/', ResendVerificationView.as_view(), name='resend-verification'),
+    path('', include(router.urls)),
 ]

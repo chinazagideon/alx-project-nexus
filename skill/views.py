@@ -145,10 +145,12 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         """
         queryset = self.get_queryset()
         serializer = UserSkillSerializer(queryset, many=True)
-        # return Response({"results": serializer.data})
-        return APIResponse.created(
-            data=serializer.data,
+        skills = serializer.data
+        skills_with_user = [{"id": skill["id"], "user": request.user.id, "skill": skill["skill_name"]} for skill in skills]
+        return APIResponse.success(
+            data=skills_with_user,
             message="User skills listed successfully"
+            # status_code=status.HTTP_200_OK
         )
 
     @extend_schema(
@@ -180,7 +182,7 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         UserSkill.objects.bulk_create([UserSkill(user=request.user, skill_id=sid) for sid in to_create], ignore_conflicts=True)
         created = len(to_create)
         # return Response({"added": created})
-        return APIResponse.created(
+        return APIResponse.success(
             data={"added": created},
             message="User skills added successfully"
         )
@@ -215,7 +217,7 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         if to_remove:
             UserSkill.objects.filter(user=request.user, skill_id__in=list(to_remove)).delete()
         # return Response({"added": len(to_add), "removed": len(to_remove)})
-        return APIResponse.created(
+        return APIResponse.success(
             data={"added": len(to_add), "removed": len(to_remove)},
             message="User skills replaced successfully"
         )
@@ -247,8 +249,7 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         deleted_count = UserSkill.objects.filter(user=request.user, skill_id__in=skills).count()
         # Delete the skills
         UserSkill.objects.filter(user=request.user, skill_id__in=skills).delete()
-        # return Response({"deleted": deleted_count})
-        return APIResponse.created(
+        return APIResponse.success(
             data={"deleted": deleted_count},
             message="User skills deleted successfully"
         )

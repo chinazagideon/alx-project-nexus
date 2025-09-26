@@ -24,7 +24,10 @@ class FeedPayloadField(serializers.Field):
                     "id": obj.id,
                     "title": getattr(obj, "title", None),
                     "company_name": getattr(getattr(obj, "company", None), "name", None),
-                    "location": getattr(obj, "location", None),
+                    "location": getattr(obj, "physical_address", None),
+                    "city": getattr(obj, "city_name", None),
+                    "salary_min": getattr(obj, "salary_min", None),
+                    "salary_max": getattr(obj, "salary_max", None),
                     "date_posted": getattr(obj, "date_posted", None),
                 },
             }

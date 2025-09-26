@@ -32,32 +32,17 @@ class Upload(models.Model):
 
     # File path of the upload
     file_path = models.FileField(
-        upload_to="uploads/", null=False, blank=False, validators=[validate_file_size]
+        upload_to="public/uploads/", null=False, blank=False, validators=[validate_file_size]
     )
     # Name of the upload
     name = models.CharField(
         max_length=255,
         null=False,
         blank=False,
-        validators=[
-            FileExtensionValidator(
-                allowed_extensions=[
-                    "pdf",
-                    "doc",
-                    "docx",
-                    "txt",
-                    "csv",
-                    "xls",
-                    "xlsx",
-                    "ppt",
-                    "pptx",
-                ]
-            )
-        ],
     )
     # Thumbnail of the upload
     thumbnail = models.ImageField(
-        upload_to="thumbnails/", null=True, blank=True, validators=[validate_file_size]
+        upload_to="public/thumbnails/", null=True, blank=True, validators=[validate_file_size]
     )
 
     # User that uploaded the upload
@@ -78,6 +63,6 @@ class Upload(models.Model):
         """
         String representation of the upload model
         """
-        return self
+        return f"{self.name} ({self.type})"
 
     

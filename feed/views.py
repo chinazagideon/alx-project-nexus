@@ -7,7 +7,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from rest_framework import status
-from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 
 from .models import FeedItem
 from .serializers import FeedItemSerializer, FeedListResponseSerializer
@@ -24,9 +24,38 @@ class FeedListView(APIView):
     @extend_schema(
         summary="Get global feed",
         parameters=[
-            OpenApiParameter(name="limit", required=False, type=int, description="Page size (default 20)"),
-            OpenApiParameter(name="cursor", required=False, type=str, description="Pagination cursor"),
-            OpenApiParameter(name="types", required=False, type=str, description="Comma list: job_posted,company_joined,promotion_active"),
+            OpenApiParameter(
+                name="limit", 
+                required=False, 
+                type=int, 
+                description="Page size (default 20)",
+                examples=[
+                    OpenApiExample("Default", value=20),
+                    OpenApiExample("Medium", value=50),
+                    OpenApiExample("Large", value=100)
+                ]
+            ),
+            OpenApiParameter(
+                name="cursor", 
+                required=False, 
+                type=str, 
+                description="Pagination cursor",
+                examples=[
+                    OpenApiExample("Example 1", value="eyJpZCI6MTIzfQ=="),
+                    OpenApiExample("Example 2", value="eyJpZCI6NDU2fQ==")
+                ]
+            ),
+            OpenApiParameter(
+                name="types", 
+                required=False, 
+                type=str, 
+                description="Comma list: job_posted,company_joined,promotion_active",
+                examples=[
+                    OpenApiExample("Single type", value="job_posted"),
+                    OpenApiExample("Multiple types", value="job_posted,company_joined"),
+                    OpenApiExample("All types", value="job_posted,company_joined,promotion_active")
+                ]
+            ),
         ],
         responses={200: FeedListResponseSerializer},
     )
