@@ -36,6 +36,22 @@ class ApplicationsViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         """
-        Get the queryset for the user list
+        Get the queryset for applications based on user role:
+        - TALENT users see only their own applications
+        - RECRUITER users see applications for jobs they own (through their company)
+        - ADMIN users see all applications
         """
-        return super().get_queryset()
+        user = self.request.user
+        
+        if user.role == 'admin':
+            # Admin can see all applications
+            return Application.objects.all()
+        elif user.role == 'talent':
+            # Talent users see only their own applications
+            return Application.objects.filter(user=user)
+        elif user.role == 'recruiter':
+            # Recruiters see applications for jobs they own (through their company)
+            return Application.objects.filter(job__company__user=user)
+        else:
+            # Default fallback - return empty queryset for unknown roles
+            return Application.objects.none()
