@@ -17,6 +17,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = Application
         fields = (
+            "id",
             "job",
             "user", 
             "status",
@@ -24,6 +25,7 @@ class ApplicationSerializer(serializers.ModelSerializer):
             "cover_letter",
             "updated_at"
         )
+        
 
-        read_only_fields = ("updated_at", "status", "date_applied")
+        read_only_fields = ("updated_at", "status", "date_applied", "id")
         required_fields = ("job", "user")
