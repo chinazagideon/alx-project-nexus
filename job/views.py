@@ -2,7 +2,7 @@
 Views for the jobs app
 """
 from .models import Job
-from .serializers import JobSerializer, JobSearchSerializer, JobSearchResponseSerializer
+from .serializers import JobSerializer, JobCreateSerializer, JobSearchSerializer, JobSearchResponseSerializer
 from .search_service import JobSearchService
 from rest_framework import generics, viewsets, status
 from rest_framework.permissions import IsAuthenticated, AllowAny
@@ -28,7 +28,7 @@ class JobListCreateView(generics.ListCreateAPIView):
     View for listing and creating jobs
     """
     queryset = Job.objects.all()
-    serializer_class = JobSerializer
+    # serializer_class = JobSerializer
 
     permission_classes = [IsAuthenticated]
 
@@ -37,6 +37,12 @@ class JobListCreateView(generics.ListCreateAPIView):
     filterset_fields = ['title', 'company', 'city', 'location']
     search_fields = ['title', 'description', 'company__name']
     ordering_fields = ['date_posted', 'updated_at']
+    
+    def get_serializer_class(self):
+        """Return different serializers for list and create"""
+        if self.request.method == 'POST':
+            return JobCreateSerializer
+        return JobSerializer
 
     def get_queryset(self):
         """
@@ -63,8 +69,13 @@ class JobViewSet(viewsets.ModelViewSet):
     View for listing and creating jobs
     """
     queryset = Job.objects.all()
-    serializer_class = JobSerializer
     permission_classes = [IsAuthenticated]
+    
+    def get_serializer_class(self):
+        """Return different serializers for different actions"""
+        if self.action in ['create', 'update', 'partial_update']:
+            return JobCreateSerializer
+        return JobSerializer
 
     def get_queryset(self):
         """

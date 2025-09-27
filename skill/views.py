@@ -53,35 +53,62 @@ class SkillViewSet(viewsets.ModelViewSet):
 class JobSkillViewSet(viewsets.ModelViewSet):
     """
     Viewset for job skill model: JobSkill related to Job model
+    
     """
 
     queryset = JobSkill.objects.all()
     serializer_class = JobSkillSerializer
     permission_classes = [IsAuthenticated]
     pagination_class = DefaultPagination
+    http_method_names = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options']
 
     def get_queryset(self):
         """
         Get the queryset for the job skill list
         """
-        return super().get_queryset()
+        return JobSkill.objects.all()
 
     @extend_schema(
         operation_id="job_skill_create",
         summary="Create Job Skill",
-        description="Create Job Skill",
+        description="Create Job Skill - Associates a skill with a job posting",
         tags=[SkillApiEnum.job_skill_tag.value],
         request=JobSkillSerializer,
         responses={
-            200: JobSkillSerializer,
+            201: JobSkillSerializer,
             400: OpenApiTypes.OBJECT,
         },
     )
     def create(self, request, *args, **kwargs):
         """
-        Create a new job skill
+        Create a new job skill association
         """
-        return super().create(request, *args, **kwargs)
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid():
+            # Check for duplicate job-skill combinations
+            job_id = serializer.validated_data['job'].id
+            skill_id = serializer.validated_data['skill'].id
+            
+            if JobSkill.objects.filter(job_id=job_id, skill_id=skill_id).exists():
+                return APIResponse.error(
+                    message="Job skill association already exists",
+                    errors={"detail": f"Job {job_id} already has skill {skill_id} associated"},
+                    status_code=status.HTTP_400_BAD_REQUEST
+                )
+            
+            self.perform_create(serializer)
+            headers = self.get_success_headers(serializer.data)
+            return APIResponse.success(
+                data=serializer.data,
+                message="Job skill created successfully",
+                status_code=status.HTTP_201_CREATED
+            )
+        else:
+            return APIResponse.error(
+                message="Failed to create job skill",
+                errors=serializer.errors,
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
 
     @extend_schema(
         operation_id="job_skill_list",
@@ -112,6 +139,105 @@ class JobSkillViewSet(viewsets.ModelViewSet):
         Delete a job skill
         """
         return super().destroy(request, *args, **kwargs)
+
+    @action(detail=False, methods=['post'], url_path='bulk-create')
+    @extend_schema(
+        operation_id="job_skills_bulk_create",
+        summary="Bulk Create Job Skills",
+        description="Create multiple job skill associations at once",
+        tags=[SkillApiEnum.job_skill_tag.value],
+        request={
+            'type': 'object',
+            'properties': {
+                'job': {'type': 'integer', 'description': 'Job ID'},
+                'skills': {
+                    'type': 'array',
+                    'items': {'type': 'integer'},
+                    'description': 'List of skill IDs to associate with the job'
+                }
+            },
+            'required': ['job', 'skills']
+        },
+        responses={
+            201: OpenApiTypes.OBJECT,
+            400: OpenApiTypes.OBJECT,
+        },
+        examples=[
+            OpenApiExample(
+                'Bulk create job skills',
+                value={"job": 1, "skills": [33, 34, 35]},
+                request_only=True,
+            ),
+        ],
+    )
+    def bulk_create_skills(self, request):
+        """
+        Create multiple job skill associations at once
+        """
+        job_id = request.data.get('job')
+        skill_ids = request.data.get('skills', [])
+        
+        if not job_id:
+            return APIResponse.error(
+                message="Job ID is required",
+                errors={"job": ["This field is required"]},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        
+        if not skill_ids:
+            return APIResponse.error(
+                message="At least one skill ID is required",
+                errors={"skills": ["This field is required and must not be empty"]},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate job exists
+        from job.models import Job
+        try:
+            job = Job.objects.get(id=job_id)
+        except Job.DoesNotExist:
+            return APIResponse.error(
+                message="Job not found",
+                errors={"job": [f"Job with id {job_id} does not exist"]},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Validate skills exist
+        from skill.models import Skill
+        existing_skills = set(Skill.objects.filter(id__in=skill_ids).values_list('id', flat=True))
+        missing_skills = [sid for sid in skill_ids if sid not in existing_skills]
+        if missing_skills:
+            return APIResponse.error(
+                message="Some skills not found",
+                errors={"skills": [f"Skills with ids {missing_skills} do not exist"]},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        
+        # Check for existing associations
+        existing_associations = set(
+            JobSkill.objects.filter(job_id=job_id, skill_id__in=skill_ids)
+            .values_list('skill_id', flat=True)
+        )
+        
+        # Create only new associations
+        new_skill_ids = [sid for sid in skill_ids if sid not in existing_associations]
+        created_count = 0
+        
+        if new_skill_ids:
+            job_skills = [JobSkill(job_id=job_id, skill_id=skill_id) for skill_id in new_skill_ids]
+            JobSkill.objects.bulk_create(job_skills, ignore_conflicts=True)
+            created_count = len(new_skill_ids)
+        
+        return APIResponse.success(
+            data={
+                "job_id": job_id,
+                "created_count": created_count,
+                "existing_count": len(existing_associations),
+                "total_skills": len(skill_ids)
+            },
+            message=f"Successfully created {created_count} job skill associations",
+            status_code=status.HTTP_201_CREATED
+        )
 
 
 class UserSkillViewSet(viewsets.ModelViewSet):
@@ -181,7 +307,6 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         to_create = [sid for sid in skills if sid not in existing]
         UserSkill.objects.bulk_create([UserSkill(user=request.user, skill_id=sid) for sid in to_create], ignore_conflicts=True)
         created = len(to_create)
-        # return Response({"added": created})
         return APIResponse.success(
             data={"added": created},
             message="User skills added successfully"
@@ -216,7 +341,6 @@ class UserSkillViewSet(viewsets.ModelViewSet):
             UserSkill.objects.bulk_create([UserSkill(user=request.user, skill_id=sid) for sid in to_add], ignore_conflicts=True)
         if to_remove:
             UserSkill.objects.filter(user=request.user, skill_id__in=list(to_remove)).delete()
-        # return Response({"added": len(to_add), "removed": len(to_remove)})
         return APIResponse.success(
             data={"added": len(to_add), "removed": len(to_remove)},
             message="User skills replaced successfully"

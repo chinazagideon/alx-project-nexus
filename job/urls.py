@@ -9,8 +9,8 @@ from skill.views import JobSkillViewSet
 
 router = DefaultRouter()
 # Mount jobs at the root of this app's URLConf
-router.register(r"", JobViewSet, basename="job")
 router.register(r'skill', JobSkillViewSet, basename='job-skill')
+router.register(r"", JobViewSet, basename="job")
 
 
 urlpatterns = [
@@ -21,9 +21,9 @@ urlpatterns = [
     path("stats/", job_stats, name="job-stats"),
 
     # path(
-    #     "job-skills/",
+    #     "skills/",
     #     JobSkillViewSet.as_view({"get": "list", "post": "create", "delete": "destroy"}),
-    #     name="job-skill",
+    #     name="Jobs skills",
     # ),
     # Job CRUD endpoints
     path("", include(router.urls)),

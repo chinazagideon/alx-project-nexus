@@ -8,7 +8,8 @@ from .views import SkillViewSet, JobSkillViewSet, UserSkillViewSet
 
 router = DefaultRouter()
 router.register(r'user', UserSkillViewSet, basename='user-skill')
-router.register(r"", SkillViewSet, basename="skill")
+router.register(r"skill", SkillViewSet, basename="skill")
+# router.register(r'job', JobSkillViewSet, basename='job-skill')
 
 urlpatterns = [
 

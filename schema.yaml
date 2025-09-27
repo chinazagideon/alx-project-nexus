@@ -3884,6 +3884,16 @@ components:
           items:
             type: string
           readOnly: true
+        skills:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: integer
+              name:
+                type: string
+          readOnly: true
         is_promoted:
           type: boolean
           readOnly: true
@@ -3903,6 +3913,7 @@ components:
       - id
       - is_promoted
       - promotion_priority
+      - skills
       - title
       - updated_at
     JobRequest:
@@ -3931,6 +3942,13 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        skills:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          description: List of skill IDs to associate with the job
           nullable: true
       required:
       - city
@@ -4576,6 +4594,13 @@ components:
           type: string
           format: decimal
           pattern: ^-?\d{0,8}(?:\.\d{0,2})?$
+          nullable: true
+        skills:
+          type: array
+          items:
+            type: integer
+            minimum: 1
+          description: List of skill IDs to associate with the job
           nullable: true
     PatchedJobSkillRequest:
       type: object
