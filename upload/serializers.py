@@ -42,8 +42,12 @@ class UploadSerializer(serializers.ModelSerializer):
 
     def get_file_size(self, obj):
         """Get file size in bytes"""
-        if obj.file_path and hasattr(obj.file_path, 'size'):
-            return obj.file_path.size
+        try:
+            if obj.file_path and hasattr(obj.file_path, 'size'):
+                return obj.file_path.size
+        except (FileNotFoundError, OSError, AttributeError):
+            # File doesn't exist or other file system error - fail silently
+            pass
         return None
 
     def get_file_url(self, obj):
