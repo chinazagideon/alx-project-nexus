@@ -1,7 +1,7 @@
 services:
   # The Web Service for your Django app
   - type: web
-    name: connect-hire
+    name: connect-api
     plan: starter
     env: python
     buildCommand: "./build.sh"
@@ -27,19 +27,19 @@ services:
           property: database
       - key: DB_USER
         fromDatabase:
-          name: connect-hire
+          name: connect-api
           property: user
       - key: DB_PASSWORD
         fromDatabase:
-          name: connect-hire
+          name: connect-api
           property: password
       - key: DB_HOST
         fromDatabase:
-          name: connect-hire
+          name: connect-api
           property: host
       - key: DB_PORT
         fromDatabase:
-          name: connect-hire
+          name: connect-api
           property: port
       - key: CELERY_BROKER_URL
         fromService:
