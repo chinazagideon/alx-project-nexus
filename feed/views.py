@@ -14,47 +14,48 @@ from .serializers import FeedItemSerializer, FeedListResponseSerializer
 from .services import zpage_by_cursor
 
 
-@method_decorator(cache_page(5), name='dispatch')
+@method_decorator(cache_page(5), name="dispatch")
 class FeedListView(APIView):
     """
     Viewset for the feed list
     """
+
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
         summary="Get global feed",
         parameters=[
             OpenApiParameter(
-                name="limit", 
-                required=False, 
-                type=int, 
+                name="limit",
+                required=False,
+                type=int,
                 description="Page size (default 20)",
                 examples=[
                     OpenApiExample("Default", value=20),
                     OpenApiExample("Medium", value=50),
-                    OpenApiExample("Large", value=100)
-                ]
+                    OpenApiExample("Large", value=100),
+                ],
             ),
             OpenApiParameter(
-                name="cursor", 
-                required=False, 
-                type=str, 
+                name="cursor",
+                required=False,
+                type=str,
                 description="Pagination cursor",
                 examples=[
                     OpenApiExample("Example 1", value="eyJpZCI6MTIzfQ=="),
-                    OpenApiExample("Example 2", value="eyJpZCI6NDU2fQ==")
-                ]
+                    OpenApiExample("Example 2", value="eyJpZCI6NDU2fQ=="),
+                ],
             ),
             OpenApiParameter(
-                name="types", 
-                required=False, 
-                type=str, 
+                name="types",
+                required=False,
+                type=str,
                 description="Comma list: job_posted,company_joined,promotion_active",
                 examples=[
                     OpenApiExample("Single type", value="job_posted"),
                     OpenApiExample("Multiple types", value="job_posted,company_joined"),
-                    OpenApiExample("All types", value="job_posted,company_joined,promotion_active")
-                ]
+                    OpenApiExample("All types", value="job_posted,company_joined,promotion_active"),
+                ],
             ),
         ],
         responses={200: FeedListResponseSerializer},
@@ -87,9 +88,10 @@ class FeedListView(APIView):
                 items = [i for i in items if i.event_type in allowed_types]
 
         serializer = FeedItemSerializer(items, many=True)
-        return Response({
-            "results": serializer.data,
-            "next_cursor": next_cursor,
-        }, status=status.HTTP_200_OK)
-
-
+        return Response(
+            {
+                "results": serializer.data,
+                "next_cursor": next_cursor,
+            },
+            status=status.HTTP_200_OK,
+        )

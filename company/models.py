@@ -1,14 +1,17 @@
 """
 Models for the company
 """
+
 from django.db import models
 from django.conf import settings
 from address.models import Address
+
 
 class Company(models.Model):
     """
     Company model for the company
     """
+
     name = models.CharField(max_length=255, null=False, blank=False)
     description = models.TextField(null=False, blank=False, default="")
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False, blank=False)

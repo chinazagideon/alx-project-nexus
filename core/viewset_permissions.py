@@ -12,7 +12,7 @@ from core.permissions_enhanced import (
     IsAddressOwnerOrStaff,
     IsOwnerOrJobOwnerOrStaffForCreate,
     IsOwnerOrJobOwnerOrStaff,
-    IsAdminOnly
+    IsAdminOnly,
 )
 
 
@@ -20,9 +20,9 @@ def get_job_permissions(self):
     """
     Permission method for JobViewSet and JobListCreateView
     """
-    if self.action == 'create':
+    if self.action == "create":
         permission_classes = [IsRecruiterOrAdmin]
-    elif self.action in ['update', 'partial_update', 'destroy']:
+    elif self.action in ["update", "partial_update", "destroy"]:
         permission_classes = [IsJobOwnerOrStaff]
     else:
         permission_classes = [permissions.IsAuthenticated]
@@ -33,9 +33,9 @@ def get_company_permissions(self):
     """
     Permission method for CompanyViewSet
     """
-    if self.action == 'create':
+    if self.action == "create":
         permission_classes = [IsRecruiterOrAdmin]
-    elif self.action in ['update', 'partial_update', 'destroy']:
+    elif self.action in ["update", "partial_update", "destroy"]:
         permission_classes = [IsCompanyOwnerOrStaff]
     else:
         permission_classes = [permissions.IsAuthenticated]
@@ -46,9 +46,9 @@ def get_upload_permissions(self):
     """
     Permission method for UploadViewSet
     """
-    if self.action in ['list', 'retrieve', 'update', 'partial_update', 'destroy']:
+    if self.action in ["list", "retrieve", "update", "partial_update", "destroy"]:
         permission_classes = [IsUploadOwnerOrStaff]
-    elif self.action == 'create':
+    elif self.action == "create":
         permission_classes = [permissions.IsAuthenticated]
     else:
         permission_classes = [permissions.IsAuthenticated]
@@ -59,9 +59,9 @@ def get_address_permissions(self):
     """
     Permission method for AddressViewSet
     """
-    if self.action in ['list', 'retrieve', 'update', 'partial_update', 'destroy']:
+    if self.action in ["list", "retrieve", "update", "partial_update", "destroy"]:
         permission_classes = [IsAddressOwnerOrStaff]
-    elif self.action == 'create':
+    elif self.action == "create":
         permission_classes = [permissions.IsAuthenticated]
     else:
         permission_classes = [permissions.IsAuthenticated]
@@ -72,9 +72,9 @@ def get_job_skill_permissions(self):
     """
     Permission method for JobSkillViewSet
     """
-    if self.action == 'create':
+    if self.action == "create":
         permission_classes = [IsOwnerOrJobOwnerOrStaffForCreate]
-    elif self.action in ['update', 'partial_update', 'destroy']:
+    elif self.action in ["update", "partial_update", "destroy"]:
         permission_classes = [IsOwnerOrJobOwnerOrStaff]
     else:
         permission_classes = [permissions.IsAuthenticated]
@@ -85,7 +85,7 @@ def get_city_state_country_permissions(self):
     """
     Permission method for CityViewSet, StateViewSet, CountryViewSet
     """
-    if self.action in ['create', 'update', 'partial_update', 'destroy']:
+    if self.action in ["create", "update", "partial_update", "destroy"]:
         permission_classes = [IsAdminOnly]
     else:
         permission_classes = [permissions.IsAuthenticated]
@@ -99,7 +99,7 @@ def get_job_queryset(self):
     """
     if self.request.user.is_staff:
         return self.queryset
-    elif self.request.user.role == 'recruiter':
+    elif self.request.user.role == "recruiter":
         return self.queryset.filter(company__user=self.request.user)
     else:
         return self.queryset  # Talent can see all jobs
@@ -141,8 +141,7 @@ def get_job_skill_queryset(self):
     """
     if self.request.user.is_staff:
         return self.queryset
-    elif self.request.user.role == 'recruiter':
+    elif self.request.user.role == "recruiter":
         return self.queryset.filter(job__company__user=self.request.user)
     else:
         return self.queryset  # Talent can see all job skills for job search
-

@@ -17,12 +17,14 @@ class UploadType(models.TextChoices):
     """
     Upload type for the job portal
     """
-    RESUME = 'resume', 'Resume'
-    COVER_LETTER = 'cover_letter', 'Cover Letter'
-    PROFILE_PICTURE = 'profile_picture', 'Profile Picture'
-    PROFILE_COVER = 'profile_cover', 'Profile Cover'
-    CERTIFICATE = 'certificate', 'Certificate'
-    KYC = 'kyc', 'KYC'
+
+    RESUME = "resume", "Resume"
+    COVER_LETTER = "cover_letter", "Cover Letter"
+    PROFILE_PICTURE = "profile_picture", "Profile Picture"
+    PROFILE_COVER = "profile_cover", "Profile Cover"
+    CERTIFICATE = "certificate", "Certificate"
+    KYC = "kyc", "KYC"
+
 
 # Create your models here.
 class Upload(models.Model):
@@ -31,9 +33,7 @@ class Upload(models.Model):
     """
 
     # File path of the upload
-    file_path = models.FileField(
-        upload_to="public/uploads/", null=False, blank=False, validators=[validate_file_size]
-    )
+    file_path = models.FileField(upload_to="public/uploads/", null=False, blank=False, validators=[validate_file_size])
     # Name of the upload
     name = models.CharField(
         max_length=255,
@@ -41,12 +41,12 @@ class Upload(models.Model):
         blank=False,
     )
     # Thumbnail of the upload
-    thumbnail = models.ImageField(
-        upload_to="public/thumbnails/", null=True, blank=True, validators=[validate_file_size]
-    )
+    thumbnail = models.ImageField(upload_to="public/thumbnails/", null=True, blank=True, validators=[validate_file_size])
 
     # User that uploaded the upload
-    uploaded_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False, blank=False, related_name="uploads")
+    uploaded_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False, blank=False, related_name="uploads"
+    )
 
     # Generic target uploaded to (Job, User profile, etc.)
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
@@ -64,5 +64,3 @@ class Upload(models.Model):
         String representation of the upload model
         """
         return f"{self.name} ({self.type})"
-
-    

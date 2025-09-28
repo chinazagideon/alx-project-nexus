@@ -6,10 +6,12 @@ class NotificationSerializer(serializers.ModelSerializer):
     """
     Serializer for the notification model
     """
+
     class Meta:
         """
         Serialize the notification model
         """
+
         model = Notification
         fields = (
             "id",
@@ -29,10 +31,12 @@ class NotificationPreferenceSerializer(serializers.ModelSerializer):
     """
     Serializer for the notification preference model
     """
+
     class Meta:
         """
         Serialize the notification preference model
         """
+
         model = NotificationPreference
         fields = (
             "in_app_enabled",
@@ -42,5 +46,3 @@ class NotificationPreferenceSerializer(serializers.ModelSerializer):
             "quiet_hours_end",
             "timezone",
         )
-
-

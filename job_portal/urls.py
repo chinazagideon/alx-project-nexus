@@ -14,6 +14,7 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.contrib import admin
 from django.urls import path, include
 from django.views.generic import RedirectView
@@ -23,23 +24,17 @@ from two_factor.urls import urlpatterns as two_factor_patterns
 
 urlpatterns = [
     # Root -> ReDoc
-    path('', RedirectView.as_view(pattern_name='redoc', permanent=False)),
+    path("", RedirectView.as_view(pattern_name="redoc", permanent=False)),
     # admin
-    path('admin/', admin.site.urls),
-
+    path("admin/", admin.site.urls),
     # API
-    path('api/', include('api.urls')),
-    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
-    
-
+    path("api/", include("api.urls")),
+    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
     # Swagger
-    path('api/docs/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     # Redoc
-    path('api/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
-
+    path("api/redoc/", SpectacularRedocView.as_view(url_name="schema"), name="redoc"),
     # Health check
-    path('health/', health, name='health'),
-
+    path("health/", health, name="health"),
     path("mfa/", include(two_factor_patterns[0])),
-
 ]

@@ -1,6 +1,7 @@
 """
 Admin-only views for user management
 """
+
 from rest_framework import viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -16,20 +17,21 @@ class AdminUserViewSet(viewsets.ModelViewSet):
     """
     Admin-only viewset for user management including admin role assignment
     """
+
     queryset = User.objects.all()
     serializer_class = AdminUserSerializer
     permission_classes = [IsAdminOnly]
     pagination_class = DefaultPagination
-    filterset_fields = ('role', 'status', 'is_active', 'is_staff')
-    search_fields = ('username', 'email', 'first_name', 'last_name', 'phone')
-    ordering_fields = ('created_at', 'updated_at', 'username', 'email')
-    ordering = ('-created_at',)
+    filterset_fields = ("role", "status", "is_active", "is_staff")
+    search_fields = ("username", "email", "first_name", "last_name", "phone")
+    ordering_fields = ("created_at", "updated_at", "username", "email")
+    ordering = ("-created_at",)
 
     def get_serializer_class(self):
         """
         Return appropriate serializer based on action
         """
-        if self.action == 'create':
+        if self.action == "create":
             return AdminUserCreateSerializer
         return AdminUserSerializer
 
@@ -126,32 +128,28 @@ class AdminUserViewSet(viewsets.ModelViewSet):
         summary="Assign admin role to user",
         description="Assign admin role to a specific user (admin only)",
         tags=["Admin"],
-        request={'type': 'object', 'properties': {'role': {'type': 'string', 'enum': ['admin', 'recruiter', 'talent']}}},
+        request={"type": "object", "properties": {"role": {"type": "string", "enum": ["admin", "recruiter", "talent"]}}},
         responses={200: AdminUserSerializer, 400: OpenApiTypes.OBJECT},
     )
-    @action(detail=True, methods=['patch'], url_path='assign-role')
+    @action(detail=True, methods=["patch"], url_path="assign-role")
     def assign_role(self, request, pk=None):
         """
         Assign a specific role to a user
         """
         user = self.get_object()
-        new_role = request.data.get('role')
-        
+        new_role = request.data.get("role")
+
         if not new_role:
+            return Response({"error": "Role is required"}, status=status.HTTP_400_BAD_REQUEST)
+
+        if new_role not in ["admin", "recruiter", "talent"]:
             return Response(
-                {"error": "Role is required"}, 
-                status=status.HTTP_400_BAD_REQUEST
+                {"error": "Invalid role. Must be 'admin', 'recruiter', or 'talent'"}, status=status.HTTP_400_BAD_REQUEST
             )
-        
-        if new_role not in ['admin', 'recruiter', 'talent']:
-            return Response(
-                {"error": "Invalid role. Must be 'admin', 'recruiter', or 'talent'"}, 
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        
+
         user.role = new_role
         user.save()
-        
+
         serializer = AdminUserSerializer(user)
         return Response(serializer.data)
 
@@ -162,7 +160,7 @@ class AdminUserViewSet(viewsets.ModelViewSet):
         tags=["Admin"],
         responses={200: AdminUserSerializer, 400: OpenApiTypes.OBJECT},
     )
-    @action(detail=True, methods=['patch'], url_path='toggle-status')
+    @action(detail=True, methods=["patch"], url_path="toggle-status")
     def toggle_status(self, request, pk=None):
         """
         Toggle user active/inactive status
@@ -170,6 +168,6 @@ class AdminUserViewSet(viewsets.ModelViewSet):
         user = self.get_object()
         user.is_active = not user.is_active
         user.save()
-        
+
         serializer = AdminUserSerializer(user)
         return Response(serializer.data)

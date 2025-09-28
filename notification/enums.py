@@ -1,9 +1,11 @@
 from enum import Enum
 
+
 class NotificationChannel(Enum):
     """
     Notification channel
     """
+
     IN_APP = "in_app"
     EMAIL = "email"
     PUSH = "push"

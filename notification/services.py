@@ -51,5 +51,3 @@ def get_unread(user_id: int) -> int:
         return int(val) if val is not None else 0
     except Exception:
         return 0
-
-

@@ -12,6 +12,7 @@ class IsOwnerOrAdmin(permissions.BasePermission):
     """
     Permission class for the promotion model
     """
+
     def has_object_permission(self, request, view, obj):
         return bool(request.user and (request.user.is_staff or obj.owner_id == request.user.id))
 
@@ -20,6 +21,7 @@ class PromotionPackageViewSet(mixins.ListModelMixin, viewsets.GenericViewSet):
     """
     View for listing promotion packages
     """
+
     queryset = PromotionPackage.objects.filter(is_active=True)
     serializer_class = PromotionPackageSerializer
     permission_classes = [permissions.AllowAny]
@@ -29,6 +31,7 @@ class PromotionViewSet(viewsets.ModelViewSet):
     """
     View for listing promotions
     """
+
     queryset = Promotion.objects.all().select_related("package", "owner")
     serializer_class = PromotionSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
@@ -70,7 +73,6 @@ class PromotionViewSet(viewsets.ModelViewSet):
 
     @extend_schema(operation_id="promotions_cancel_create")
     @action(detail=True, methods=["post"], permission_classes=[IsOwnerOrAdmin])
-
     def cancel(self, request, pk=None):
         """
         Cancel the promotion
@@ -79,4 +81,3 @@ class PromotionViewSet(viewsets.ModelViewSet):
         promotion.status = PromotionStatus.CANCELLED
         promotion.save(update_fields=["status", "updated_at"])
         return Response(self.get_serializer(promotion).data, status=status.HTTP_200_OK)
-

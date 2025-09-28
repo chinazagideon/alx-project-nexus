@@ -9,10 +9,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         now = timezone.now()
-        expired = (
-            Promotion.objects.filter(status=PromotionStatus.ACTIVE, end_at__lt=now)
-            .update(status=PromotionStatus.EXPIRED)
+        expired = Promotion.objects.filter(status=PromotionStatus.ACTIVE, end_at__lt=now).update(
+            status=PromotionStatus.EXPIRED
         )
         self.stdout.write(self.style.SUCCESS(f"Expired {expired} promotions"))
-
-

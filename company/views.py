@@ -11,17 +11,16 @@ from core.permissions_enhanced import IsCompanyOwnerOrStaff, IsRecruiterOrAdmin
 from core.viewset_permissions import get_company_permissions, get_company_queryset
 
 
-
 class CompanyViewSet(viewsets.ModelViewSet):
     """
     Viewset for the company model
     """
+
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
-    
+
     def get_permissions(self):
         return get_company_permissions(self)
-        
 
     def get_queryset(self):
         """
@@ -33,7 +32,6 @@ class CompanyViewSet(viewsets.ModelViewSet):
         #     return self.queryset.filter(user=self.request.user)
         return get_company_queryset(self)
 
-    
     @extend_schema(
         summary="Create company",
         description="Create a new company",
@@ -50,12 +48,7 @@ class CompanyViewSet(viewsets.ModelViewSet):
             company = serializer.save(user=request.user)
             response_serializer = CompanySerializer(company)
             # return Response(response_serializer.data, status=status.HTTP_201_CREATED)
-            return APIResponse.created(
-                response_serializer.data,
-                message="Company created successfully"
-            )
+            return APIResponse.created(response_serializer.data, message="Company created successfully")
         return APIResponse.error(
-            message="Company creation failed",
-            errors=serializer.errors,
-            status_code=status.HTTP_400_BAD_REQUEST
+            message="Company creation failed", errors=serializer.errors, status_code=status.HTTP_400_BAD_REQUEST
         )

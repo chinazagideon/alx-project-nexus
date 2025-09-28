@@ -4,8 +4,10 @@ import importlib, sys
 # Swap real app with mock app (same app_label)
 MOCK_APPS = {"notification": "tests.mocks.notification"}
 
+
 def _swap_apps(installed):
     return [MOCK_APPS.get(app.split(".")[0], app) for app in installed]
+
 
 INSTALLED_APPS = _swap_apps(INSTALLED_APPS)
 

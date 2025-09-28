@@ -1,6 +1,7 @@
 """
 Views for the jobs app
 """
+
 from .models import Job
 from .serializers import JobSerializer, JobCreateSerializer, JobSearchSerializer, JobSearchResponseSerializer
 from .search_service import JobSearchService
@@ -25,29 +26,28 @@ from promotion.models import Promotion
 from core.permissions_enhanced import IsJobOwnerOrStaff, IsRecruiterOrAdmin
 
 
-
-
 class JobListCreateView(generics.ListCreateAPIView):
     """
     View for listing and creating jobs
     """
+
     queryset = Job.objects.all()
 
     pagination_class = PageNumberPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
-    filterset_fields = ['title', 'company', 'city', 'location']
-    search_fields = ['title', 'description', 'company__name']
-    ordering_fields = ['date_posted', 'updated_at']
+    filterset_fields = ["title", "company", "city", "location"]
+    search_fields = ["title", "description", "company__name"]
+    ordering_fields = ["date_posted", "updated_at"]
 
     def get_permissions(self):
         """
         Permission method for JobListCreateView
         """
         return get_job_permissions(self)
-        
+
     def get_serializer_class(self):
         """Return different serializers for list and create"""
-        if self.request.method == 'POST':
+        if self.request.method == "POST":
             return JobCreateSerializer
         return JobSerializer
 
@@ -56,20 +56,20 @@ class JobListCreateView(generics.ListCreateAPIView):
         Get the queryset for the job list
         """
         base_qs = super().get_queryset()
-        
+
         # Apply permission filtering
         if self.request.user.is_staff:
             pass  # No filtering - staff can see all jobs
-        elif self.request.user.role == 'recruiter':
+        elif self.request.user.role == "recruiter":
             base_qs = base_qs.filter(company__user=self.request.user)
         # else: talent can see all jobs
-        
+
         # Apply promotion logic
         job_ct = ContentType.objects.get_for_model(Job)
-        active_promotions = Promotion.objects.active().filter(content_type=job_ct, object_id=OuterRef('pk'))
+        active_promotions = Promotion.objects.active().filter(content_type=job_ct, object_id=OuterRef("pk"))
 
         priority_subquery = Subquery(
-            active_promotions.values('package__priority_weight')[:1],
+            active_promotions.values("package__priority_weight")[:1],
             output_field=IntegerField(),
         )
 
@@ -78,37 +78,38 @@ class JobListCreateView(generics.ListCreateAPIView):
             promotion_priority=Coalesce(priority_subquery, Value(0)),
         )
 
-        return annotated.order_by('-is_promoted', '-promotion_priority', '-date_posted')
+        return annotated.order_by("-is_promoted", "-promotion_priority", "-date_posted")
+
 
 class JobViewSet(viewsets.ModelViewSet):
     """
     View for listing and creating jobs
     """
+
     queryset = Job.objects.all()
-    
+
     def get_permissions(self):
         return get_job_permissions(self)
-    
 
     def get_queryset(self):
         """
         Get the queryset for the job list with promotions and proper permissions
         """
         base_qs = super().get_queryset()
-        
+
         # Apply permission filtering
         if self.request.user.is_staff:
             pass  # No filtering - staff can see all jobs
-        elif self.request.user.role == 'recruiter':
+        elif self.request.user.role == "recruiter":
             base_qs = base_qs.filter(company__user=self.request.user)
         # else: talent can see all jobs
-        
+
         # Apply promotion logic
         job_ct = ContentType.objects.get_for_model(Job)
-        active_promotions = Promotion.objects.active().filter(content_type=job_ct, object_id=OuterRef('pk'))
+        active_promotions = Promotion.objects.active().filter(content_type=job_ct, object_id=OuterRef("pk"))
 
         priority_subquery = Subquery(
-            active_promotions.values('package__priority_weight')[:1],
+            active_promotions.values("package__priority_weight")[:1],
             output_field=IntegerField(),
         )
 
@@ -117,78 +118,75 @@ class JobViewSet(viewsets.ModelViewSet):
             promotion_priority=Coalesce(priority_subquery, Value(0)),
         )
 
-        return annotated.order_by('-is_promoted', '-promotion_priority', '-date_posted')
+        return annotated.order_by("-is_promoted", "-promotion_priority", "-date_posted")
+
     def get_serializer_class(self):
         """Return different serializers for different actions"""
-        if self.action in ['create', 'update', 'partial_update']:
+        if self.action in ["create", "update", "partial_update"]:
             return JobCreateSerializer
         return JobSerializer
 
 
 # Search API endpoints
 @extend_schema(
-    operation_id='job_search_get',
-    summary='Advanced Job Search (GET)',
-    description='Search jobs with advanced filtering, sorting, and pagination options using query parameters',
+    operation_id="job_search_get",
+    summary="Advanced Job Search (GET)",
+    description="Search jobs with advanced filtering, sorting, and pagination options using query parameters",
     responses={
         200: JobSearchResponseSerializer,
         400: OpenApiTypes.OBJECT,
     },
     parameters=[
         OpenApiParameter(
-            name='query',
+            name="query",
             type=OpenApiTypes.STR,
             location=OpenApiParameter.QUERY,
-            description='Search query for title, description, company, location',
+            description="Search query for title, description, company, location",
             examples=[
-                OpenApiExample('Basic search', value='python developer'),
-                OpenApiExample('Location search', value='remote python developer'),
-            ]
+                OpenApiExample("Basic search", value="python developer"),
+                OpenApiExample("Location search", value="remote python developer"),
+            ],
         ),
         OpenApiParameter(
-            name='location',
+            name="location",
             type=OpenApiTypes.STR,
             location=OpenApiParameter.QUERY,
-            description='Filter by location',
-            examples=[OpenApiExample('Location filter', value='San Francisco')]
+            description="Filter by location",
+            examples=[OpenApiExample("Location filter", value="San Francisco")],
         ),
         OpenApiParameter(
-            name='company',
+            name="company",
             type=OpenApiTypes.STR,
             location=OpenApiParameter.QUERY,
-            description='Filter by company name',
-            examples=[OpenApiExample('Company filter', value='Google')]
+            description="Filter by company name",
+            examples=[OpenApiExample("Company filter", value="Google")],
         ),
         OpenApiParameter(
-            name='sort_by',
+            name="sort_by",
             type=OpenApiTypes.STR,
             location=OpenApiParameter.QUERY,
-            description='Sort results by',
-            enum=['relevance', 'date_posted', 'salary', 'company', 'title'],
-            default='relevance'
+            description="Sort results by",
+            enum=["relevance", "date_posted", "salary", "company", "title"],
+            default="relevance",
         ),
         OpenApiParameter(
-            name='page',
+            name="page", type=OpenApiTypes.INT, location=OpenApiParameter.QUERY, description="Page number", default=1
+        ),
+        OpenApiParameter(
+            name="page_size",
             type=OpenApiTypes.INT,
             location=OpenApiParameter.QUERY,
-            description='Page number',
-            default=1
-        ),
-        OpenApiParameter(
-            name='page_size',
-            type=OpenApiTypes.INT,
-            location=OpenApiParameter.QUERY,
-            description='Results per page (max 100)',
-            default=20
+            description="Results per page (max 100)",
+            default=20,
         ),
     ],
-    tags=['jobs'],
-    methods=['GET']
+    tags=["jobs"],
+    methods=["GET"],
 )
 @extend_schema(
-    operation_id='job_search_post',
-    summary='Advanced Job Search (POST)',
-    description='Search jobs with advanced filtering, sorting, and pagination options',
+    operation_id="job_search_post",
+    summary="Advanced Job Search (POST)",
+    description="Search jobs with advanced filtering, sorting, and pagination options",
     request=JobSearchSerializer,
     responses={
         200: JobSearchResponseSerializer,
@@ -196,374 +194,291 @@ class JobViewSet(viewsets.ModelViewSet):
     },
     parameters=[
         OpenApiParameter(
-            name='query',
+            name="query",
             type=OpenApiTypes.STR,
             location=OpenApiParameter.QUERY,
-            description='Search query for title, description, company, location',
+            description="Search query for title, description, company, location",
             examples=[
-                OpenApiExample('Basic search', value='python developer'),
-                OpenApiExample('Location search', value='remote python developer'),
-            ]
+                OpenApiExample("Basic search", value="python developer"),
+                OpenApiExample("Location search", value="remote python developer"),
+            ],
         ),
         OpenApiParameter(
-            name='location',
+            name="location",
             type=OpenApiTypes.STR,
             location=OpenApiParameter.QUERY,
-            description='Filter by location',
-            examples=[OpenApiExample('Location filter', value='San Francisco')]
+            description="Filter by location",
+            examples=[OpenApiExample("Location filter", value="San Francisco")],
         ),
         OpenApiParameter(
-            name='company',
+            name="company",
             type=OpenApiTypes.STR,
             location=OpenApiParameter.QUERY,
-            description='Filter by company name',
-            examples=[OpenApiExample('Company filter', value='Google')]
+            description="Filter by company name",
+            examples=[OpenApiExample("Company filter", value="Google")],
         ),
         OpenApiParameter(
-            name='sort_by',
+            name="sort_by",
             type=OpenApiTypes.STR,
             location=OpenApiParameter.QUERY,
-            description='Sort results by',
-            enum=['relevance', 'date_posted', 'salary', 'company', 'title'],
-            default='relevance'
+            description="Sort results by",
+            enum=["relevance", "date_posted", "salary", "company", "title"],
+            default="relevance",
         ),
         OpenApiParameter(
-            name='page',
+            name="page", type=OpenApiTypes.INT, location=OpenApiParameter.QUERY, description="Page number", default=1
+        ),
+        OpenApiParameter(
+            name="page_size",
             type=OpenApiTypes.INT,
             location=OpenApiParameter.QUERY,
-            description='Page number',
-            default=1
-        ),
-        OpenApiParameter(
-            name='page_size',
-            type=OpenApiTypes.INT,
-            location=OpenApiParameter.QUERY,
-            description='Results per page (max 100)',
-            default=20
+            description="Results per page (max 100)",
+            default=20,
         ),
     ],
     examples=[
         OpenApiExample(
-            'Basic GET Search',
-            value={
-                'query': 'python developer',
-                'location': 'remote',
-                'sort_by': 'relevance',
-                'page': 1,
-                'page_size': 20
-            },
+            "Basic GET Search",
+            value={"query": "python developer", "location": "remote", "sort_by": "relevance", "page": 1, "page_size": 20},
             request_only=True,
         ),
         OpenApiExample(
-            'Advanced POST Search',
+            "Advanced POST Search",
             value={
-                'query': 'senior python developer',
-                'location': 'San Francisco',
-                'company': 'Google',
-                'physical_address': '225 San Francisco St, San Francisco, CA 94133',
-                'category': 'Software Engineering',
-                'salary_min': 100000,
-                'salary_max': 200000,
-                'date_posted': 'month',
-                'sort_by': 'relevance',
-                'sort_order': 'desc',
-                'promoted_only': False,
-                'remote_only': True,
-                'page': 1,
-                'page_size': 20
+                "query": "senior python developer",
+                "location": "San Francisco",
+                "company": "Google",
+                "physical_address": "225 San Francisco St, San Francisco, CA 94133",
+                "category": "Software Engineering",
+                "salary_min": 100000,
+                "salary_max": 200000,
+                "date_posted": "month",
+                "sort_by": "relevance",
+                "sort_order": "desc",
+                "promoted_only": False,
+                "remote_only": True,
+                "page": 1,
+                "page_size": 20,
             },
             request_only=True,
         ),
     ],
-    tags=['jobs'],
-    methods=['POST']
+    tags=["jobs"],
+    methods=["POST"],
 )
-@api_view(['GET', 'POST'])
+@api_view(["GET", "POST"])
 @permission_classes([IsAuthenticated])
 def job_search(request):
     """
     Advanced job search endpoint with comprehensive filtering and sorting options.
-    
+
     Supports both GET (query parameters) and POST (request body) methods.
     Returns paginated results with search metadata.
     """
     search_service = JobSearchService()
-    
+
     # Get search parameters
-    if request.method == 'GET':
+    if request.method == "GET":
         search_data = request.query_params.dict()
     else:  # POST
         search_data = request.data
-    
+
     try:
         # Perform search
         results = search_service.search(search_data, user=request.user)
-        
+
         # Serialize response
         serializer = JobSearchResponseSerializer(results)
-        return APIResponse.success(
-            data=serializer.data,
-            message="Job search completed successfully"
-        )
-    
+        return APIResponse.success(data=serializer.data, message="Job search completed successfully")
+
     except Exception as e:
         return APIResponse.error(
-            message="Job search failed",
-            errors={"search_error": str(e)},
-            status_code=status.HTTP_400_BAD_REQUEST
+            message="Job search failed", errors={"search_error": str(e)}, status_code=status.HTTP_400_BAD_REQUEST
         )
 
 
 @extend_schema(
-    operation_id='job_search_suggestions',
-    summary='Get Search Suggestions',
-    description='Get auto-complete suggestions based on partial query input',
+    operation_id="job_search_suggestions",
+    summary="Get Search Suggestions",
+    description="Get auto-complete suggestions based on partial query input",
     parameters=[
         OpenApiParameter(
-            name='q',
+            name="q",
             type=OpenApiTypes.STR,
             location=OpenApiParameter.QUERY,
-            description='Partial search query (minimum 2 characters)',
+            description="Partial search query (minimum 2 characters)",
             required=True,
             examples=[
-                OpenApiExample('Job title', value='python'),
-                OpenApiExample('Company', value='goog'),
-                OpenApiExample('Location', value='san'),
-            ]
+                OpenApiExample("Job title", value="python"),
+                OpenApiExample("Company", value="goog"),
+                OpenApiExample("Location", value="san"),
+            ],
         ),
         OpenApiParameter(
-            name='limit',
+            name="limit",
             type=OpenApiTypes.INT,
             location=OpenApiParameter.QUERY,
-            description='Maximum number of suggestions to return',
-            default=10
+            description="Maximum number of suggestions to return",
+            default=10,
         ),
     ],
     responses={
         200: {
-            'type': 'object',
-            'properties': {
-                'suggestions': {
-                    'type': 'array',
-                    'items': {'type': 'string'},
-                    'description': 'List of search suggestions'
-                }
+            "type": "object",
+            "properties": {
+                "suggestions": {"type": "array", "items": {"type": "string"}, "description": "List of search suggestions"}
             },
-            'example': {
-                'suggestions': [
-                    'Python Developer',
-                    'Python Engineer', 
-                    'Senior Python Developer',
-                    'Python Backend Developer',
-                    'Google',
-                    'San Francisco'
+            "example": {
+                "suggestions": [
+                    "Python Developer",
+                    "Python Engineer",
+                    "Senior Python Developer",
+                    "Python Backend Developer",
+                    "Google",
+                    "San Francisco",
                 ]
-            }
+            },
         }
     },
-    tags=['jobs']
+    tags=["jobs"],
 )
-@api_view(['GET'])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def search_suggestions(request):
     """
     Get auto-complete search suggestions based on partial query input.
-    
+
     Returns suggestions from job titles, company names, and locations.
     """
-    query = request.query_params.get('q', '')
-    limit = int(request.query_params.get('limit', 10))
-    
+    query = request.query_params.get("q", "")
+    limit = int(request.query_params.get("limit", 10))
+
     if len(query) < 2:
-        return Response({'suggestions': []})
-    
+        return Response({"suggestions": []})
+
     search_service = JobSearchService()
     suggestions = search_service.get_search_suggestions(query, limit)
-    
-    return Response({'suggestions': suggestions})
+
+    return Response({"suggestions": suggestions})
 
 
 @extend_schema(
-    operation_id='job_search_facets',
-    summary='Get Search Facets',
-    description='Get available filter options and their counts for search refinement',
+    operation_id="job_search_facets",
+    summary="Get Search Facets",
+    description="Get available filter options and their counts for search refinement",
     responses={
         200: {
-            'type': 'object',
-            'properties': {
-                'locations': {
-                    'type': 'array',
-                    'items': {
-                        'type': 'object',
-                        'properties': {
-                            'name': {'type': 'string'},
-                            'count': {'type': 'integer'}
-                        }
-                    }
+            "type": "object",
+            "properties": {
+                "locations": {
+                    "type": "array",
+                    "items": {"type": "object", "properties": {"name": {"type": "string"}, "count": {"type": "integer"}}},
                 },
-                'companies': {
-                    'type': 'array',
-                    'items': {
-                        'type': 'object',
-                        'properties': {
-                            'name': {'type': 'string'},
-                            'count': {'type': 'integer'}
-                        }
-                    }
+                "companies": {
+                    "type": "array",
+                    "items": {"type": "object", "properties": {"name": {"type": "string"}, "count": {"type": "integer"}}},
                 },
-                'categories': {
-                    'type': 'array',
-                    'items': {
-                        'type': 'object',
-                        'properties': {
-                            'name': {'type': 'string'},
-                            'count': {'type': 'integer'}
-                        }
-                    }
+                "categories": {
+                    "type": "array",
+                    "items": {"type": "object", "properties": {"name": {"type": "string"}, "count": {"type": "integer"}}},
                 },
-                'salary_min': {
-                    'type': 'array',
-                    'items': {
-                        'type': 'object',
-                        'properties': {
-                            'min': {'type': 'string'},
-                            'count': {'type': 'integer'}
-                        }
-                    }
+                "salary_min": {
+                    "type": "array",
+                    "items": {"type": "object", "properties": {"min": {"type": "string"}, "count": {"type": "integer"}}},
                 },
-                'salary_max': {
-                    'type': 'array',
-                    'items': {
-                        'type': 'object',
-                        'properties': {
-                            'max': {'type': 'string'},
-                            'count': {'type': 'integer'}
-                        }
-                    }
-                }
+                "salary_max": {
+                    "type": "array",
+                    "items": {"type": "object", "properties": {"max": {"type": "string"}, "count": {"type": "integer"}}},
+                },
             },
-            'example': {
-                'locations': [
-                    {'name': 'San Francisco', 'count': 125},
-                    {'name': 'New York', 'count': 98},
-                    {'name': 'Remote', 'count': 87}
+            "example": {
+                "locations": [
+                    {"name": "San Francisco", "count": 125},
+                    {"name": "New York", "count": 98},
+                    {"name": "Remote", "count": 87},
                 ],
-                'companies': [
-                    {'name': 'Google', 'count': 45},
-                    {'name': 'Apple', 'count': 32}
-                ],
-                'categories': [
-                    {'name': 'Software Engineering', 'count': 156},
-                    {'name': 'Data Science', 'count': 89}
-                ],
-                'salary_min': [
-                    {'min': '$100k', 'count': 78},
-                    {'range': '$150k+', 'count': 45}
-                ],
-                'salary_max': [
-                    {'max': '$100k', 'count': 78},
-                    {'max': '$150k+', 'count': 45}
-                ]
-            }
+                "companies": [{"name": "Google", "count": 45}, {"name": "Apple", "count": 32}],
+                "categories": [{"name": "Software Engineering", "count": 156}, {"name": "Data Science", "count": 89}],
+                "salary_min": [{"min": "$100k", "count": 78}, {"range": "$150k+", "count": 45}],
+                "salary_max": [{"max": "$100k", "count": 78}, {"max": "$150k+", "count": 45}],
+            },
         }
     },
-    tags=['jobs']
+    tags=["jobs"],
 )
-@api_view(['GET'])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def search_facets(request):
     """
     Get available filter options and their counts for search refinement.
-    
+
     Returns faceted search data to help users understand available filtering options.
     """
     search_service = JobSearchService()
-    
+
     # Get base queryset with current filters
     base_queryset = search_service._build_base_queryset()
-    
+
     # Apply any existing filters from query params
     search_data = request.query_params.dict()
     if search_data:
         validated_data = JobSearchSerializer(data=search_data)
         if validated_data.is_valid():
             base_queryset = search_service._apply_filters(base_queryset, validated_data.validated_data)
-    
+
     facets = search_service.get_facet_counts(base_queryset)
-    
+
     return Response(facets)
 
 
 @extend_schema(
-    operation_id='job_statistics',
-    summary='Get Job Statistics',
-    description='Get overall job portal statistics and metrics',
+    operation_id="job_statistics",
+    summary="Get Job Statistics",
+    description="Get overall job portal statistics and metrics",
     responses={
         200: {
-            'type': 'object',
-            'properties': {
-                'total_jobs': {
-                    'type': 'integer',
-                    'description': 'Total number of jobs in the system'
-                },
-                'jobs_today': {
-                    'type': 'integer',
-                    'description': 'Jobs posted today'
-                },
-                'jobs_this_week': {
-                    'type': 'integer',
-                    'description': 'Jobs posted in the last 7 days'
-                },
-                'jobs_this_month': {
-                    'type': 'integer',
-                    'description': 'Jobs posted in the last 30 days'
-                },
-                'companies_count': {
-                    'type': 'integer',
-                    'description': 'Number of unique companies'
-                },
-                'locations_count': {
-                    'type': 'integer',
-                    'description': 'Number of unique job locations'
-                }
+            "type": "object",
+            "properties": {
+                "total_jobs": {"type": "integer", "description": "Total number of jobs in the system"},
+                "jobs_today": {"type": "integer", "description": "Jobs posted today"},
+                "jobs_this_week": {"type": "integer", "description": "Jobs posted in the last 7 days"},
+                "jobs_this_month": {"type": "integer", "description": "Jobs posted in the last 30 days"},
+                "companies_count": {"type": "integer", "description": "Number of unique companies"},
+                "locations_count": {"type": "integer", "description": "Number of unique job locations"},
             },
-            'example': {
-                'total_jobs': 1250,
-                'jobs_today': 15,
-                'jobs_this_week': 87,
-                'jobs_this_month': 342,
-                'companies_count': 156,
-                'locations_count': 89
-            }
+            "example": {
+                "total_jobs": 1250,
+                "jobs_today": 15,
+                "jobs_this_week": 87,
+                "jobs_this_month": 342,
+                "companies_count": 156,
+                "locations_count": 89,
+            },
         }
     },
-    tags=['jobs']
+    tags=["jobs"],
 )
-@api_view(['GET'])
+@api_view(["GET"])
 @permission_classes([IsAuthenticated])
 def job_stats(request):
     """
     Get overall job portal statistics and metrics.
-    
+
     Returns key metrics about jobs, companies, and locations in the system.
     """
     from django.db.models import Count
     from django.utils import timezone
     from datetime import timedelta
-    
+
     now = timezone.now()
-    
+
     stats = {
-        'total_jobs': Job.objects.count(),
-        'jobs_today': Job.objects.filter(date_posted__date=now.date()).count(),
-        'jobs_this_week': Job.objects.filter(
-            date_posted__gte=now - timedelta(days=7)
-        ).count(),
-        'jobs_this_month': Job.objects.filter(
-            date_posted__gte=now - timedelta(days=30)
-        ).count(),
-        'companies_count': Job.objects.values('company').distinct().count(),
-        'locations_count': Job.objects.values('city').distinct().count(),
+        "total_jobs": Job.objects.count(),
+        "jobs_today": Job.objects.filter(date_posted__date=now.date()).count(),
+        "jobs_this_week": Job.objects.filter(date_posted__gte=now - timedelta(days=7)).count(),
+        "jobs_this_month": Job.objects.filter(date_posted__gte=now - timedelta(days=30)).count(),
+        "companies_count": Job.objects.values("company").distinct().count(),
+        "locations_count": Job.objects.values("city").distinct().count(),
     }
-    
+
     return Response(stats)

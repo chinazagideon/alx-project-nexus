@@ -47,5 +47,3 @@ class FeedItem(models.Model):
 
     def __str__(self):
         return f"FeedItem[{self.id}] {self.event_type} -> {self.content_type.app_label}.{self.content_type.model}:{self.object_id}"
-
-

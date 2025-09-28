@@ -37,7 +37,9 @@ def _deactivate_feed_item(event_type: str, instance) -> None:
     Deactivate a feed item
     """
     ct = ContentType.objects.get_for_model(instance.__class__)
-    FeedItem.objects.filter(event_type=event_type, content_type=ct, object_id=instance.id, is_active=True).update(is_active=False)
+    FeedItem.objects.filter(event_type=event_type, content_type=ct, object_id=instance.id, is_active=True).update(
+        is_active=False
+    )
     for fi in FeedItem.objects.filter(event_type=event_type, content_type=ct, object_id=instance.id):
         zrem_feed(fi.id)
 
@@ -73,5 +75,3 @@ def promotion_activated_feed(sender, instance: Promotion, created: bool, **kwarg
         _create_or_update_feed_item(FeedItem.EVENT_PROMOTION_ACTIVE, instance, bonus=bonus)
     elif instance.status in {PromotionStatus.EXPIRED, PromotionStatus.CANCELLED}:
         _deactivate_feed_item(FeedItem.EVENT_PROMOTION_ACTIVE, instance)
-
-

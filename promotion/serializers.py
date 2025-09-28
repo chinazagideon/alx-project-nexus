@@ -65,14 +65,13 @@ class PromotionSerializer(serializers.ModelSerializer):
 
         # whitelist models for each type
         model_class = content_type.model_class()
-        if not hasattr(model_class, '_promotion_types'):
+        if not hasattr(model_class, "_promotion_types"):
             raise serializers.ValidationError("Model is not promotable")
 
         # check if the model is promotable
         if (promo_type, content_type.app_label, content_type.model) not in model_class._promotion_types:
             raise serializers.ValidationError(
-                f"Model {content_type.app_label}.{content_type.model} "
-                f"cannot be promoted as {promo_type}"
+                f"Model {content_type.app_label}.{content_type.model} " f"cannot be promoted as {promo_type}"
             )
 
         # check if the placement matches the package's placement
@@ -116,5 +115,3 @@ class PromotionSerializer(serializers.ModelSerializer):
             validated_data["placement"] = validated_data["package"].placement
         # return the created promotion
         return super().create(validated_data)
-
-

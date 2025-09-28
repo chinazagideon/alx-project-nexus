@@ -28,23 +28,22 @@ COMPANY_MODEL = "company.Company"
 APPLICATION_MODEL = "application.Application"
 UPLOAD_MODEL = "upload.Upload"
 
-DJANGO_SETTINGS_MODULE="job_portal.settings_test"
+DJANGO_SETTINGS_MODULE = "job_portal.settings_test"
 
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Connect Hire API Documentation',
-    'DESCRIPTION': 'API documentation for Connect Hire endpoints and usage.  (ALX PROJECT NEXUS)',
-    'VERSION': 'v1',
-    'COMPONENT_SPLIT_REQUEST': True,
-    'SORT_OPERATIONS': False,
-    'TAGS': [
+    "TITLE": "Connect Hire API Documentation",
+    "DESCRIPTION": "API documentation for Connect Hire endpoints and usage.  (ALX PROJECT NEXUS)",
+    "VERSION": "v1",
+    "COMPONENT_SPLIT_REQUEST": True,
+    "SORT_OPERATIONS": False,
+    "TAGS": [
         # {'name': 'Users', 'description': 'User endpoints'},
     ],
-    'EXCLUDE_FROM_SCHEMA': [
+    "EXCLUDE_FROM_SCHEMA": [
         # 'application.views.ApplicationsViewSet.destroy',
-        'application.views.CountryViewSet.destroy',
-        'application.views.CountryViewSet.create',
-
-    ]
+        "application.views.CountryViewSet.destroy",
+        "application.views.CountryViewSet.create",
+    ],
 }
 
 # REST_FRAMEWORK.update({
@@ -91,7 +90,6 @@ INSTALLED_APPS = [
     "two_factor",
     "django_celery_beat",
     "user.apps.UsersConfig",
-
     "core",
     "job",
     "api",
@@ -110,7 +108,7 @@ MIDDLEWARE = [
     "django_otp.middleware.OTPMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "corsheaders.middleware.CorsMiddleware",
-    'core.middleware.RequestIDMiddleware',
+    "core.middleware.RequestIDMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -210,9 +208,7 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 REST_FRAMEWORK = {
     "EXCEPTION_HANDLER": "core.exceptions.drf_exception_handler",
     "DEFAULT_PAGINATION_CLASS": "core.pagination.DefaultPagination",
-    "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ),
+    "DEFAULT_AUTHENTICATION_CLASSES": ("rest_framework_simplejwt.authentication.JWTAuthentication",),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_THROTTLE_CLASSES": [
@@ -259,20 +255,21 @@ CORS_ALLOWED_ORIGIN_REGEXES = [
 
 # Additional CORS headers for Next.js
 CORS_ALLOW_HEADERS = [
-    'accept',
-    'accept-encoding',
-    'authorization',
-    'content-type',
-    'dnt',
-    'origin',
-    'user-agent',
-    'x-csrftoken',
-    'x-requested-with',
+    "accept",
+    "accept-encoding",
+    "authorization",
+    "content-type",
+    "dnt",
+    "origin",
+    "user-agent",
+    "x-csrftoken",
+    "x-requested-with",
 ]
 
 # Cache configuration with Redis fallback
 try:
     import redis
+
     redis_client = redis.Redis.from_url(os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"))
     redis_client.ping()  # Test connection
     CACHES = {
@@ -310,9 +307,7 @@ SECURE_SSL_REDIRECT = os.getenv("DJANGO_SECURE_SSL_REDIRECT", "false").lower() =
 SESSION_COOKIE_SECURE = os.getenv("DJANGO_SESSION_COOKIE_SECURE", "false").lower() == "true"
 CSRF_COOKIE_SECURE = os.getenv("DJANGO_CSRF_COOKIE_SECURE", "false").lower() == "true"
 SECURE_HSTS_SECONDS = int(os.getenv("DJANGO_SECURE_HSTS_SECONDS", "0"))
-SECURE_HSTS_INCLUDE_SUBDOMAINS = (
-    os.getenv("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", "false").lower() == "true"
-)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv("DJANGO_SECURE_HSTS_INCLUDE_SUBDOMAINS", "false").lower() == "true"
 SECURE_HSTS_PRELOAD = os.getenv("DJANGO_SECURE_HSTS_PRELOAD", "false").lower() == "true"
 SECURE_REFERRER_POLICY = os.getenv("DJANGO_SECURE_REFERRER_POLICY", "same-origin")
 

@@ -1,21 +1,24 @@
 """
 Serializers for the upload app
 """
+
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 from .models import Upload, UploadType
 import os
 
+
 class UploadSerializer(serializers.ModelSerializer):
     """
     Serializer for the upload model
     """
+
     uploaded_by = serializers.PrimaryKeyRelatedField(read_only=True)
     content_type = serializers.SlugRelatedField(slug_field="model", queryset=ContentType.objects.all(), required=False)
     file_size = serializers.SerializerMethodField()
     file_url = serializers.SerializerMethodField()
     thumbnail_url = serializers.SerializerMethodField()
-    
+
     # Override file_path to handle file uploads properly
     file_path = serializers.FileField(required=True)
 
@@ -23,6 +26,7 @@ class UploadSerializer(serializers.ModelSerializer):
         """
         Meta class for the upload serializer
         """
+
         model = Upload
         fields = (
             "id",
@@ -43,7 +47,7 @@ class UploadSerializer(serializers.ModelSerializer):
     def get_file_size(self, obj):
         """Get file size in bytes"""
         try:
-            if obj.file_path and hasattr(obj.file_path, 'size'):
+            if obj.file_path and hasattr(obj.file_path, "size"):
                 return obj.file_path.size
         except (FileNotFoundError, OSError, AttributeError):
             # File doesn't exist or other file system error - fail silently
@@ -53,7 +57,7 @@ class UploadSerializer(serializers.ModelSerializer):
     def get_file_url(self, obj):
         """Get full URL for the file"""
         if obj.file_path:
-            request = self.context.get('request')
+            request = self.context.get("request")
             if request:
                 return request.build_absolute_uri(obj.file_path.url)
             return obj.file_path.url
@@ -62,7 +66,7 @@ class UploadSerializer(serializers.ModelSerializer):
     def get_thumbnail_url(self, obj):
         """Get full URL for the thumbnail"""
         if obj.thumbnail:
-            request = self.context.get('request')
+            request = self.context.get("request")
             if request:
                 return request.build_absolute_uri(obj.thumbnail.url)
             return obj.thumbnail.url
@@ -73,23 +77,23 @@ class UploadSerializer(serializers.ModelSerializer):
         try:
             if not value:
                 raise serializers.ValidationError("File name is required")
-            
+
             # Ensure value is a string
             if not isinstance(value, str):
                 raise serializers.ValidationError("File name must be a string")
-            
+
             # Check file extension
-            allowed_extensions = ['pdf', 'doc', 'docx', 'txt', 'csv', 'xls', 'xlsx', 'ppt', 'pptx']
+            allowed_extensions = ["pdf", "doc", "docx", "txt", "csv", "xls", "xlsx", "ppt", "pptx"]
             try:
                 file_ext = os.path.splitext(value)[1][1:].lower()
             except (IndexError, AttributeError):
                 raise serializers.ValidationError("Invalid file name format")
-            
+
             if file_ext not in allowed_extensions:
                 raise serializers.ValidationError(
                     f"File extension '{file_ext}' is not allowed. Allowed extensions: {', '.join(allowed_extensions)}"
                 )
-            
+
             return value
         except Exception as e:
             raise serializers.ValidationError(f"Error validating name: {str(e)}")
@@ -107,16 +111,16 @@ class UploadSerializer(serializers.ModelSerializer):
         Create a new upload instance
         """
         request = self.context.get("request")
-        if request and hasattr(request, 'user') and request.user.is_authenticated:
-            validated_data['uploaded_by'] = request.user
-            
+        if request and hasattr(request, "user") and request.user.is_authenticated:
+            validated_data["uploaded_by"] = request.user
+
             # Set default content_type to user if not provided
-            if 'content_type' not in validated_data:
-                validated_data['content_type'] = ContentType.objects.get_for_model(request.user)
-                validated_data['object_id'] = request.user.id
+            if "content_type" not in validated_data:
+                validated_data["content_type"] = ContentType.objects.get_for_model(request.user)
+                validated_data["object_id"] = request.user.id
         else:
             raise serializers.ValidationError("User must be authenticated to upload files")
-        
+
         return super().create(validated_data)
 
     def validate(self, attrs):
@@ -125,18 +129,18 @@ class UploadSerializer(serializers.ModelSerializer):
         """
         try:
             request = self.context.get("request")
-            
+
             # Set uploaded_by from request user
-            if request and hasattr(request, 'user') and request.user.is_authenticated:
-                attrs['uploaded_by'] = request.user
-                
+            if request and hasattr(request, "user") and request.user.is_authenticated:
+                attrs["uploaded_by"] = request.user
+
                 # Set default content_type and object_id if not provided
-                if 'content_type' not in attrs or 'object_id' not in attrs:
-                    attrs['content_type'] = ContentType.objects.get_for_model(request.user)
-                    attrs['object_id'] = request.user.id
+                if "content_type" not in attrs or "object_id" not in attrs:
+                    attrs["content_type"] = ContentType.objects.get_for_model(request.user)
+                    attrs["object_id"] = request.user.id
             else:
                 raise serializers.ValidationError("User must be authenticated to upload files")
-            
+
             return attrs
         except Exception as e:
             raise serializers.ValidationError(f"Error in validate method: {str(e)}")

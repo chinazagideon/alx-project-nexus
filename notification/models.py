@@ -10,6 +10,7 @@ class NotificationChannel(models.IntegerChoices):
     """
     Notification channel choices
     """
+
     IN_APP = 1, "in_app"
     EMAIL = 2, "email"
     PUSH = 4, "push"
@@ -19,6 +20,7 @@ class NotificationStatus(models.TextChoices):
     """
     Notification status choices
     """
+
     PENDING = "pending", "Pending"
     SENT = "sent", "Sent"
     READ = "read", "Read"
@@ -29,6 +31,7 @@ class Notification(models.Model):
     """
     Notification model
     """
+
     user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notifications")
     event_type = models.CharField(max_length=100)
 
@@ -36,7 +39,9 @@ class Notification(models.Model):
     object_id = models.PositiveIntegerField(null=True, blank=True)
     content_object = GenericForeignKey("content_type", "object_id")
 
-    actor_content_type = models.ForeignKey(ContentType, on_delete=models.SET_NULL, null=True, blank=True, related_name="actor_notifs")
+    actor_content_type = models.ForeignKey(
+        ContentType, on_delete=models.SET_NULL, null=True, blank=True, related_name="actor_notifs"
+    )
     actor_object_id = models.PositiveIntegerField(null=True, blank=True)
 
     channels = models.IntegerField(default=NotificationChannel.IN_APP)
@@ -73,6 +78,7 @@ class NotificationPreference(models.Model):
     """
     Notification preference model
     """
+
     user = models.OneToOneField(AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="notification_pref")
     in_app_enabled = models.BooleanField(default=True)
     email_enabled = models.BooleanField(default=False)
@@ -83,5 +89,3 @@ class NotificationPreference(models.Model):
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-
-

@@ -68,12 +68,8 @@ class AddressNestedSerializer(serializers.ModelSerializer):
 
     city_name = serializers.CharField(source="city.name", read_only=True)
     state_name = serializers.CharField(source="city.state.name", read_only=True)
-    country_name = serializers.CharField(
-        source="city.state.country.name", read_only=True
-    )
-    country_code = serializers.CharField(
-        source="city.state.country.code", read_only=True
-    )
+    country_name = serializers.CharField(source="city.state.country.name", read_only=True)
+    country_code = serializers.CharField(source="city.state.country.code", read_only=True)
 
     class Meta:
         model = Address
@@ -97,12 +93,8 @@ class AddressCreateSerializer(serializers.ModelSerializer):
     city_id = serializers.IntegerField(write_only=True)
     city_name = serializers.CharField(source="city.name", read_only=True)
     state_name = serializers.CharField(source="city.state.name", read_only=True)
-    country_name = serializers.CharField(
-        source="city.state.country.name", read_only=True
-    )
-    country_code = serializers.CharField(
-        source="city.state.country.code", read_only=True
-    )
+    country_name = serializers.CharField(source="city.state.country.name", read_only=True)
+    country_code = serializers.CharField(source="city.state.country.code", read_only=True)
 
     class Meta:
         model = Address
@@ -145,9 +137,7 @@ class AddressSerializer(serializers.ModelSerializer):
     """
 
     city = CitySerializer(read_only=True)
-    content_type = serializers.SlugRelatedField(
-        slug_field="model", queryset=ContentType.objects.all()
-    )
+    content_type = serializers.SlugRelatedField(slug_field="model", queryset=ContentType.objects.all())
     country_id = serializers.IntegerField(write_only=True, required=True)
     state_id = serializers.IntegerField(write_only=True, required=True)
 

@@ -37,7 +37,7 @@ class AddressViewSet(viewsets.ModelViewSet):
 
     def get_permissions(self):
         return get_address_permissions(self)
-        
+
     def get_queryset(self):
         """
         Get the queryset for the address list
@@ -52,7 +52,6 @@ class CityViewSet(viewsets.ModelViewSet):
 
     queryset = City.objects.all()
     serializer_class = CitySerializer
-    
 
     def get_permissions(self):
         return get_city_state_country_permissions(self)
@@ -83,7 +82,7 @@ class CityViewSet(viewsets.ModelViewSet):
         Hide the PATCH endpoint from docs
         """
         return super().partial_update(request, *args, **kwargs)
-    
+
     # hide the endpoints from docs
     @extend_schema(exclude=False)
     def create(self, request, *args, **kwargs):
@@ -91,6 +90,7 @@ class CityViewSet(viewsets.ModelViewSet):
         Hide the POST endpoint from docs
         """
         return super().create(request, *args, **kwargs)
+
 
 class StateViewSet(viewsets.ModelViewSet):
     """
@@ -157,7 +157,6 @@ class CountryViewSet(viewsets.ModelViewSet):
         """
         return get_city_state_country_permissions(self)
 
-
     def get_queryset(self):
         """
         Get the queryset for the country list
@@ -184,7 +183,7 @@ class CountryViewSet(viewsets.ModelViewSet):
         Hide the PATCH endpoint from docs
         """
         return super().partial_update(request, *args, **kwargs)
-    
+
     @extend_schema(exclude=False)
     def create(self, request, *args, **kwargs):
         """

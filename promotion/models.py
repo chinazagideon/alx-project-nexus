@@ -17,6 +17,7 @@ class PromotionType(models.TextChoices):
     COMPANY = "company", "Company"
     PORTFOLIO = "portfolio", "Portfolio"
 
+
 # Promotion placement choices
 class PromotionPlacement(models.TextChoices):
     """
@@ -105,7 +106,6 @@ class PromotionQuerySet(models.QuerySet):
 
     def visible(self, now=None):
         return self.active(now=now)
-
 
 
 # Promotion model
@@ -218,6 +218,7 @@ class Promotion(models.Model):
         """
         self.status = PromotionStatus.EXPIRED
         self.save(update_fields=["status", "updated_at"])
+
 
 # Decorator to register promotable models
 def register_promotable(promotion_type, app_label, model_name):

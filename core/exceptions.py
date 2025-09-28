@@ -11,12 +11,12 @@ def drf_exception_handler(exc, context):
     """
     # Get the standard error response
     response = exception_handler(exc, context)
-    
+
     if response is not None:
         # Extract error details
         error_data = response.data
         status_code = response.status_code
-        
+
         # Determine error message based on status code
         if status_code == status.HTTP_400_BAD_REQUEST:
             message = "Validation failed"
@@ -34,14 +34,10 @@ def drf_exception_handler(exc, context):
             message = "Internal server error"
         else:
             message = "An error occurred"
-        
+
         # Create standardized error response
-        error_response = APIResponse.error(
-            message=message,
-            errors=error_data,
-            status_code=status_code
-        )
-        
+        error_response = APIResponse.error(message=message, errors=error_data, status_code=status_code)
+
         return error_response
-    
+
     return response

@@ -10,16 +10,16 @@ from core.pagination import DefaultPagination
 from core.permissions import PublicReadAuthenticatedWrite, IsOwnerOrStaffForList
 from .models import Skill, JobSkill, UserSkill
 from .serializers import (
-    SkillSerializer, 
-    JobSkillSerializer, 
-    UserSkillSerializer, 
-    UserSkillsUpdateSerializer, 
+    SkillSerializer,
+    JobSkillSerializer,
+    UserSkillSerializer,
+    UserSkillsUpdateSerializer,
     UserSkillsDeleteSerializer,
     UserSkillsResponseSerializer,
     UserSkillsListResponseSerializer,
     JobRecommendationsResponseSerializer,
     JobSkillMatchResponseSerializer,
-    UserSkillProfileSerializer
+    UserSkillProfileSerializer,
 )
 from drf_spectacular.utils import extend_schema, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
@@ -35,13 +35,13 @@ from core.permissions_enhanced import IsOwnerOrJobOwnerOrStaffForCreate, IsOwner
 from core.viewset_permissions import get_job_skill_permissions, get_job_skill_queryset
 
 
-
 class SkillMatchingThrottle(UserRateThrottle):
     """
     Custom throttle for skill matching operations
     """
-    scope = 'skill_matching'
-    rate = '10/min'  # 10 requests per minute for expensive operations
+
+    scope = "skill_matching"
+    rate = "10/min"  # 10 requests per minute for expensive operations
 
 
 class SkillApiEnum(Enum):
@@ -73,13 +73,13 @@ class SkillViewSet(viewsets.ModelViewSet):
 class JobSkillViewSet(viewsets.ModelViewSet):
     """
     Viewset for job skill model: JobSkill related to Job model
-    
+
     """
 
     queryset = JobSkill.objects.all()
     serializer_class = JobSkillSerializer
     pagination_class = DefaultPagination
-    http_method_names = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options']
+    http_method_names = ["get", "post", "put", "patch", "delete", "head", "options"]
 
     def get_permissions(self):
         return get_job_skill_permissions(self)
@@ -108,28 +108,24 @@ class JobSkillViewSet(viewsets.ModelViewSet):
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             # Check for duplicate job-skill combinations
-            job_id = serializer.validated_data['job'].id
-            skill_id = serializer.validated_data['skill'].id
-            
+            job_id = serializer.validated_data["job"].id
+            skill_id = serializer.validated_data["skill"].id
+
             if JobSkill.objects.filter(job_id=job_id, skill_id=skill_id).exists():
                 return APIResponse.error(
                     message="Job skill association already exists",
                     errors={"detail": f"Job {job_id} already has skill {skill_id} associated"},
-                    status_code=status.HTTP_400_BAD_REQUEST
+                    status_code=status.HTTP_400_BAD_REQUEST,
                 )
-            
+
             self.perform_create(serializer)
             headers = self.get_success_headers(serializer.data)
             return APIResponse.success(
-                data=serializer.data,
-                message="Job skill created successfully",
-                status_code=status.HTTP_201_CREATED
+                data=serializer.data, message="Job skill created successfully", status_code=status.HTTP_201_CREATED
             )
         else:
             return APIResponse.error(
-                message="Failed to create job skill",
-                errors=serializer.errors,
-                status_code=status.HTTP_400_BAD_REQUEST
+                message="Failed to create job skill", errors=serializer.errors, status_code=status.HTTP_400_BAD_REQUEST
             )
 
     @extend_schema(
@@ -162,23 +158,23 @@ class JobSkillViewSet(viewsets.ModelViewSet):
         """
         return super().destroy(request, *args, **kwargs)
 
-    @action(detail=False, methods=['post'], url_path='bulk-create')
+    @action(detail=False, methods=["post"], url_path="bulk-create")
     @extend_schema(
         operation_id="job_skills_bulk_create",
         summary="Bulk Create Job Skills",
         description="Create multiple job skill associations at once",
         tags=[SkillApiEnum.job_skill_tag.value],
         request={
-            'type': 'object',
-            'properties': {
-                'job': {'type': 'integer', 'description': 'Job ID'},
-                'skills': {
-                    'type': 'array',
-                    'items': {'type': 'integer'},
-                    'description': 'List of skill IDs to associate with the job'
-                }
+            "type": "object",
+            "properties": {
+                "job": {"type": "integer", "description": "Job ID"},
+                "skills": {
+                    "type": "array",
+                    "items": {"type": "integer"},
+                    "description": "List of skill IDs to associate with the job",
+                },
             },
-            'required': ['job', 'skills']
+            "required": ["job", "skills"],
         },
         responses={
             201: OpenApiTypes.OBJECT,
@@ -186,7 +182,7 @@ class JobSkillViewSet(viewsets.ModelViewSet):
         },
         examples=[
             OpenApiExample(
-                'Bulk create job skills',
+                "Bulk create job skills",
                 value={"job": 1, "skills": [33, 34, 35]},
                 request_only=True,
             ),
@@ -196,69 +192,70 @@ class JobSkillViewSet(viewsets.ModelViewSet):
         """
         Create multiple job skill associations at once
         """
-        job_id = request.data.get('job')
-        skill_ids = request.data.get('skills', [])
-        
+        job_id = request.data.get("job")
+        skill_ids = request.data.get("skills", [])
+
         if not job_id:
             return APIResponse.error(
                 message="Job ID is required",
                 errors={"job": ["This field is required"]},
-                status_code=status.HTTP_400_BAD_REQUEST
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         if not skill_ids:
             return APIResponse.error(
                 message="At least one skill ID is required",
                 errors={"skills": ["This field is required and must not be empty"]},
-                status_code=status.HTTP_400_BAD_REQUEST
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         # Validate job exists
         from job.models import Job
+
         try:
             job = Job.objects.get(id=job_id)
         except Job.DoesNotExist:
             return APIResponse.error(
                 message="Job not found",
                 errors={"job": [f"Job with id {job_id} does not exist"]},
-                status_code=status.HTTP_400_BAD_REQUEST
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         # Validate skills exist
         from skill.models import Skill
-        existing_skills = set(Skill.objects.filter(id__in=skill_ids).values_list('id', flat=True))
+
+        existing_skills = set(Skill.objects.filter(id__in=skill_ids).values_list("id", flat=True))
         missing_skills = [sid for sid in skill_ids if sid not in existing_skills]
         if missing_skills:
             return APIResponse.error(
                 message="Some skills not found",
                 errors={"skills": [f"Skills with ids {missing_skills} do not exist"]},
-                status_code=status.HTTP_400_BAD_REQUEST
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
-        
+
         # Check for existing associations
         existing_associations = set(
-            JobSkill.objects.filter(job_id=job_id, skill_id__in=skill_ids)
-            .values_list('skill_id', flat=True)
+            JobSkill.objects.filter(job_id=job_id, skill_id__in=skill_ids).values_list("skill_id", flat=True)
         )
-        
+
         # Create only new associations
         new_skill_ids = [sid for sid in skill_ids if sid not in existing_associations]
         created_count = 0
-        
+
         if new_skill_ids:
             job_skills = [JobSkill(job_id=job_id, skill_id=skill_id) for skill_id in new_skill_ids]
             JobSkill.objects.bulk_create(job_skills, ignore_conflicts=True)
             created_count = len(new_skill_ids)
-        
+
         return APIResponse.success(
             data={
                 "job_id": job_id,
                 "created_count": created_count,
                 "existing_count": len(existing_associations),
-                "total_skills": len(skill_ids)
+                "total_skills": len(skill_ids),
             },
             message=f"Successfully created {created_count} job skill associations",
-            status_code=status.HTTP_201_CREATED
+            status_code=status.HTTP_201_CREATED,
         )
 
 
@@ -297,7 +294,7 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         skills_with_user = [{"id": skill["id"], "user": request.user.id, "skill": skill["skill_name"]} for skill in skills]
         return APIResponse.success(
             data=skills_with_user,
-            message="User skills listed successfully"
+            message="User skills listed successfully",
             # status_code=status.HTTP_200_OK
         )
 
@@ -310,7 +307,7 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         responses={200: UserSkillsResponseSerializer, 400: OpenApiTypes.OBJECT},
         examples=[
             OpenApiExample(
-                'Add skills example',
+                "Add skills example",
                 value={"skills": [1, 2, 3]},
                 request_only=True,
             ),
@@ -322,17 +319,14 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         """
         ser = UserSkillsUpdateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
-        skills = ser.validated_data.get('skills', [])
+        skills = ser.validated_data.get("skills", [])
         created = 0
         # create missing pairs
-        existing = set(UserSkill.objects.filter(user=request.user, skill_id__in=skills).values_list('skill_id', flat=True))
+        existing = set(UserSkill.objects.filter(user=request.user, skill_id__in=skills).values_list("skill_id", flat=True))
         to_create = [sid for sid in skills if sid not in existing]
         UserSkill.objects.bulk_create([UserSkill(user=request.user, skill_id=sid) for sid in to_create], ignore_conflicts=True)
         created = len(to_create)
-        return APIResponse.success(
-            data={"added": created},
-            message="User skills added successfully"
-        )
+        return APIResponse.success(data={"added": created}, message="User skills added successfully")
 
     @extend_schema(
         operation_id="user_skills_replace",
@@ -343,7 +337,7 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         responses={200: UserSkillsResponseSerializer, 400: OpenApiTypes.OBJECT},
         examples=[
             OpenApiExample(
-                'Replace skills example',
+                "Replace skills example",
                 value={"skills": [2, 4, 5]},
                 request_only=True,
             ),
@@ -355,20 +349,21 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         """
         ser = UserSkillsUpdateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
-        target_ids = set(ser.validated_data.get('skills', []))
-        current_ids = set(UserSkill.objects.filter(user=request.user).values_list('skill_id', flat=True))
+        target_ids = set(ser.validated_data.get("skills", []))
+        current_ids = set(UserSkill.objects.filter(user=request.user).values_list("skill_id", flat=True))
         to_add = target_ids - current_ids
         to_remove = current_ids - target_ids
         if to_add:
-            UserSkill.objects.bulk_create([UserSkill(user=request.user, skill_id=sid) for sid in to_add], ignore_conflicts=True)
+            UserSkill.objects.bulk_create(
+                [UserSkill(user=request.user, skill_id=sid) for sid in to_add], ignore_conflicts=True
+            )
         if to_remove:
             UserSkill.objects.filter(user=request.user, skill_id__in=list(to_remove)).delete()
         return APIResponse.success(
-            data={"added": len(to_add), "removed": len(to_remove)},
-            message="User skills replaced successfully"
+            data={"added": len(to_add), "removed": len(to_remove)}, message="User skills replaced successfully"
         )
-    
-    @action(detail=False, methods=['post'], url_path='delete')
+
+    @action(detail=False, methods=["post"], url_path="delete")
     @extend_schema(
         operation_id="user_skills_delete",
         summary="Delete skills from current user",
@@ -378,7 +373,7 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         responses={200: UserSkillsResponseSerializer, 400: OpenApiTypes.OBJECT},
         examples=[
             OpenApiExample(
-                'Delete skills example',
+                "Delete skills example",
                 value={"skills": [1, 3]},
                 request_only=True,
             ),
@@ -390,17 +385,14 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         """
         ser = UserSkillsDeleteSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
-        skills = ser.validated_data.get('skills', [])
+        skills = ser.validated_data.get("skills", [])
         # Count before deletion
         deleted_count = UserSkill.objects.filter(user=request.user, skill_id__in=skills).count()
         # Delete the skills
         UserSkill.objects.filter(user=request.user, skill_id__in=skills).delete()
-        return APIResponse.success(
-            data={"deleted": deleted_count},
-            message="User skills deleted successfully"
-        )
-    
-    @action(detail=False, methods=['get'], url_path='job-recommendations', throttle_classes=[SkillMatchingThrottle])
+        return APIResponse.success(data={"deleted": deleted_count}, message="User skills deleted successfully")
+
+    @action(detail=False, methods=["get"], url_path="job-recommendations", throttle_classes=[SkillMatchingThrottle])
     @extend_schema(
         operation_id="user_skill_job_recommendations",
         summary="Get job recommendations based on user skills",
@@ -408,19 +400,19 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         tags=[SkillApiEnum.user_skill_tag.value],
         parameters=[
             {
-                'name': 'limit',
-                'in': 'query',
-                'description': 'Number of recommendations to return (max 50)',
-                'required': False,
-                'schema': {'type': 'integer', 'minimum': 1, 'maximum': 50, 'default': 20}
+                "name": "limit",
+                "in": "query",
+                "description": "Number of recommendations to return (max 50)",
+                "required": False,
+                "schema": {"type": "integer", "minimum": 1, "maximum": 50, "default": 20},
             },
             {
-                'name': 'min_match',
-                'in': 'query',
-                'description': 'Minimum match percentage (0-100)',
-                'required': False,
-                'schema': {'type': 'number', 'minimum': 0, 'maximum': 100, 'default': 50}
-            }
+                "name": "min_match",
+                "in": "query",
+                "description": "Minimum match percentage (0-100)",
+                "required": False,
+                "schema": {"type": "number", "minimum": 0, "maximum": 100, "default": 50},
+            },
         ],
         responses={200: JobRecommendationsResponseSerializer, 400: OpenApiTypes.OBJECT},
     )
@@ -429,54 +421,44 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         Get job recommendations based on user skills
         """
         try:
-            limit = min(int(request.query_params.get('limit', 20)), 50)
-            min_match = float(request.query_params.get('min_match', 50))
-            
+            limit = min(int(request.query_params.get("limit", 20)), 50)
+            min_match = float(request.query_params.get("min_match", 50))
+
             # Check cache first
             cache_key = f"job_recommendations_{request.user.id}_{limit}_{min_match}"
             cached_result = cache.get(cache_key)
-            
+
             if cached_result:
-                return APIResponse.success(
-                    data=cached_result,
-                    message="Job recommendations retrieved successfully (cached)"
-                )
-            
+                return APIResponse.success(data=cached_result, message="Job recommendations retrieved successfully (cached)")
+
             # Get recommendations
             recommendations = SkillMatchingService.get_job_recommendations(
-                user_id=request.user.id,
-                limit=limit,
-                min_match=min_match
+                user_id=request.user.id, limit=limit, min_match=min_match
             )
-            
+
             result = {
-                'recommendations': recommendations,
-                'total_count': len(recommendations),
-                'min_match_threshold': min_match
+                "recommendations": recommendations,
+                "total_count": len(recommendations),
+                "min_match_threshold": min_match,
             }
-            
+
             # Cache for 5 minutes
             cache.set(cache_key, result, 300)
-            
-            return APIResponse.success(
-                data=result,
-                message="Job recommendations retrieved successfully"
-            )
-            
+
+            return APIResponse.success(data=result, message="Job recommendations retrieved successfully")
+
         except ValueError as e:
             return APIResponse.error(
-                message="Invalid parameter value",
-                errors={"detail": str(e)},
-                status_code=status.HTTP_400_BAD_REQUEST
+                message="Invalid parameter value", errors={"detail": str(e)}, status_code=status.HTTP_400_BAD_REQUEST
             )
         except Exception as e:
             return APIResponse.error(
                 message="Failed to get job recommendations",
                 errors={"detail": str(e)},
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-    
-    @action(detail=False, methods=['get'], url_path='skill-profile', throttle_classes=[SkillMatchingThrottle])
+
+    @action(detail=False, methods=["get"], url_path="skill-profile", throttle_classes=[SkillMatchingThrottle])
     @extend_schema(
         operation_id="user_skill_profile",
         summary="Get user skill profile with insights",
@@ -492,32 +474,26 @@ class UserSkillViewSet(viewsets.ModelViewSet):
             # Check cache first
             cache_key = f"skill_profile_{request.user.id}"
             cached_result = cache.get(cache_key)
-            
+
             if cached_result:
-                return APIResponse.success(
-                    data=cached_result,
-                    message="Skill profile retrieved successfully (cached)"
-                )
-            
+                return APIResponse.success(data=cached_result, message="Skill profile retrieved successfully (cached)")
+
             # Get profile
             profile = SkillMatchingService.get_user_skill_profile(request.user.id)
-            
+
             # Cache for 10 minutes
             cache.set(cache_key, profile, 600)
-            
-            return APIResponse.success(
-                data=profile,
-                message="Skill profile retrieved successfully"
-            )
-            
+
+            return APIResponse.success(data=profile, message="Skill profile retrieved successfully")
+
         except Exception as e:
             return APIResponse.error(
                 message="Failed to get skill profile",
                 errors={"detail": str(e)},
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )
-    
-    @action(detail=False, methods=['get'], url_path='job-match/(?P<job_id>[^/.]+)', throttle_classes=[SkillMatchingThrottle])
+
+    @action(detail=False, methods=["get"], url_path="job-match/(?P<job_id>[^/.]+)", throttle_classes=[SkillMatchingThrottle])
     @extend_schema(
         operation_id="user_skill_job_match",
         summary="Get detailed skill match analysis for a specific job",
@@ -531,46 +507,36 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         """
         try:
             job_id = int(job_id)
-            
+
             # Check cache first
             cache_key = f"job_match_{request.user.id}_{job_id}"
             cached_result = cache.get(cache_key)
-            
+
             if cached_result:
                 return APIResponse.success(
-                    data=cached_result,
-                    message="Job skill match analysis retrieved successfully (cached)"
+                    data=cached_result, message="Job skill match analysis retrieved successfully (cached)"
                 )
-            
+
             # Get match analysis
-            match_analysis = SkillMatchingService.get_job_skill_match(
-                user_id=request.user.id,
-                job_id=job_id
-            )
-            
-            if 'error' in match_analysis:
-                return APIResponse.error(
-                    message=match_analysis['error'],
-                    status_code=status.HTTP_404_NOT_FOUND
-                )
-            
+            match_analysis = SkillMatchingService.get_job_skill_match(user_id=request.user.id, job_id=job_id)
+
+            if "error" in match_analysis:
+                return APIResponse.error(message=match_analysis["error"], status_code=status.HTTP_404_NOT_FOUND)
+
             # Cache for 5 minutes
             cache.set(cache_key, match_analysis, 300)
-            
-            return APIResponse.success(
-                data=match_analysis,
-                message="Job skill match analysis retrieved successfully"
-            )
-            
+
+            return APIResponse.success(data=match_analysis, message="Job skill match analysis retrieved successfully")
+
         except ValueError:
             return APIResponse.error(
                 message="Invalid job ID",
                 errors={"job_id": ["Job ID must be a valid integer"]},
-                status_code=status.HTTP_400_BAD_REQUEST
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
         except Exception as e:
             return APIResponse.error(
                 message="Failed to get job skill match analysis",
                 errors={"detail": str(e)},
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             )

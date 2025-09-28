@@ -7,6 +7,7 @@ class PromotionPackageAdmin(admin.ModelAdmin):
     """
     Admin for the promotion package model
     """
+
     list_display = (
         "name",
         "placement",
@@ -27,7 +28,7 @@ class PromotionAdmin(admin.ModelAdmin):
     """
     Admin for the promotion model
     """
-    
+
     list_display = (
         "id",
         "type",
@@ -42,7 +43,6 @@ class PromotionAdmin(admin.ModelAdmin):
         "created_at",
     )
 
-
     list_filter = (
         "type",
         "placement",
@@ -51,4 +51,3 @@ class PromotionAdmin(admin.ModelAdmin):
     )
     search_fields = ("id", "payment_reference")
     autocomplete_fields = ("owner", "approved_by")
-

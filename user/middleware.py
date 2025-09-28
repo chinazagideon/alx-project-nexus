@@ -1,12 +1,16 @@
 """
 Middleware for user authentication
 """
+
 from rest_framework.response import Response
 from rest_framework import status
+
+
 class MFAMiddleware:
     """
     Middleware for user authentication
     """
+
     def __init__(self, get_response):
         self.get_response = get_response
 

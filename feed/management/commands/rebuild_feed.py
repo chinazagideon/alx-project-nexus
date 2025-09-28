@@ -53,5 +53,3 @@ class Command(BaseCommand):
             zadd_feed(fi.id, float(fi.score))
 
         self.stdout.write(self.style.SUCCESS("Feed rebuilt and Redis populated."))
-
-

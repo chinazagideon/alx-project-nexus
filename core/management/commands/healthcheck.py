@@ -5,6 +5,7 @@ class Command(BaseCommand):
     """
     Command to check the health of the application
     """
+
     help = "Simple health check"
 
     def handle(self, *args, **opts):

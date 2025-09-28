@@ -9,11 +9,13 @@ from address.models import City
 from promotion.models import register_promotable, PromotionType
 from job_portal.settings import JOB_MODEL, JOB_CATEGORY_MODEL
 
-@register_promotable(PromotionType.JOB, 'job', 'job')
+
+@register_promotable(PromotionType.JOB, "job", "job")
 class Job(models.Model):
     """
     Job model for the job portal
     """
+
     title = models.CharField(max_length=255, null=False, blank=False)
     description = models.TextField(null=False, blank=False)
     company = models.ForeignKey(Company, on_delete=models.CASCADE, null=False, blank=False)
@@ -28,10 +30,12 @@ class Job(models.Model):
     def __str__(self):
         return self.title
 
+
 class Category(models.Model):
     """
     Category model for the job portal
     """
+
     name = models.CharField(max_length=255, null=False, blank=False)
     status = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -40,10 +44,12 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+
 class JobCategory(models.Model):
     """
     Job category model for the job portal
     """
+
     job = models.ForeignKey(JOB_MODEL, on_delete=models.CASCADE, null=False, blank=False)
     category = models.ForeignKey(JOB_CATEGORY_MODEL, on_delete=models.CASCADE, null=False, blank=False)
 

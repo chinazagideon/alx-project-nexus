@@ -2,20 +2,25 @@ from django.db import models
 from job.models import Job
 from django.conf import settings
 from job_portal.settings import UPLOAD_MODEL
+
+
 class ApplicationStatus(models.TextChoices):
     """
     Application status for the job portal
     """
-    APPLIED = 'applied', 'Applied'
-    INTERVIEW = 'interview', 'Interview'
-    APPROVED = 'approved', 'Approved'
-    PENDING = 'pending', 'Pending'
-    REJECTED = 'rejected', 'Rejected'
+
+    APPLIED = "applied", "Applied"
+    INTERVIEW = "interview", "Interview"
+    APPROVED = "approved", "Approved"
+    PENDING = "pending", "Pending"
+    REJECTED = "rejected", "Rejected"
+
 
 class Application(models.Model):
     """
     Application model for the job portal
     """
+
     job = models.ForeignKey(Job, on_delete=models.CASCADE, null=False, blank=False)
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False, blank=False)
     status = models.CharField(max_length=30, choices=ApplicationStatus.choices, default=ApplicationStatus.APPLIED)

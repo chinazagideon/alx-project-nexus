@@ -26,5 +26,3 @@ class Command(BaseCommand):
         cutoff = timezone.now() - timezone.timedelta(days=days)
         deleted, _ = FeedItem.objects.filter(created_at__lt=cutoff, is_active=False).delete()
         self.stdout.write(self.style.SUCCESS(f"Deleted {deleted} old inactive feed items from DB"))
-
-

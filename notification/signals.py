@@ -14,9 +14,7 @@ from .services import incr_unread
 from .enums import CustomMessage
 
 
-def _notify(
-    user_id: int, event_type: str, title: str, body: str, content_object=None, data=None
-):
+def _notify(user_id: int, event_type: str, title: str, body: str, content_object=None, data=None):
     """
     Notify a user
     """
@@ -45,10 +43,7 @@ def on_job_created(sender, instance: Job, created: bool, **kwargs):
                 user_id=company_owner_id,
                 event_type="job_posted",
                 title="Your job was posted",
-                body=CustomMessage.JOB_CREATED_TXT.value.format(
-                    job_title=instance.title, 
-                    company_name=instance.company.name
-                ),
+                body=CustomMessage.JOB_CREATED_TXT.value.format(job_title=instance.title, company_name=instance.company.name),
                 content_object=instance,
                 data={"job_id": instance.id},
             )

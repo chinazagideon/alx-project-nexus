@@ -39,7 +39,7 @@ class EmailVerificationView(StandardAPIViewMixin, APIView):
                 type=str,
                 location=OpenApiParameter.QUERY,
                 required=True,
-                description="6-digit email verification token"
+                description="6-digit email verification token",
             )
         ],
         responses={
@@ -94,9 +94,7 @@ class EmailVerificationView(StandardAPIViewMixin, APIView):
         # Validate token format (6 digits)
         if not token.isdigit() or len(token) != 6:
             return self.error_response(
-                message="Invalid token format. Token must be 6 digits.",
-                error="INVALID_TOKEN_FORMAT",
-                status_code=400
+                message="Invalid token format. Token must be 6 digits.", error="INVALID_TOKEN_FORMAT", status_code=400
             )
 
         try:

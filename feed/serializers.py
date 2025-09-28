@@ -11,6 +11,7 @@ class FeedPayloadField(serializers.Field):
     """
     Field to serialize the payload of a feed item
     """
+
     def to_representation(self, feed_item: FeedItem):
         """
         Serialize the payload of a feed item
@@ -60,6 +61,7 @@ class FeedItemSerializer(serializers.ModelSerializer):
     """
     Serializer for the feed item model
     """
+
     payload = FeedPayloadField(source="*")
 
     class Meta:
@@ -77,7 +79,6 @@ class FeedListResponseSerializer(serializers.Serializer):
     """
     Serializer for the feed list response
     """
+
     results = FeedItemSerializer(many=True)
     next_cursor = serializers.CharField(allow_null=True)
-
-

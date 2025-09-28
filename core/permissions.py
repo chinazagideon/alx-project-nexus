@@ -29,11 +29,11 @@ class IsOwnerOrStaff(permissions.BasePermission):
         # Staff can access everything
         if request.user.is_staff:
             return True
-        
+
         # Owners can access their own objects
-        if hasattr(obj, 'user'):
+        if hasattr(obj, "user"):
             return obj.user == request.user
-        
+
         return False
 
 
@@ -50,11 +50,11 @@ class IsOwnerOrStaffOrReadOnly(permissions.BasePermission):
         # Staff can edit everything
         if request.user.is_staff:
             return True
-        
+
         # Owners can edit their own objects
-        if hasattr(obj, 'user'):
+        if hasattr(obj, "user"):
             return obj.user == request.user
-        
+
         return False
 
 
@@ -70,11 +70,11 @@ class IsOwnerOrStaffForList(permissions.BasePermission):
         # Staff can see everything
         if request.user.is_staff:
             return True
-        
+
         # Users can only see their own objects
-        if hasattr(obj, 'user'):
+        if hasattr(obj, "user"):
             return obj.user == request.user
-        
+
         return False
 
 
@@ -87,7 +87,7 @@ class PublicReadAuthenticatedWrite(permissions.BasePermission):
         # Allow read access to everyone
         if request.method in permissions.SAFE_METHODS:
             return True
-        
+
         # Require authentication for write operations
         return request.user.is_authenticated
 
@@ -101,7 +101,7 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         # Allow read access to everyone
         if request.method in permissions.SAFE_METHODS:
             return True
-        
+
         # Require admin access for write operations
         return request.user.is_authenticated and request.user.is_staff
 

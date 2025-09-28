@@ -18,19 +18,20 @@ class UserViewSet(StandardResponseMixin, viewsets.ModelViewSet):
     """
     User viewset for both public registration and authenticated operations
     """
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     pagination_class = DefaultPagination
-    filterset_fields = ('role', 'status')
-    search_fields = ('username', 'email', 'first_name', 'last_name', 'phone')
-    ordering_fields = ('created_at', 'updated_at')
-    ordering = ('-created_at',)
+    filterset_fields = ("role", "status")
+    search_fields = ("username", "email", "first_name", "last_name", "phone")
+    ordering_fields = ("created_at", "updated_at")
+    ordering = ("-created_at",)
 
     def get_permissions(self):
         """
         Instantiates and returns the list of permissions that this view requires.
         """
-        if self.action == 'list':
+        if self.action == "list":
             # Only admin can list all users
             permission_classes = [IsAdminOnly]
         else:
@@ -42,12 +43,11 @@ class UserViewSet(StandardResponseMixin, viewsets.ModelViewSet):
         """
         Get the queryset for the user list
         """
-        if self.action == 'list':
+        if self.action == "list":
             # Only show current user's profile for non-staff users
             if not self.request.user.is_staff:
                 return User.objects.filter(id=self.request.user.id)
         return super().get_queryset()
-
 
     @extend_schema(
         operation_id="user_profile_get",
@@ -59,16 +59,13 @@ class UserViewSet(StandardResponseMixin, viewsets.ModelViewSet):
             401: ErrorResponseSerializer,
         },
     )
-    @action(detail=False, methods=['get'], url_path='profile')
+    @action(detail=False, methods=["get"], url_path="profile")
     def profile(self, request):
         """
         Get current user's profile
         """
         serializer = self.get_serializer(request.user)
-        return APIResponse.success(
-            data=serializer.data,
-            message="User profile retrieved successfully"
-        )
+        return APIResponse.success(data=serializer.data, message="User profile retrieved successfully")
 
     @extend_schema(
         operation_id="user_profile_update_put",
@@ -82,7 +79,7 @@ class UserViewSet(StandardResponseMixin, viewsets.ModelViewSet):
             401: ErrorResponseSerializer,
         },
     )
-    @action(detail=False, methods=['put'], url_path='profile')
+    @action(detail=False, methods=["put"], url_path="profile")
     def update_profile_put(self, request):
         """
         Update current user's profile (full update)
@@ -90,10 +87,7 @@ class UserViewSet(StandardResponseMixin, viewsets.ModelViewSet):
         serializer = self.get_serializer(request.user, data=request.data, partial=False)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return APIResponse.success(
-            data=serializer.data,
-            message="User profile updated successfully"
-        )
+        return APIResponse.success(data=serializer.data, message="User profile updated successfully")
 
     @extend_schema(
         operation_id="user_profile_update_patch",
@@ -107,7 +101,7 @@ class UserViewSet(StandardResponseMixin, viewsets.ModelViewSet):
             401: ErrorResponseSerializer,
         },
     )
-    @action(detail=False, methods=['patch'], url_path='profile')
+    @action(detail=False, methods=["patch"], url_path="profile")
     def update_profile_patch(self, request):
         """
         Update current user's profile (partial update)
@@ -115,11 +109,8 @@ class UserViewSet(StandardResponseMixin, viewsets.ModelViewSet):
         serializer = self.get_serializer(request.user, data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
         serializer.save()
-        return APIResponse.success(
-            data=serializer.data,
-            message="User profile updated successfully"
-        )
-    
+        return APIResponse.success(data=serializer.data, message="User profile updated successfully")
+
     @extend_schema(
         # exclude=True,
         summary="List users",

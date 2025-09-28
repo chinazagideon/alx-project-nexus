@@ -91,5 +91,3 @@ def zpage_by_cursor(limit: int, cursor: Optional[str]) -> Tuple[Iterable[int], O
     last_score = r.zscore(FEED_ZSET_KEY, ids[-1])
     next_cursor = f"{last_score}:{ids[-1]}"
     return ids, next_cursor
-
-

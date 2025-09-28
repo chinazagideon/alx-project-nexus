@@ -9,7 +9,7 @@ from skill.views import JobSkillViewSet
 
 router = DefaultRouter()
 # Mount jobs at the root of this app's URLConf
-router.register(r'skill', JobSkillViewSet, basename='job-skill')
+router.register(r"skill", JobSkillViewSet, basename="job-skill")
 router.register(r"", JobViewSet, basename="job")
 
 
@@ -19,7 +19,6 @@ urlpatterns = [
     path("search/suggestions/", search_suggestions, name="search-suggestions"),
     path("search/facets/", search_facets, name="search-facets"),
     path("stats/", job_stats, name="job-stats"),
-
     # path(
     #     "skills/",
     #     JobSkillViewSet.as_view({"get": "list", "post": "create", "delete": "destroy"}),

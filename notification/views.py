@@ -11,8 +11,9 @@ from .services import get_unread, decr_unread
 
 class NotificationListView(APIView):
     """
-    Viewset for the notification list   
+    Viewset for the notification list
     """
+
     permission_classes = [IsAuthenticated]
 
     @extend_schema(responses={200: NotificationSerializer(many=True)})
@@ -20,66 +21,71 @@ class NotificationListView(APIView):
         """
         Get the notification list
         """
-        qs = Notification.objects.filter(user=request.user).order_by('-created_at', '-id')
-        status_filter = request.query_params.get('status')
-        if status_filter == 'unread':
+        qs = Notification.objects.filter(user=request.user).order_by("-created_at", "-id")
+        status_filter = request.query_params.get("status")
+        if status_filter == "unread":
             qs = qs.exclude(status=NotificationStatus.READ)
-        page_size = int(request.query_params.get('page_size', 20))
-        page = int(request.query_params.get('page', 1))
+        page_size = int(request.query_params.get("page_size", 20))
+        page = int(request.query_params.get("page", 1))
         start = (page - 1) * page_size
         end = start + page_size
         items = list(qs[start:end])
-        return Response({
-            'results': NotificationSerializer(items, many=True).data,
-            'page': page,
-            'page_size': page_size,
-        })
+        return Response(
+            {
+                "results": NotificationSerializer(items, many=True).data,
+                "page": page,
+                "page_size": page_size,
+            }
+        )
 
 
 class NotificationUnreadCountView(APIView):
     """
     Viewset for the notification unread count
     """
+
     permission_classes = [IsAuthenticated]
 
-    @extend_schema(responses={200: {'type': 'object', 'properties': {'count': {'type': 'integer'}}}})
+    @extend_schema(responses={200: {"type": "object", "properties": {"count": {"type": "integer"}}}})
     def get(self, request):
-        return Response({'count': get_unread(request.user.id)})
+        return Response({"count": get_unread(request.user.id)})
 
 
 class NotificationMarkReadView(APIView):
     """
     Notification mark read view
     """
+
     permission_classes = [IsAuthenticated]
 
     @extend_schema(
-        request={'type': 'object', 'properties': {'ids': {'type': 'array', 'items': {'type': 'integer'}}}}, 
-        responses={200: {'type': 'object'}},
-        operation_id='notification_mark_read',
-        summary='Mark notifications as read',
-        tags=['notifications']
+        request={"type": "object", "properties": {"ids": {"type": "array", "items": {"type": "integer"}}}},
+        responses={200: {"type": "object"}},
+        operation_id="notification_mark_read",
+        summary="Mark notifications as read",
+        tags=["notifications"],
     )
     def post(self, request):
         """
         Mark the notification as read
         """
-        ids = request.data.get('ids', [])
+        ids = request.data.get("ids", [])
         if not isinstance(ids, list):
-            return Response({'detail': 'ids must be a list'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "ids must be a list"}, status=status.HTTP_400_BAD_REQUEST)
         qs = Notification.objects.filter(user=request.user, id__in=ids).exclude(status=NotificationStatus.READ)
         count = qs.count()
         for n in qs:
             n.mark_read()
         if count:
             decr_unread(request.user.id, count)
-        return Response({'updated': count})
+        return Response({"updated": count})
 
 
 class NotificationPreferenceView(APIView):
     """
     Viewset for the notification preference
     """
+
     permission_classes = [IsAuthenticated]
 
     @extend_schema(responses={200: NotificationPreferenceSerializer})
@@ -100,5 +106,3 @@ class NotificationPreferenceView(APIView):
         ser.is_valid(raise_exception=True)
         ser.save()
         return Response(ser.data)
-
-
