@@ -5,6 +5,7 @@ from rest_framework import viewsets, status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.response import Response
+from core.pagination import DefaultPagination
 from .serializers import UploadSerializer
 from core.response import APIResponse
 from core.mixins import StandardAPIViewMixin
@@ -21,6 +22,7 @@ class UploadViewSet(viewsets.ModelViewSet):
     serializer_class = UploadSerializer
     permission_classes = [IsAuthenticated]
     queryset = Upload.objects.all()
+    pagination_class = DefaultPagination
 
     @extend_schema(
         operation_id="list_uploads",
@@ -32,7 +34,17 @@ class UploadViewSet(viewsets.ModelViewSet):
         """
         List all uploads
         """
-        return super().list(request)
+        queryset = Upload.objects.filter(uploaded_by=request.user)
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+        
+        serializer = self.get_serializer(queryset, many=True)
+        return APIResponse.success(
+            data=serializer.data,
+            message='Uploads listed successfully'
+        )
 
     @extend_schema(
         operation_id="create_upload",
