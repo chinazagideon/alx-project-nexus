@@ -46,6 +46,7 @@ class SkillModelTest(TestCase):
     def test_skill_required_fields(self):
         """Test that required fields are enforced"""
         from django.core.exceptions import ValidationError
+
         with self.assertRaises(ValidationError):
             skill = Skill(status=True)  # Missing name
             skill.full_clean()  # This will trigger validation
@@ -58,21 +59,18 @@ class JobSkillModelTest(TestCase):
         """Set up test data"""
         from company.models import Company
         from address.models import City, State, Country
-        
+
         self.user = User.objects.create_user(username="testuser", email="test@example.com", password="testpass123")
         self.skill = Skill.objects.create(name="Python Programming")
-        
+
         # Create required related objects
         self.country = Country.objects.create(name="Test Country", code="TC")
         self.state = State.objects.create(name="Test State", country=self.country)
         self.city = City.objects.create(name="Test City", state=self.state)
         self.company = Company.objects.create(
-            name="Test Company",
-            description="Test company description",
-            user=self.user,
-            contact_details="test@company.com"
+            name="Test Company", description="Test company description", user=self.user, contact_details="test@company.com"
         )
-        
+
         self.job = Job.objects.create(
             title="Python Developer",
             description="Python development role",
@@ -182,22 +180,19 @@ class SkillIntegrationTest(TestCase):
         """Set up test data"""
         from company.models import Company
         from address.models import City, State, Country
-        
+
         self.user = User.objects.create_user(username="testuser", email="test@uniqueexample.com", password="testpass123")
         self.skill1 = Skill.objects.create(name="Python Programming")
         self.skill2 = Skill.objects.create(name="JavaScript")
-        
+
         # Create required related objects
         self.country = Country.objects.create(name="Test Country", code="TC")
         self.state = State.objects.create(name="Test State", country=self.country)
         self.city = City.objects.create(name="Test City", state=self.state)
         self.company = Company.objects.create(
-            name="Test Company",
-            description="Test company description",
-            user=self.user,
-            contact_details="test@company.com"
+            name="Test Company", description="Test company description", user=self.user, contact_details="test@company.com"
         )
-        
+
         self.job = Job.objects.create(
             title="Full Stack Developer",
             description="Full stack development role",
