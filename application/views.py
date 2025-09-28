@@ -7,6 +7,7 @@ from rest_framework.response import Response
 
 from application.models import Application
 from application.serializers import ApplicationCreateSerializer, ApplicationSerializer, ApplicationUpdateSerializer
+from core.permissions_enhanced import IsAccountActive
 from core.response import APIResponse
 
 
@@ -17,7 +18,7 @@ class ApplicationsViewSet(viewsets.ModelViewSet):
 
     queryset = Application.objects.all()
     serializer_class = ApplicationSerializer
-    permission_classes = [IsAccountActive]
+    # permission_classes = [IsAccountActive]
 
     def get_serializer_class(self):
         """
