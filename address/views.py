@@ -22,6 +22,9 @@ from .mixins import AddressLookupMixin
 from core.pagination import DefaultPagination
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
+from core.permissions_enhanced import IsAddressOwnerOrStaff, IsAdminOnly
+from core.viewset_permissions import get_address_permissions, get_address_queryset, get_city_state_country_permissions
+
 
 class AddressViewSet(viewsets.ModelViewSet):
     """
@@ -30,14 +33,16 @@ class AddressViewSet(viewsets.ModelViewSet):
 
     queryset = Address.objects.all()
     serializer_class = AddressSerializer
-    permission_classes = [IsAuthenticated]
     pagination_class = DefaultPagination
 
+    def get_permissions(self):
+        return get_address_permissions(self)
+        
     def get_queryset(self):
         """
         Get the queryset for the address list
         """
-        return super().get_queryset()
+        return get_address_queryset(self)
 
 
 class CityViewSet(viewsets.ModelViewSet):
@@ -47,8 +52,10 @@ class CityViewSet(viewsets.ModelViewSet):
 
     queryset = City.objects.all()
     serializer_class = CitySerializer
-    permission_classes = [IsAuthenticated]
-    pagination_class = DefaultPagination
+    
+
+    def get_permissions(self):
+        return get_city_state_country_permissions(self)
 
     def get_queryset(self):
         """
@@ -56,21 +63,21 @@ class CityViewSet(viewsets.ModelViewSet):
         """
         return super().get_queryset()
 
-    @extend_schema(exclude=True)
+    @extend_schema(exclude=False)
     def destroy(self, request, *args, **kwargs):
         """
         Hide the DELETE endpoint from docs
         """
         return super().destroy(request, *args, **kwargs)
 
-    @extend_schema(exclude=True)
+    @extend_schema(exclude=False)
     def update(self, request, *args, **kwargs):
         """
         Hide the PUT endpoint from docs
         """
         return super().update(request, *args, **kwargs)
 
-    @extend_schema(exclude=True)
+    @extend_schema(exclude=False)
     def partial_update(self, request, *args, **kwargs):
         """
         Hide the PATCH endpoint from docs
@@ -78,7 +85,7 @@ class CityViewSet(viewsets.ModelViewSet):
         return super().partial_update(request, *args, **kwargs)
     
     # hide the endpoints from docs
-    @extend_schema(exclude=True)
+    @extend_schema(exclude=False)
     def create(self, request, *args, **kwargs):
         """
         Hide the POST endpoint from docs
@@ -92,8 +99,13 @@ class StateViewSet(viewsets.ModelViewSet):
 
     queryset = State.objects.all()
     serializer_class = StateSerializer
-    permission_classes = [IsAuthenticated]
     pagination_class = DefaultPagination
+
+    def get_permissions(self):
+        """
+        Permission method for StateViewSet
+        """
+        return get_city_state_country_permissions(self)
 
     def get_queryset(self):
         """
@@ -101,28 +113,28 @@ class StateViewSet(viewsets.ModelViewSet):
         """
         return super().get_queryset()
 
-    @extend_schema(exclude=True)
+    @extend_schema(exclude=False)
     def destroy(self, request, *args, **kwargs):
         """
         Hide the DELETE endpoint from docs
         """
         return super().destroy(request, *args, **kwargs)
 
-    @extend_schema(exclude=True)
+    @extend_schema(exclude=False)
     def update(self, request, *args, **kwargs):
         """
         Hide the PUT endpoint from docs
         """
         return super().update(request, *args, **kwargs)
 
-    @extend_schema(exclude=True)
+    @extend_schema(exclude=False)
     def partial_update(self, request, *args, **kwargs):
         """
         Hide the PATCH endpoint from docs
         """
         return super().partial_update(request, *args, **kwargs)
 
-    @extend_schema(exclude=True)
+    @extend_schema(exclude=False)
     def create(self, request, *args, **kwargs):
         """
         Hide the POST endpoint from docs
@@ -137,8 +149,14 @@ class CountryViewSet(viewsets.ModelViewSet):
 
     queryset = Country.objects.all()
     serializer_class = CountrySerializer
-    permission_classes = [IsAuthenticated]
     pagination_class = DefaultPagination
+
+    def get_permissions(self):
+        """
+        Permission method for CountryViewSet
+        """
+        return get_city_state_country_permissions(self)
+
 
     def get_queryset(self):
         """
@@ -146,28 +164,28 @@ class CountryViewSet(viewsets.ModelViewSet):
         """
         return super().get_queryset()
 
-    @extend_schema(exclude=True)
+    @extend_schema(exclude=False)
     def destroy(self, request, *args, **kwargs):
         """
         Hide the DELETE endpoint from docs
         """
         return super().destroy(request, *args, **kwargs)
 
-    @extend_schema(exclude=True)
+    @extend_schema(exclude=False)
     def update(self, request, *args, **kwargs):
         """
         Hide the PUT endpoint from docs
         """
         return super().update(request, *args, **kwargs)
 
-    @extend_schema(exclude=True)
+    @extend_schema(exclude=False)
     def partial_update(self, request, *args, **kwargs):
         """
         Hide the PATCH endpoint from docs
         """
         return super().partial_update(request, *args, **kwargs)
     
-    @extend_schema(exclude=True)
+    @extend_schema(exclude=False)
     def create(self, request, *args, **kwargs):
         """
         Hide the POST endpoint from docs

@@ -10,9 +10,13 @@ from .serializers import UploadSerializer
 from core.response import APIResponse
 from core.mixins import StandardAPIViewMixin
 from drf_spectacular.utils import extend_schema
-from drf_spectacular.openapi import OpenApiParameter, OpenApiExample
+from drf_spectacular.openapi import OpenApiParameter
+from drf_spectacular.utils import OpenApiExample
 from .models import Upload, UploadType
 import logging
+from core.permissions_enhanced import IsUploadOwnerOrStaff
+from core.viewset_permissions import get_upload_permissions, get_upload_queryset
+
 logger = logging.getLogger(__name__)
 
 class UploadViewSet(viewsets.ModelViewSet):
@@ -20,21 +24,28 @@ class UploadViewSet(viewsets.ModelViewSet):
     View for listing and creating files
     """
     serializer_class = UploadSerializer
-    permission_classes = [IsAuthenticated]
     queryset = Upload.objects.all()
-    pagination_class = DefaultPagination
+    
+    def get_permissions(self):
+        return get_upload_permissions(self)
+    
+    def get_queryset(self):
+        """
+        Get the queryset for the upload list
+        """
+        return get_upload_queryset(self)
 
     @extend_schema(
         operation_id="list_uploads",
         summary="List all uploads",
         description="List all uploads",
-        tags=["Upload"],
+        tags=["uploads"],
     )
     def list(self, request):
         """
         List all uploads
         """
-        queryset = Upload.objects.filter(uploaded_by=request.user)
+        queryset = self.get_queryset()
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -156,7 +167,7 @@ class UploadViewSet(viewsets.ModelViewSet):
                 }
             }
         },
-        tags=["Upload"],
+        tags=["uploads"],
     )
     def create(self, request):
         """
@@ -267,7 +278,7 @@ class UploadViewSet(viewsets.ModelViewSet):
         summary="Retrieve a upload",
         description="Retrieve a upload",
         responses={200: UploadSerializer},
-        tags=["Upload"],
+        tags=["uploads"],
     )
     def retrieve(self, request, *args, **kwargs):
         """

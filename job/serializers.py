@@ -17,8 +17,8 @@ class JobSerializer(serializers.ModelSerializer):
     company_description = serializers.CharField(source='company.description', read_only=True)
     city_name = serializers.CharField(source='city.name', read_only=True)
     # address_city = serializers.CharField(source='address.city', read_only=True)
-    # address_state = serializers.CharField(source='address.state', read_only=True)
-    # address_country = serializers.CharField(source='address.country', read_only=True)
+    city_state = serializers.CharField(source='city.state.name', read_only=True)
+    state_country = serializers.CharField(source='city.state.country.name', read_only=True)
     categories = serializers.SerializerMethodField()
     skills = serializers.SerializerMethodField()
     is_promoted = serializers.BooleanField(read_only=True)
@@ -39,6 +39,8 @@ class JobSerializer(serializers.ModelSerializer):
             'physical_address',
             'city',
             'city_name',
+            'city_state',
+            'state_country',
             'salary_min',
             'salary_max',
             'date_posted',
@@ -50,6 +52,8 @@ class JobSerializer(serializers.ModelSerializer):
             'promotion_priority',
         )
         read_only_fields = ('date_posted', 'close_date')
+    
+    
     
     @extend_schema_field(serializers.ListField(child=serializers.CharField()))
     def get_categories(self, obj):

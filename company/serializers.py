@@ -17,6 +17,7 @@ class CompanySerializer(serializers.ModelSerializer):
             "id",
             "name",
             "description",
+            "user",
             "contact_details",
             "website",
             "status",

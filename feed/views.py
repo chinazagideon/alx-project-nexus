@@ -5,7 +5,7 @@ from django.views.decorators.cache import cache_page
 from django.db.models import Prefetch
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework import status
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 
@@ -19,7 +19,7 @@ class FeedListView(APIView):
     """
     Viewset for the feed list
     """
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
 
     @extend_schema(
         summary="Get global feed",

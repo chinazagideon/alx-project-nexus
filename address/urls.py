@@ -15,7 +15,7 @@ from .lookup_views import (
 )
 
 router = DefaultRouter()
-router.register(r'addresses', AddressViewSet, basename='address')
+router.register(r'', AddressViewSet, basename='address')
 # router.register(r'cities', CityViewSet, basename='city')
 # router.register(r'states', StateViewSet, basename='state')
 # router.register(r'countries', CountryViewSet, basename='country')

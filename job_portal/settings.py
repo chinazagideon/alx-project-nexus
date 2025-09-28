@@ -215,6 +215,15 @@ REST_FRAMEWORK = {
     ),
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.AnonRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "user": "1000/hour",
+        "anon": "100/hour",
+        "skill_matching": "10/minute",  # Custom throttle for skill matching
+    },
     # Browsable API only in DEBUG
     "DEFAULT_RENDERER_CLASSES": (
         [
@@ -261,15 +270,28 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 ]
 
-# Redis cache (optional in dev)
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"),
-        "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
-        "TIMEOUT": 60 * 60,
+# Cache configuration with Redis fallback
+try:
+    import redis
+    redis_client = redis.Redis.from_url(os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"))
+    redis_client.ping()  # Test connection
+    CACHES = {
+        "default": {
+            "BACKEND": "django_redis.cache.RedisCache",
+            "LOCATION": os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1"),
+            "OPTIONS": {"CLIENT_CLASS": "django_redis.client.DefaultClient"},
+            "TIMEOUT": 60 * 60,
+        }
     }
-}
+except (ImportError, redis.ConnectionError, Exception):
+    # Fallback to local memory cache when Redis is not available
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "unique-snowflake",
+            "TIMEOUT": 60 * 60,
+        }
+    }
 
 # Database: use Postgres when env vars are provided, otherwise fallback to sqlite (dev)
 if os.getenv("DB_NAME"):

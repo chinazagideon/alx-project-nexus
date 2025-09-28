@@ -13,6 +13,8 @@ from rest_framework.response import Response
 from django_filters.rest_framework import DjangoFilterBackend
 from core.response import APIResponse
 from core.mixins import StandardAPIViewMixin
+from core.viewset_permissions import get_job_permissions, get_job_queryset
+from core.permissions_enhanced import IsRecruiterOrAdmin, IsJobOwnerOrStaff
 from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from rest_framework.pagination import PageNumberPagination
@@ -20,6 +22,8 @@ from django.contrib.contenttypes.models import ContentType
 from django.db.models import Exists, OuterRef, Subquery, Value, IntegerField
 from django.db.models.functions import Coalesce
 from promotion.models import Promotion
+from core.permissions_enhanced import IsJobOwnerOrStaff, IsRecruiterOrAdmin
+
 
 
 
@@ -28,16 +32,19 @@ class JobListCreateView(generics.ListCreateAPIView):
     View for listing and creating jobs
     """
     queryset = Job.objects.all()
-    # serializer_class = JobSerializer
-
-    permission_classes = [IsAuthenticated]
 
     pagination_class = PageNumberPagination
     filter_backends = [DjangoFilterBackend, SearchFilter, OrderingFilter]
     filterset_fields = ['title', 'company', 'city', 'location']
     search_fields = ['title', 'description', 'company__name']
     ordering_fields = ['date_posted', 'updated_at']
-    
+
+    def get_permissions(self):
+        """
+        Permission method for JobListCreateView
+        """
+        return get_job_permissions(self)
+        
     def get_serializer_class(self):
         """Return different serializers for list and create"""
         if self.request.method == 'POST':
@@ -49,6 +56,15 @@ class JobListCreateView(generics.ListCreateAPIView):
         Get the queryset for the job list
         """
         base_qs = super().get_queryset()
+        
+        # Apply permission filtering
+        if self.request.user.is_staff:
+            pass  # No filtering - staff can see all jobs
+        elif self.request.user.role == 'recruiter':
+            base_qs = base_qs.filter(company__user=self.request.user)
+        # else: talent can see all jobs
+        
+        # Apply promotion logic
         job_ct = ContentType.objects.get_for_model(Job)
         active_promotions = Promotion.objects.active().filter(content_type=job_ct, object_id=OuterRef('pk'))
 
@@ -69,19 +85,25 @@ class JobViewSet(viewsets.ModelViewSet):
     View for listing and creating jobs
     """
     queryset = Job.objects.all()
-    permission_classes = [IsAuthenticated]
     
-    def get_serializer_class(self):
-        """Return different serializers for different actions"""
-        if self.action in ['create', 'update', 'partial_update']:
-            return JobCreateSerializer
-        return JobSerializer
+    def get_permissions(self):
+        return get_job_permissions(self)
+    
 
     def get_queryset(self):
         """
-        Get the queryset for the job list with promotions
+        Get the queryset for the job list with promotions and proper permissions
         """
         base_qs = super().get_queryset()
+        
+        # Apply permission filtering
+        if self.request.user.is_staff:
+            pass  # No filtering - staff can see all jobs
+        elif self.request.user.role == 'recruiter':
+            base_qs = base_qs.filter(company__user=self.request.user)
+        # else: talent can see all jobs
+        
+        # Apply promotion logic
         job_ct = ContentType.objects.get_for_model(Job)
         active_promotions = Promotion.objects.active().filter(content_type=job_ct, object_id=OuterRef('pk'))
 
@@ -96,6 +118,11 @@ class JobViewSet(viewsets.ModelViewSet):
         )
 
         return annotated.order_by('-is_promoted', '-promotion_priority', '-date_posted')
+    def get_serializer_class(self):
+        """Return different serializers for different actions"""
+        if self.action in ['create', 'update', 'partial_update']:
+            return JobCreateSerializer
+        return JobSerializer
 
 
 # Search API endpoints
@@ -270,7 +297,7 @@ def job_search(request):
     
     try:
         # Perform search
-        results = search_service.search(search_data)
+        results = search_service.search(search_data, user=request.user)
         
         # Serialize response
         serializer = JobSearchResponseSerializer(results)

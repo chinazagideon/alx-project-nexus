@@ -7,6 +7,9 @@ from rest_framework.permissions import IsAuthenticated
 from core.pagination import DefaultPagination
 from drf_spectacular.utils import extend_schema
 from core.response import APIResponse
+from core.permissions_enhanced import IsCompanyOwnerOrStaff, IsRecruiterOrAdmin
+from core.viewset_permissions import get_company_permissions, get_company_queryset
+
 
 
 class CompanyViewSet(viewsets.ModelViewSet):
@@ -15,15 +18,21 @@ class CompanyViewSet(viewsets.ModelViewSet):
     """
     queryset = Company.objects.all()
     serializer_class = CompanySerializer
-    permission_classes = [IsAuthenticated]
-    pagination_class = DefaultPagination
+    
+    def get_permissions(self):
+        return get_company_permissions(self)
+        
 
     def get_queryset(self):
         """
         Get the queryset for the company list
         """
+        # if self.request.user.is_staff:
+        #     return self.queryset
+        # else:
+        #     return self.queryset.filter(user=self.request.user)
+        return get_company_queryset(self)
 
-        return super().get_queryset()
     
     @extend_schema(
         summary="Create company",

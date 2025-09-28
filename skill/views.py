@@ -16,12 +16,32 @@ from .serializers import (
     UserSkillsUpdateSerializer, 
     UserSkillsDeleteSerializer,
     UserSkillsResponseSerializer,
-    UserSkillsListResponseSerializer
+    UserSkillsListResponseSerializer,
+    JobRecommendationsResponseSerializer,
+    JobSkillMatchResponseSerializer,
+    UserSkillProfileSerializer
 )
 from drf_spectacular.utils import extend_schema, OpenApiExample
 from drf_spectacular.types import OpenApiTypes
 from enum import Enum
 from core.response import APIResponse
+from .services import SkillMatchingService
+from django.core.cache import cache
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
+from django.views.decorators.vary import vary_on_headers
+from rest_framework.throttling import UserRateThrottle
+from core.permissions_enhanced import IsOwnerOrJobOwnerOrStaffForCreate, IsOwnerOrJobOwnerOrStaff
+from core.viewset_permissions import get_job_skill_permissions, get_job_skill_queryset
+
+
+
+class SkillMatchingThrottle(UserRateThrottle):
+    """
+    Custom throttle for skill matching operations
+    """
+    scope = 'skill_matching'
+    rate = '10/min'  # 10 requests per minute for expensive operations
 
 
 class SkillApiEnum(Enum):
@@ -58,15 +78,17 @@ class JobSkillViewSet(viewsets.ModelViewSet):
 
     queryset = JobSkill.objects.all()
     serializer_class = JobSkillSerializer
-    permission_classes = [IsAuthenticated]
     pagination_class = DefaultPagination
     http_method_names = ['get', 'post', 'put', 'patch', 'delete', 'head', 'options']
+
+    def get_permissions(self):
+        return get_job_skill_permissions(self)
 
     def get_queryset(self):
         """
         Get the queryset for the job skill list
         """
-        return JobSkill.objects.all()
+        return get_job_skill_queryset(self)
 
     @extend_schema(
         operation_id="job_skill_create",
@@ -377,3 +399,178 @@ class UserSkillViewSet(viewsets.ModelViewSet):
             data={"deleted": deleted_count},
             message="User skills deleted successfully"
         )
+    
+    @action(detail=False, methods=['get'], url_path='job-recommendations', throttle_classes=[SkillMatchingThrottle])
+    @extend_schema(
+        operation_id="user_skill_job_recommendations",
+        summary="Get job recommendations based on user skills",
+        description="Get personalized job recommendations based on skill matching",
+        tags=[SkillApiEnum.user_skill_tag.value],
+        parameters=[
+            {
+                'name': 'limit',
+                'in': 'query',
+                'description': 'Number of recommendations to return (max 50)',
+                'required': False,
+                'schema': {'type': 'integer', 'minimum': 1, 'maximum': 50, 'default': 20}
+            },
+            {
+                'name': 'min_match',
+                'in': 'query',
+                'description': 'Minimum match percentage (0-100)',
+                'required': False,
+                'schema': {'type': 'number', 'minimum': 0, 'maximum': 100, 'default': 50}
+            }
+        ],
+        responses={200: JobRecommendationsResponseSerializer, 400: OpenApiTypes.OBJECT},
+    )
+    def get_job_recommendations(self, request):
+        """
+        Get job recommendations based on user skills
+        """
+        try:
+            limit = min(int(request.query_params.get('limit', 20)), 50)
+            min_match = float(request.query_params.get('min_match', 50))
+            
+            # Check cache first
+            cache_key = f"job_recommendations_{request.user.id}_{limit}_{min_match}"
+            cached_result = cache.get(cache_key)
+            
+            if cached_result:
+                return APIResponse.success(
+                    data=cached_result,
+                    message="Job recommendations retrieved successfully (cached)"
+                )
+            
+            # Get recommendations
+            recommendations = SkillMatchingService.get_job_recommendations(
+                user_id=request.user.id,
+                limit=limit,
+                min_match=min_match
+            )
+            
+            result = {
+                'recommendations': recommendations,
+                'total_count': len(recommendations),
+                'min_match_threshold': min_match
+            }
+            
+            # Cache for 5 minutes
+            cache.set(cache_key, result, 300)
+            
+            return APIResponse.success(
+                data=result,
+                message="Job recommendations retrieved successfully"
+            )
+            
+        except ValueError as e:
+            return APIResponse.error(
+                message="Invalid parameter value",
+                errors={"detail": str(e)},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return APIResponse.error(
+                message="Failed to get job recommendations",
+                errors={"detail": str(e)},
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['get'], url_path='skill-profile', throttle_classes=[SkillMatchingThrottle])
+    @extend_schema(
+        operation_id="user_skill_profile",
+        summary="Get user skill profile with insights",
+        description="Get detailed skill profile with market demand insights",
+        tags=[SkillApiEnum.user_skill_tag.value],
+        responses={200: UserSkillProfileSerializer, 400: OpenApiTypes.OBJECT},
+    )
+    def get_skill_profile(self, request):
+        """
+        Get user skill profile with insights
+        """
+        try:
+            # Check cache first
+            cache_key = f"skill_profile_{request.user.id}"
+            cached_result = cache.get(cache_key)
+            
+            if cached_result:
+                return APIResponse.success(
+                    data=cached_result,
+                    message="Skill profile retrieved successfully (cached)"
+                )
+            
+            # Get profile
+            profile = SkillMatchingService.get_user_skill_profile(request.user.id)
+            
+            # Cache for 10 minutes
+            cache.set(cache_key, profile, 600)
+            
+            return APIResponse.success(
+                data=profile,
+                message="Skill profile retrieved successfully"
+            )
+            
+        except Exception as e:
+            return APIResponse.error(
+                message="Failed to get skill profile",
+                errors={"detail": str(e)},
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+    
+    @action(detail=False, methods=['get'], url_path='job-match/(?P<job_id>[^/.]+)', throttle_classes=[SkillMatchingThrottle])
+    @extend_schema(
+        operation_id="user_skill_job_match",
+        summary="Get detailed skill match analysis for a specific job",
+        description="Analyze how well user skills match a specific job",
+        tags=[SkillApiEnum.user_skill_tag.value],
+        responses={200: JobSkillMatchResponseSerializer, 400: OpenApiTypes.OBJECT, 404: OpenApiTypes.OBJECT},
+    )
+    def get_job_skill_match(self, request, job_id=None):
+        """
+        Get detailed skill match analysis for a specific job
+        """
+        try:
+            job_id = int(job_id)
+            
+            # Check cache first
+            cache_key = f"job_match_{request.user.id}_{job_id}"
+            cached_result = cache.get(cache_key)
+            
+            if cached_result:
+                return APIResponse.success(
+                    data=cached_result,
+                    message="Job skill match analysis retrieved successfully (cached)"
+                )
+            
+            # Get match analysis
+            match_analysis = SkillMatchingService.get_job_skill_match(
+                user_id=request.user.id,
+                job_id=job_id
+            )
+            
+            if 'error' in match_analysis:
+                return APIResponse.error(
+                    message=match_analysis['error'],
+                    status_code=status.HTTP_404_NOT_FOUND
+                )
+            
+            # Cache for 5 minutes
+            cache.set(cache_key, match_analysis, 300)
+            
+            return APIResponse.success(
+                data=match_analysis,
+                message="Job skill match analysis retrieved successfully"
+            )
+            
+        except ValueError:
+            return APIResponse.error(
+                message="Invalid job ID",
+                errors={"job_id": ["Job ID must be a valid integer"]},
+                status_code=status.HTTP_400_BAD_REQUEST
+            )
+        except Exception as e:
+            return APIResponse.error(
+                message="Failed to get job skill match analysis",
+                errors={"detail": str(e)},
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )

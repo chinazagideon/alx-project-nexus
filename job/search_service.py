@@ -32,7 +32,7 @@ class JobSearchService:
             'categories__name': 'C'
         }
     
-    def search(self, search_data: Dict) -> Dict:
+    def search(self, search_data: Dict, user=None) -> Dict:
         """
         Main search method that orchestrates different search strategies
         """
@@ -51,7 +51,7 @@ class JobSearchService:
         #     return cached_result
         
         # Build base queryset
-        queryset = self._build_base_queryset()
+        queryset = self._build_base_queryset(user)
         
         # Apply text search
         if validated_data.get('query'):
@@ -85,12 +85,25 @@ class JobSearchService:
         search_str = str(sorted(validated_data.items()))
         return f"job_search:{hashlib.md5(search_str.encode()).hexdigest()}"
     
-    def _build_base_queryset(self):
+    def _build_base_queryset(self, user=None):
         """
         Build base queryset with promotions and related data
         """
         from django.contrib.contenttypes.models import ContentType
         from promotion.models import Promotion
+        
+        # Start with base queryset
+        base_qs = Job.objects.select_related(
+            'company', 'city'
+        ).prefetch_related(
+            'jobcategory_set__category'
+        )
+        
+        # Apply permission filtering
+        if user and not user.is_staff:
+            if user.role == 'recruiter':
+                base_qs = base_qs.filter(company__user=user)
+            # talent users can see all jobs (no additional filtering)
         
         job_ct = ContentType.objects.get_for_model(Job)
         active_promotions = Promotion.objects.active().filter(
@@ -100,11 +113,7 @@ class JobSearchService:
         
         priority_subquery = active_promotions.values('package__priority_weight')[:1]
         
-        return Job.objects.select_related(
-            'company', 'city'
-        ).prefetch_related(
-            'jobcategory_set__category'
-        ).annotate(
+        return base_qs.annotate(
             is_promoted=Q(id__in=active_promotions.values('object_id')),
             promotion_priority=Case(
                 When(is_promoted=True, then=priority_subquery),

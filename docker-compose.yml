@@ -21,10 +21,16 @@ services:
       DB_PORT: ${DB_PORT:-5432}
       REDIS_URL: ${REDIS_URL:-redis://redis:6379/1}
       DJANGO_SETTINGS_MODULE: job_portal.settings
+      # MailHog configuration
+      USE_MAILHOG: "true"
+      EMAIL_HOST: "mailhog"
+      EMAIL_PORT: "1025"
+      DEFAULT_FROM_EMAIL: "noreply@connecthire.com"
     command: sh -c "python manage.py migrate --noinput && python manage.py runserver 0.0.0.0:8001"
     depends_on:
       - pgsql
       - redis
+      - mailhog
     networks:
       - connect-hire-network
     volumes:
@@ -100,6 +106,16 @@ services:
       - ./:/app:delegated
     networks:
       - connect-hire-network
+
+  mailhog:
+        image: mailhog/mailhog:latest
+        container_name: connect-hire-mailhog
+        restart: unless-stopped
+        ports:
+            - "1025:1025"  # SMTP port
+            - "8025:8025"  # Web UI port
+        networks:
+            - connect-hire-network
 
 volumes:
   pgdata:
