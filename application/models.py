@@ -1,6 +1,7 @@
-from django.db import models
-from job.models import Job
 from django.conf import settings
+from django.db import models
+
+from job.models import Job
 from job_portal.settings import UPLOAD_MODEL
 
 

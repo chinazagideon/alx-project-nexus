@@ -1,8 +1,8 @@
-from django.db import models
-from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.core.validators import FileExtensionValidator, ValidationError
 from django.conf import settings
+from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.models import ContentType
+from django.core.validators import FileExtensionValidator, ValidationError
+from django.db import models
 
 
 def validate_file_size(value):

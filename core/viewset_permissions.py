@@ -4,15 +4,16 @@ These can be directly applied to fix the most urgent security vulnerabilities.
 """
 
 from rest_framework import permissions
+
 from core.permissions_enhanced import (
-    IsJobOwnerOrStaff,
-    IsRecruiterOrAdmin,
-    IsCompanyOwnerOrStaff,
-    IsUploadOwnerOrStaff,
     IsAddressOwnerOrStaff,
-    IsOwnerOrJobOwnerOrStaffForCreate,
-    IsOwnerOrJobOwnerOrStaff,
     IsAdminOnly,
+    IsCompanyOwnerOrStaff,
+    IsJobOwnerOrStaff,
+    IsOwnerOrJobOwnerOrStaff,
+    IsOwnerOrJobOwnerOrStaffForCreate,
+    IsRecruiterOrAdmin,
+    IsUploadOwnerOrStaff,
 )
 
 

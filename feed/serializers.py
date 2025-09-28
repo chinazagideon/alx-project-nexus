@@ -1,10 +1,11 @@
-from rest_framework import serializers
 from django.contrib.contenttypes.models import ContentType
+from rest_framework import serializers
+
+from company.models import Company
+from job.models import Job
+from promotion.models import Promotion
 
 from .models import FeedItem
-from company.models import Company
-from promotion.models import Promotion
-from job.models import Job
 
 
 class FeedPayloadField(serializers.Field):

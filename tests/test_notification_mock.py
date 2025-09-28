@@ -1,6 +1,6 @@
 import pytest
-from django.test import TestCase
 from django.apps import apps
+from django.test import TestCase
 
 # Get the model from the app registry to ensure we get the mock version
 Notification = apps.get_model("notification", "Notification")

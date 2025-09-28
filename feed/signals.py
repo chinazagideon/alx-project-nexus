@@ -1,12 +1,12 @@
 from typing import Optional
 
+from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
-from django.contrib.contenttypes.models import ContentType
 
-from job.models import Job
 from company.models import Company
+from job.models import Job
 from promotion.models import Promotion, PromotionPlacement, PromotionStatus
 
 from .models import FeedItem

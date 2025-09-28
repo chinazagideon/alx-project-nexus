@@ -3,6 +3,7 @@ Permission mixins for viewsets to easily apply proper permissions.
 """
 
 from rest_framework import permissions
+
 from core.permission_config import get_permission_classes_for_viewset
 
 
@@ -51,10 +52,10 @@ class JobPermissionMixin:
         Apply job-specific permissions.
         """
         from core.permissions_enhanced import (
-            IsRecruiterOrAdmin,
             IsJobOwnerOrStaff,
-            IsOwnerOrJobOwnerOrStaffForCreate,
             IsOwnerOrJobOwnerOrStaff,
+            IsOwnerOrJobOwnerOrStaffForCreate,
+            IsRecruiterOrAdmin,
         )
 
         if self.action == "create":
@@ -78,7 +79,7 @@ class ApplicationPermissionMixin:
         """
         Apply application-specific permissions.
         """
-        from core.permissions_enhanced import IsTalentOrAdmin, IsApplicationOwnerOrJobOwnerOrStaff
+        from core.permissions_enhanced import IsApplicationOwnerOrJobOwnerOrStaff, IsTalentOrAdmin
 
         if self.action == "create":
             permission_classes = [IsTalentOrAdmin]
@@ -99,7 +100,7 @@ class CompanyPermissionMixin:
         """
         Apply company-specific permissions.
         """
-        from core.permissions_enhanced import IsRecruiterOrAdmin, IsCompanyOwnerOrStaff
+        from core.permissions_enhanced import IsCompanyOwnerOrStaff, IsRecruiterOrAdmin
 
         if self.action == "create":
             permission_classes = [IsRecruiterOrAdmin]
@@ -124,8 +125,8 @@ class SkillPermissionMixin:
         """
         from core.permissions_enhanced import (
             IsAdminOnly,
-            IsOwnerOrJobOwnerOrStaffForCreate,
             IsOwnerOrJobOwnerOrStaff,
+            IsOwnerOrJobOwnerOrStaffForCreate,
             IsOwnerOrStaffForList,
             PublicReadAuthenticatedWrite,
         )

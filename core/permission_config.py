@@ -3,26 +3,27 @@ Permission configuration for all viewsets and endpoints.
 This centralizes permission management for better maintainability.
 """
 
+from rest_framework import permissions
+
 from core.permissions_enhanced import (
-    IsOwnerOrReadOnly,
-    IsOwnerOrStaff,
-    IsOwnerOrStaffOrReadOnly,
-    IsOwnerOrStaffForList,
-    PublicReadAuthenticatedWrite,
-    IsAdminOrReadOnly,
-    IsAdminOnly,
-    IsRecruiterOrAdmin,
-    IsTalentOrAdmin,
-    IsJobOwnerOrStaff,
-    IsCompanyOwnerOrStaff,
-    IsApplicationOwnerOrJobOwnerOrStaff,
-    IsUploadOwnerOrStaff,
     IsAddressOwnerOrStaff,
+    IsAdminOnly,
+    IsAdminOrReadOnly,
+    IsApplicationOwnerOrJobOwnerOrStaff,
+    IsCompanyOwnerOrStaff,
+    IsJobOwnerOrStaff,
     IsOwnerOrJobOwnerOrStaff,
     IsOwnerOrJobOwnerOrStaffForCreate,
+    IsOwnerOrReadOnly,
+    IsOwnerOrStaff,
+    IsOwnerOrStaffForList,
+    IsOwnerOrStaffOrReadOnly,
+    IsRecruiterOrAdmin,
+    IsTalentOrAdmin,
+    IsUploadOwnerOrStaff,
+    PublicReadAuthenticatedWrite,
     RoleBasedPermission,
 )
-from rest_framework import permissions
 
 # Permission configurations for each app
 PERMISSION_CONFIG = {

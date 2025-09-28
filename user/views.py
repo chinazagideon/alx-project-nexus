@@ -1,17 +1,19 @@
 from django.shortcuts import render
-from rest_framework import viewsets, status
-from rest_framework.response import Response
-from rest_framework.decorators import action
-from .serializers import UserSerializer
-from .models.models import User
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework_simplejwt.authentication import JWTAuthentication
-from core.pagination import DefaultPagination
-from core.permissions import IsOwnerOrStaffForList, IsAdminOnly
-from core.response import APIResponse, SuccessResponseSerializer, ErrorResponseSerializer, ValidationErrorResponseSerializer
-from core.mixins import StandardResponseMixin
-from drf_spectacular.utils import extend_schema
 from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework_simplejwt.authentication import JWTAuthentication
+
+from core.mixins import StandardResponseMixin
+from core.pagination import DefaultPagination
+from core.permissions import IsAdminOnly, IsOwnerOrStaffForList
+from core.response import APIResponse, ErrorResponseSerializer, SuccessResponseSerializer, ValidationErrorResponseSerializer
+
+from .models.models import User
+from .serializers import UserSerializer
 
 
 class UserViewSet(StandardResponseMixin, viewsets.ModelViewSet):

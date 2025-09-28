@@ -4,18 +4,19 @@ This creates more realistic, interconnected data suitable for testing.
 Usage: python manage.py seed_production_data [--reset] [--companies=50] [--users=200] [--jobs=500]
 """
 
-from django.core.management.base import BaseCommand
-from django.contrib.auth import get_user_model
-from django.db import transaction
-from faker import Faker
 import random
 from datetime import datetime, timedelta
 
+from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand
+from django.db import transaction
+from faker import Faker
+
+from address.models import Address
 from company.models import Company
 from job.models import Job
-from skill.models import Skill, JobSkill, UserSkill
 from promotion.models import Promotion
-from address.models import Address
+from skill.models import JobSkill, Skill, UserSkill
 
 User = get_user_model()
 fake = Faker()

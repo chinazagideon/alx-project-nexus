@@ -2,11 +2,12 @@
 Skill matching services for job recommendations and analysis
 """
 
-from django.db.models import Q, Prefetch
-from django.core.cache import cache
-from django.conf import settings
-from typing import List, Dict, Any, Optional
 import logging
+from typing import Any, Dict, List, Optional
+
+from django.conf import settings
+from django.core.cache import cache
+from django.db.models import Prefetch, Q
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +113,7 @@ class SkillMatchingService:
         """
         Get user skill profile with insights
         """
-        from .models import UserSkill, JobSkill
+        from .models import JobSkill, UserSkill
 
         # Get user skills
         user_skills = UserSkill.objects.filter(user_id=user_id).select_related("skill")
@@ -148,8 +149,9 @@ class SkillMatchingService:
         """
         Get job recommendations for user based on skill matching
         """
-        from .models import UserSkill, JobSkill
         from job.models import Job
+
+        from .models import JobSkill, UserSkill
 
         # Get user skills
         user_skills = list(
@@ -208,8 +210,9 @@ class SkillMatchingService:
         """
         Get detailed skill match analysis for a specific job
         """
-        from .models import UserSkill, JobSkill
         from job.models import Job
+
+        from .models import JobSkill, UserSkill
 
         # Get user skills
         user_skills = list(

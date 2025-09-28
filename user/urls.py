@@ -2,11 +2,13 @@
 URL configuration for the user app
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from .views import UserViewSet
+
 from skill.views import UserSkillViewSet
+
 from .email_verification import EmailVerificationView, ResendVerificationView
+from .views import UserViewSet
 
 # Single router for all user operations
 router = DefaultRouter()

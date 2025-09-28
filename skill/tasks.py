@@ -2,10 +2,12 @@
 Celery tasks for skill matching operations
 """
 
+import logging
+
 from celery import shared_task
 from django.core.cache import cache
+
 from .services import SkillMatchingService
-import logging
 
 logger = logging.getLogger(__name__)
 

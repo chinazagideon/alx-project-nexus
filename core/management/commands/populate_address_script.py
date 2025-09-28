@@ -5,6 +5,7 @@ This script can be run independently or imported into Django shell.
 """
 import os
 import sys
+
 import django
 
 # Add the project directory to Python path
@@ -14,9 +15,10 @@ sys.path.append("/Applications/MAMP/htdocs/alx-project-nexus")
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "job_portal.settings")
 django.setup()
 
-from django.db import transaction
 from django.contrib.contenttypes.models import ContentType
-from address.models import Address, Country, State, City
+from django.db import transaction
+
+from address.models import Address, City, Country, State
 
 
 def create_address_data(

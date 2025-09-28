@@ -2,15 +2,15 @@
 URL configuration for api app.
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework_simplejwt.views import (
+    TokenBlacklistView,
     TokenObtainPairView,
     TokenRefreshView,
-    TokenBlacklistView,
 )
-from .views import LogoutAllView, LoginView, RefreshView, LogoutView, RegistrationView
 from two_factor.urls import urlpatterns as two_factor_patterns
 
+from .views import LoginView, LogoutAllView, LogoutView, RefreshView, RegistrationView
 
 # Authentication endpoints
 auth_patterns = [

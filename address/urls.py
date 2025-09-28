@@ -2,18 +2,19 @@
 URL configuration for the address app
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from .views import AddressViewSet, CityViewSet, StateViewSet, CountryViewSet
+
 from .lookup_views import (
-    get_countries,
-    get_states_by_country,
-    get_cities_by_state,
-    search_locations,
-    validate_address,
     get_address_hierarchy,
     get_address_statistics,
+    get_cities_by_state,
+    get_countries,
+    get_states_by_country,
+    search_locations,
+    validate_address,
 )
+from .views import AddressViewSet, CityViewSet, CountryViewSet, StateViewSet
 
 router = DefaultRouter()
 router.register(r"", AddressViewSet, basename="address")

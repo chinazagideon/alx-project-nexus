@@ -2,15 +2,17 @@
 Admin-only views for user management
 """
 
-from rest_framework import viewsets, status
-from rest_framework.response import Response
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import extend_schema
+from rest_framework import status, viewsets
 from rest_framework.decorators import action
-from .models.models import User
-from .admin_serializers import AdminUserSerializer, AdminUserCreateSerializer
+from rest_framework.response import Response
+
 from core.pagination import DefaultPagination
 from core.permissions import IsAdminOnly
-from drf_spectacular.utils import extend_schema
-from drf_spectacular.types import OpenApiTypes
+
+from .admin_serializers import AdminUserCreateSerializer, AdminUserSerializer
+from .models.models import User
 
 
 class AdminUserViewSet(viewsets.ModelViewSet):

@@ -2,9 +2,10 @@
 Serializers for the skill app
 """
 
-from rest_framework import serializers
 from drf_spectacular.utils import extend_schema
-from .models import Skill, JobSkill, UserSkill
+from rest_framework import serializers
+
+from .models import JobSkill, Skill, UserSkill
 
 
 class SkillSerializer(serializers.ModelSerializer):

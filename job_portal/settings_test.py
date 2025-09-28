@@ -1,5 +1,7 @@
+import importlib
+import sys
+
 from .settings import *
-import importlib, sys
 
 # Swap real app with mock app (same app_label)
 MOCK_APPS = {"notification": "tests.mocks.notification"}

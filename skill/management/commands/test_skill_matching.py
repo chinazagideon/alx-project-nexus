@@ -2,14 +2,16 @@
 Management command to test skill matching functionality
 """
 
-from django.core.management.base import BaseCommand
-from django.contrib.auth import get_user_model
-from skill.services import SkillMatchingService
-from skill.models import Skill, UserSkill, JobSkill
-from job.models import Job
-from company.models import Company
-from address.models import City
 import json
+
+from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand
+
+from address.models import City
+from company.models import Company
+from job.models import Job
+from skill.models import JobSkill, Skill, UserSkill
+from skill.services import SkillMatchingService
 
 User = get_user_model()
 

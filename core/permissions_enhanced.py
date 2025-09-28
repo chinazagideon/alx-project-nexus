@@ -2,8 +2,8 @@
 Enhanced permission classes for the application
 """
 
-from rest_framework import permissions
 from django.contrib.auth import get_user_model
+from rest_framework import permissions
 
 User = get_user_model()
 

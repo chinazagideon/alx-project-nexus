@@ -2,8 +2,9 @@
 Models for the company
 """
 
-from django.db import models
 from django.conf import settings
+from django.db import models
+
 from address.models import Address
 
 

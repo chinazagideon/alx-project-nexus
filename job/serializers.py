@@ -2,12 +2,14 @@
 Serializers for the jobs app
 """
 
-from rest_framework import serializers
-from django.db.models import Q, F, Case, When, Value, CharField
-from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
+from django.db.models import Case, CharField, F, Q, Value, When
 from drf_spectacular.utils import extend_schema_field
-from .models import Job, Category, JobCategory
-from skill.models import Skill, JobSkill
+from rest_framework import serializers
+
+from skill.models import JobSkill, Skill
+
+from .models import Category, Job, JobCategory
 
 
 # Job serializer

@@ -3,20 +3,21 @@ Management command to seed the application with real data.
 Usage: python manage.py seed_data [--reset] [--sample-size=100]
 """
 
-from django.core.management.base import BaseCommand, CommandError
-from django.contrib.auth import get_user_model
-from django.db import transaction
-from faker import Faker
+import os
 import random
 from datetime import datetime, timedelta
-from django.utils import timezone
-import os
 
+from django.contrib.auth import get_user_model
+from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
+from django.utils import timezone
+from faker import Faker
+
+from address.models import Address, City, Country, State
 from company.models import Company
 from job.models import Job
-from skill.models import Skill, JobSkill, UserSkill
 from promotion.models import Promotion
-from address.models import Address, Country, State, City
+from skill.models import JobSkill, Skill, UserSkill
 
 User = get_user_model()
 fake = Faker()

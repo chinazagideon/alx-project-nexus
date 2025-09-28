@@ -2,11 +2,11 @@
 Standardized API response utilities for consistent frontend integration
 """
 
-from rest_framework import status
-from rest_framework.response import Response
 from typing import Any, Dict, Optional, Union
+
 from drf_spectacular.utils import extend_schema_serializer
-from rest_framework import serializers
+from rest_framework import serializers, status
+from rest_framework.response import Response
 
 
 class APIResponseSerializer(serializers.Serializer):

@@ -2,37 +2,40 @@
 Skill views
 """
 
-from rest_framework import viewsets, status
-from rest_framework.decorators import action
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.response import Response
-from core.pagination import DefaultPagination
-from core.permissions import PublicReadAuthenticatedWrite, IsOwnerOrStaffForList
-from .models import Skill, JobSkill, UserSkill
-from .serializers import (
-    SkillSerializer,
-    JobSkillSerializer,
-    UserSkillSerializer,
-    UserSkillsUpdateSerializer,
-    UserSkillsDeleteSerializer,
-    UserSkillsResponseSerializer,
-    UserSkillsListResponseSerializer,
-    JobRecommendationsResponseSerializer,
-    JobSkillMatchResponseSerializer,
-    UserSkillProfileSerializer,
-)
-from drf_spectacular.utils import extend_schema, OpenApiExample
-from drf_spectacular.types import OpenApiTypes
 from enum import Enum
-from core.response import APIResponse
-from .services import SkillMatchingService
+
 from django.core.cache import cache
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from django.views.decorators.vary import vary_on_headers
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiExample, extend_schema
+from rest_framework import status, viewsets
+from rest_framework.decorators import action
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
-from core.permissions_enhanced import IsOwnerOrJobOwnerOrStaffForCreate, IsOwnerOrJobOwnerOrStaff
+
+from core.pagination import DefaultPagination
+from core.permissions import IsOwnerOrStaffForList, PublicReadAuthenticatedWrite
+from core.permissions_enhanced import IsOwnerOrJobOwnerOrStaff, IsOwnerOrJobOwnerOrStaffForCreate
+from core.response import APIResponse
 from core.viewset_permissions import get_job_skill_permissions, get_job_skill_queryset
+
+from .models import JobSkill, Skill, UserSkill
+from .serializers import (
+    JobRecommendationsResponseSerializer,
+    JobSkillMatchResponseSerializer,
+    JobSkillSerializer,
+    SkillSerializer,
+    UserSkillProfileSerializer,
+    UserSkillsDeleteSerializer,
+    UserSkillSerializer,
+    UserSkillsListResponseSerializer,
+    UserSkillsResponseSerializer,
+    UserSkillsUpdateSerializer,
+)
+from .services import SkillMatchingService
 
 
 class SkillMatchingThrottle(UserRateThrottle):

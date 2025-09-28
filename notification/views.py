@@ -1,12 +1,12 @@
-from rest_framework.views import APIView
-from rest_framework.response import Response
+from drf_spectacular.utils import extend_schema
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
-from drf_spectacular.utils import extend_schema
+from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .models import Notification, NotificationStatus, NotificationPreference
-from .serializers import NotificationSerializer, NotificationPreferenceSerializer
-from .services import get_unread, decr_unread
+from .models import Notification, NotificationPreference, NotificationStatus
+from .serializers import NotificationPreferenceSerializer, NotificationSerializer
+from .services import decr_unread, get_unread
 
 
 class NotificationListView(APIView):

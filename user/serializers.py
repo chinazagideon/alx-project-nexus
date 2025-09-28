@@ -2,10 +2,10 @@
 User serializers
 """
 
-from rest_framework import serializers
-from .models.models import User
-from .models.models import UserRole
 from django.contrib.auth.hashers import make_password
+from rest_framework import serializers
+
+from .models.models import User, UserRole
 
 
 class UserSerializer(serializers.ModelSerializer):

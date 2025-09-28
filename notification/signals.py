@@ -1,17 +1,15 @@
+from django.contrib.contenttypes.models import ContentType
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.contenttypes.models import ContentType
 
-from job.models import Job
 from company.models import Company
+from job.models import Job
 from promotion.models import Promotion, PromotionStatus
 from user.models.models import User
 
+from .enums import CustomMessage
 from .models import Notification, NotificationChannel, NotificationStatus
 from .services import incr_unread
-
-
-from .enums import CustomMessage
 
 
 def _notify(user_id: int, event_type: str, title: str, body: str, content_object=None, data=None):

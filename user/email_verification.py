@@ -2,21 +2,24 @@
 Email verification views and utilities
 """
 
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.views import View
-from django.utils import timezone
-from django.conf import settings
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import AllowAny
-from rest_framework import status
-from core.response import APIResponse
-from core.mixins import StandardAPIViewMixin
-from drf_spectacular.utils import extend_schema
-from drf_spectacular.openapi import OpenApiParameter
-from .models.models import User
 import logging
+
+from django.conf import settings
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.utils import timezone
+from django.views import View
+from drf_spectacular.openapi import OpenApiParameter
+from drf_spectacular.utils import extend_schema
+from rest_framework import status
+from rest_framework.permissions import AllowAny
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+from core.mixins import StandardAPIViewMixin
+from core.response import APIResponse
+
+from .models.models import User
 
 logger = logging.getLogger(__name__)
 

@@ -2,8 +2,9 @@
 Mixins for standardized API responses
 """
 
-from rest_framework import viewsets, status
+from rest_framework import status, viewsets
 from rest_framework.response import Response
+
 from .response import APIResponse
 
 

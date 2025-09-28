@@ -2,12 +2,13 @@
 Models for the job portal
 """
 
-from django.db import models
 from django.conf import settings
-from company.models import Company
+from django.db import models
+
 from address.models import City
-from promotion.models import register_promotable, PromotionType
-from job_portal.settings import JOB_MODEL, JOB_CATEGORY_MODEL
+from company.models import Company
+from job_portal.settings import JOB_CATEGORY_MODEL, JOB_MODEL
+from promotion.models import PromotionType, register_promotable
 
 
 @register_promotable(PromotionType.JOB, "job", "job")

@@ -2,15 +2,15 @@
 Application  Serializers
 """
 
+from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
-from user.models.models import User
-from user.models.models import UserRole
+
 from application.models import Application
 from job.serializers import JobSerializer
-from user.serializers import UserSerializer
-from upload.serializers import UploadSerializer
 from upload.models import Upload, UploadType
-from django.contrib.contenttypes.models import ContentType
+from upload.serializers import UploadSerializer
+from user.models.models import User, UserRole
+from user.serializers import UserSerializer
 
 
 class ApplicationSerializer(serializers.ModelSerializer):

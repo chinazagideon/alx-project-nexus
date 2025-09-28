@@ -1,13 +1,12 @@
+from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand
 from django.utils import timezone
-from django.contrib.contenttypes.models import ContentType
 
-from job.models import Job
 from company.models import Company
-from promotion.models import Promotion, PromotionPlacement, PromotionStatus
-
 from feed.models import FeedItem
 from feed.services import calculate_score, zadd_feed
+from job.models import Job
+from promotion.models import Promotion, PromotionPlacement, PromotionStatus
 
 
 class Command(BaseCommand):

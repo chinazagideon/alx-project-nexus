@@ -3,12 +3,14 @@ Management command to manually populate address app with custom data.
 Usage: python manage.py populate_address [--country=COUNTRY] [--state=STATE] [--city=CITY] [--location=LOCATION] [--zip-code=ZIP] [--interactive]
 """
 
+import json
+
+from django.contrib.contenttypes.models import ContentType
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-from django.contrib.contenttypes.models import ContentType
-from address.models import Address, Country, State, City
+
+from address.models import Address, City, Country, State
 from address.services import AddressService
-import json
 
 
 class Command(BaseCommand):

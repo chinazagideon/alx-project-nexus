@@ -2,10 +2,11 @@
 Address serializers
 """
 
-from rest_framework import serializers
-from drf_spectacular.utils import extend_schema_field
 from django.contrib.contenttypes.models import ContentType
-from .models import Address, City, State, Country
+from drf_spectacular.utils import extend_schema_field
+from rest_framework import serializers
+
+from .models import Address, City, Country, State
 
 
 # Base serializers for lookup and reference

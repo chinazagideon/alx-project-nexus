@@ -2,9 +2,8 @@ import os
 import time
 from typing import Iterable, Optional, Tuple
 
-from django_redis import get_redis_connection
 from django.conf import settings
-
+from django_redis import get_redis_connection
 
 FEED_ZSET_KEY = "feed:global"
 

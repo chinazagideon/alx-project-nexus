@@ -2,19 +2,20 @@
 Address lookup and utility views
 """
 
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+
 from .serializers import (
+    AddressValidationSerializer,
+    CityLookupSerializer,
     CountryLookupSerializer,
     StateLookupSerializer,
-    CityLookupSerializer,
-    AddressValidationSerializer,
 )
-from .services import AddressService, AddressLookupService
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
-from drf_spectacular.types import OpenApiTypes
+from .services import AddressLookupService, AddressService
 
 
 @extend_schema(

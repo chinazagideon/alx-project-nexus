@@ -2,9 +2,9 @@
 Custom API routers for better organization and documentation
 """
 
-from rest_framework.routers import DefaultRouter
-from drf_spectacular.utils import extend_schema, OpenApiParameter
 from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework.routers import DefaultRouter
 
 
 class CustomRouter(DefaultRouter):

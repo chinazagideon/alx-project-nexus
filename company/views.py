@@ -1,14 +1,16 @@
 from django.shortcuts import render
-from rest_framework import viewsets, status
-from rest_framework.response import Response
-from .models import Company
-from .serializers import CompanySerializer, CompanyCreateSerializer
-from rest_framework.permissions import IsAuthenticated
-from core.pagination import DefaultPagination
 from drf_spectacular.utils import extend_schema
-from core.response import APIResponse
+from rest_framework import status, viewsets
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+
+from core.pagination import DefaultPagination
 from core.permissions_enhanced import IsCompanyOwnerOrStaff, IsRecruiterOrAdmin
+from core.response import APIResponse
 from core.viewset_permissions import get_company_permissions, get_company_queryset
+
+from .models import Company
+from .serializers import CompanyCreateSerializer, CompanySerializer
 
 
 class CompanyViewSet(viewsets.ModelViewSet):

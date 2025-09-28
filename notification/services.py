@@ -1,4 +1,5 @@
-from typing import Optional, Iterable, Tuple, List
+from typing import Iterable, List, Optional, Tuple
+
 from django_redis import get_redis_connection
 
 

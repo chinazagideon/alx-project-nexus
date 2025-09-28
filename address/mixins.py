@@ -2,9 +2,10 @@
 Address mixins for reusable functionality across different models
 """
 
-from rest_framework import serializers
 from drf_spectacular.utils import extend_schema_field
-from .serializers import AddressNestedSerializer, AddressCreateSerializer
+from rest_framework import serializers
+
+from .serializers import AddressCreateSerializer, AddressNestedSerializer
 from .services import AddressService
 
 

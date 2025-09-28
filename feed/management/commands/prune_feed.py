@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.utils import timezone
 
 from feed.models import FeedItem
-from feed.services import redis_conn, FEED_ZSET_KEY
+from feed.services import FEED_ZSET_KEY, redis_conn
 
 
 class Command(BaseCommand):

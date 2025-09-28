@@ -2,28 +2,29 @@
 Views for the jobs app
 """
 
-from .models import Job
-from .serializers import JobSerializer, JobCreateSerializer, JobSearchSerializer, JobSearchResponseSerializer
-from .search_service import JobSearchService
-from rest_framework import generics, viewsets, status
-from rest_framework.permissions import IsAuthenticated, AllowAny
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.filters import SearchFilter, OrderingFilter
-from rest_framework.decorators import api_view, permission_classes
-from rest_framework.response import Response
-from django_filters.rest_framework import DjangoFilterBackend
-from core.response import APIResponse
-from core.mixins import StandardAPIViewMixin
-from core.viewset_permissions import get_job_permissions, get_job_queryset
-from core.permissions_enhanced import IsRecruiterOrAdmin, IsJobOwnerOrStaff
-from drf_spectacular.utils import extend_schema, OpenApiParameter, OpenApiExample
-from drf_spectacular.types import OpenApiTypes
-from rest_framework.pagination import PageNumberPagination
 from django.contrib.contenttypes.models import ContentType
-from django.db.models import Exists, OuterRef, Subquery, Value, IntegerField
+from django.db.models import Exists, IntegerField, OuterRef, Subquery, Value
 from django.db.models.functions import Coalesce
-from promotion.models import Promotion
+from django_filters.rest_framework import DjangoFilterBackend
+from drf_spectacular.types import OpenApiTypes
+from drf_spectacular.utils import OpenApiExample, OpenApiParameter, extend_schema
+from rest_framework import generics, status, viewsets
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+
+from core.mixins import StandardAPIViewMixin
 from core.permissions_enhanced import IsJobOwnerOrStaff, IsRecruiterOrAdmin
+from core.response import APIResponse
+from core.viewset_permissions import get_job_permissions, get_job_queryset
+from promotion.models import Promotion
+
+from .models import Job
+from .search_service import JobSearchService
+from .serializers import JobCreateSerializer, JobSearchResponseSerializer, JobSearchSerializer, JobSerializer
 
 
 class JobListCreateView(generics.ListCreateAPIView):
@@ -466,9 +467,10 @@ def job_stats(request):
 
     Returns key metrics about jobs, companies, and locations in the system.
     """
+    from datetime import timedelta
+
     from django.db.models import Count
     from django.utils import timezone
-    from datetime import timedelta
 
     now = timezone.now()
 

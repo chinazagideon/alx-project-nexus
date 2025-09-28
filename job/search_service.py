@@ -2,20 +2,20 @@
 Advanced search service for jobs
 """
 
-import time
-import re
 import hashlib
-from typing import Dict, List, Optional, Tuple
+import re
+import time
 from datetime import datetime, timedelta
 from decimal import Decimal
+from typing import Dict, List, Optional, Tuple
 
-from django.db.models import Q, F, Case, When, Value, CharField, IntegerField, OuterRef, Subquery, Exists
-from django.contrib.postgres.search import SearchVector, SearchQuery, SearchRank
-from django.core.paginator import Paginator
+from django.contrib.postgres.search import SearchQuery, SearchRank, SearchVector
 from django.core.cache import cache
+from django.core.paginator import Paginator
+from django.db.models import Case, CharField, Exists, F, IntegerField, OuterRef, Q, Subquery, Value, When
 from django.utils import timezone
 
-from .models import Job, Category, JobCategory
+from .models import Category, Job, JobCategory
 from .serializers import JobSearchSerializer
 
 
@@ -91,6 +91,7 @@ class JobSearchService:
         Build base queryset with promotions and related data
         """
         from django.contrib.contenttypes.models import ContentType
+
         from promotion.models import Promotion
 
         # Start with base queryset

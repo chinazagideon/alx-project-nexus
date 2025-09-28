@@ -2,10 +2,12 @@
 URL configuration for the jobs app
 """
 
-from django.urls import path, include
+from django.urls import include, path
 from rest_framework.routers import DefaultRouter
-from .views import JobViewSet, job_search, search_suggestions, search_facets, job_stats
+
 from skill.views import JobSkillViewSet
+
+from .views import JobViewSet, job_search, job_stats, search_facets, search_suggestions
 
 router = DefaultRouter()
 # Mount jobs at the root of this app's URLConf

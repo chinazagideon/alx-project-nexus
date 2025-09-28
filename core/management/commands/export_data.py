@@ -5,9 +5,10 @@ Usage: python manage.py export_data [--output-dir=./data_exports]
 
 import json
 import os
+
+from django.apps import apps
 from django.core.management.base import BaseCommand
 from django.core.serializers import serialize
-from django.apps import apps
 
 
 class Command(BaseCommand):

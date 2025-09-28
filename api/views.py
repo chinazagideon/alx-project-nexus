@@ -1,18 +1,16 @@
 from django.shortcuts import render
-
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenBlacklistView
-from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
-from rest_framework import serializers
-from rest_framework.permissions import AllowAny
-from core.response import APIResponse, create_success_response_serializer, create_error_response_serializer
-from core.mixins import StandardAPIViewMixin
 from drf_spectacular.utils import extend_schema, extend_schema_view
-from user.serializers import UserSerializer, UserRegistrationSerializer
+from rest_framework import serializers, status
+from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+from rest_framework_simplejwt.token_blacklist.models import BlacklistedToken, OutstandingToken
+from rest_framework_simplejwt.views import TokenBlacklistView, TokenObtainPairView, TokenRefreshView
+
+from core.mixins import StandardAPIViewMixin
+from core.response import APIResponse, create_error_response_serializer, create_success_response_serializer
 from upload.serializers import UploadSerializer
+from user.serializers import UserRegistrationSerializer, UserSerializer
 
 
 class LoginResponseSerializer(serializers.Serializer):

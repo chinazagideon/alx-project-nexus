@@ -3,11 +3,12 @@ URLs for the notification app
 """
 
 from django.urls import path
+
 from .views import (
     NotificationListView,
-    NotificationUnreadCountView,
     NotificationMarkReadView,
     NotificationPreferenceView,
+    NotificationUnreadCountView,
 )
 
 urlpatterns = [

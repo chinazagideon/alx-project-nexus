@@ -2,10 +2,12 @@
 Serializers for the upload app
 """
 
+import os
+
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
+
 from .models import Upload, UploadType
-import os
 
 
 class UploadSerializer(serializers.ModelSerializer):

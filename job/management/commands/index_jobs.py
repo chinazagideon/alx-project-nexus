@@ -4,6 +4,7 @@ Management command to index jobs for search optimization
 
 from django.core.management.base import BaseCommand
 from django.db import connection
+
 from job.models import Job
 
 
