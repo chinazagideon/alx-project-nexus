@@ -295,7 +295,7 @@ class Command(BaseCommand):
                 last_name="Admin",
                 role="recruiter",
                 phone="1234567890",
-                password="testpassword123",
+                password=os.getenv("DEFAULT_TEST_USER_PASSWORD"),
             )
 
         for _ in range(count):
