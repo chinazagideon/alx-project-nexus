@@ -346,7 +346,7 @@ CELERY_TASK_TIME_LIMIT = 30 * 60
 
 # Email Configuration
 # Use MailHog for development/testing, SMTP for production
-if DEBUG or os.getenv("USE_MAILHOG", "true").lower() == "true":
+if DEBUG and os.getenv("USE_MAILHOG", "true").lower() == "true":
     # MailHog configuration for development/testing
     EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
     EMAIL_HOST = os.getenv("EMAIL_HOST", "mailhog")
