@@ -7,7 +7,7 @@ from rest_framework.response import Response
 
 from application.models import Application
 from application.serializers import ApplicationCreateSerializer, ApplicationSerializer, ApplicationUpdateSerializer
-from core.pagination import DefaultPagination
+from core.permissions_enhanced import IsAccountActive
 from core.response import APIResponse
 
 
@@ -17,9 +17,8 @@ class ApplicationsViewSet(viewsets.ModelViewSet):
     """
 
     queryset = Application.objects.all()
-    serializer_class = ApplicationSerializer  # Default serializer for backward compatibility
-    permission_classes = [IsAuthenticated]
-    pagination_class = DefaultPagination
+    serializer_class = ApplicationSerializer
+    permission_classes = [IsAccountActive]
 
     def get_serializer_class(self):
         """
@@ -69,6 +68,7 @@ class ApplicationsViewSet(viewsets.ModelViewSet):
         Create a new job application
         Backward compatible - enhanced resume handling is optional
         """
+
         serializer = self.get_serializer(data=request.data)
         if serializer.is_valid():
             # Set the user to current user if not provided

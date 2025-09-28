@@ -18,10 +18,11 @@ from rest_framework.throttling import UserRateThrottle
 
 from core.pagination import DefaultPagination
 from core.permissions import IsOwnerOrStaffForList, PublicReadAuthenticatedWrite
+from core.permissions_enhanced import IsAdminOrReadOnly, IsOwnerOrJobOwnerOrStaff, IsOwnerOrJobOwnerOrStaffForCreate
+
 # from core.permissions_enhanced import IsOwnerOrJobOwnerOrStaff, IsOwnerOrJobOwnerOrStaffForCreate
 from core.response import APIResponse
 from core.viewset_permissions import get_job_skill_permissions, get_job_skill_queryset
-from core.permissions_enhanced import IsAdminOrReadOnly, IsOwnerOrJobOwnerOrStaff, IsOwnerOrJobOwnerOrStaffForCreate
 
 from .models import JobSkill, Skill, UserSkill
 from .serializers import (
