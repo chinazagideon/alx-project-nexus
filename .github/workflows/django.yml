@@ -1,4 +1,4 @@
-name: Connect-API CI/CD Pipeline
+name: connect-api
 
 on:
   push:
