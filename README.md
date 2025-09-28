@@ -415,10 +415,3 @@ def get_user_skill_match_percentage(cls, user_skills: List[Dict], job_skills: Li
 ## Mentors & Acknowledgements
 
 A huge thank you to my mentors: **Cole, Faith, and Amanuel**, for their invaluable guidance and feedback throughout the program. Their support was instrumental in the successful completion of this project.
-
-## Project Timeline
-
-- **Development Phase:** 12 weeks intensive development
-- **Technology Stack:** Modern Python/Django ecosystem with enterprise-grade tools
-- **Deployment:** Production-ready with Docker containerization and CI/CD pipeline
-
