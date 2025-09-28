@@ -7,7 +7,6 @@ from rest_framework.response import Response
 
 from application.models import Application
 from application.serializers import ApplicationCreateSerializer, ApplicationSerializer, ApplicationUpdateSerializer
-from core.permissions_enhanced import IsAccountActive
 from core.response import APIResponse
 
 
