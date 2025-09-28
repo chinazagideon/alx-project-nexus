@@ -14,12 +14,13 @@ exclude =
     .mypy_cache,
     .DS_Store
 ignore = 
-    E203,  # whitespace before ':'
-    E501,  # line too long (handled by black)
-    W503,  # line break before binary operator
-    E402,  # module level import not at top of file
-    F401,  # imported but unused (handled by isort)
+    E203,
+    E501,
+    W503,
+    E402,
+    F401
 per-file-ignores =
     __init__.py:F401
     migrations/*:E501
 max-complexity = 10
+
