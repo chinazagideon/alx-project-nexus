@@ -26,7 +26,7 @@ class Application(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=False, blank=False)
     status = models.CharField(max_length=30, choices=ApplicationStatus.choices, default=ApplicationStatus.APPLIED)
     date_applied = models.DateTimeField(auto_now_add=True)
-    cover_letter = models.TextField(null=True, blank=True)
+    cover_letter = models.TextField(null=False, blank=False)
     resume = models.ForeignKey(UPLOAD_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     updated_at = models.DateTimeField(auto_now=True)
 
