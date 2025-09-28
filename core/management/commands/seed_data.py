@@ -94,9 +94,9 @@ class Command(BaseCommand):
 
     def create_admin_account(self, count):
         """Create a default admin account for testing"""
-        admin_username = os.getenv("ADMIN_DEFAULT_USERNAME", "admin")
-        admin_email = os.getenv("ADMIN_DEFAULT_EMAIL", "admin@example.com")
-        admin_password = os.getenv("ADMIN_DEFAULT_PASSWORD", "admin123")
+        admin_username = os.getenv("ADMIN_DEFAULT_USERNAME")
+        admin_email = os.getenv("ADMIN_DEFAULT_EMAIL")
+        admin_password = os.getenv("ADMIN_DEFAULT_PASSWORD")
 
         if User.objects.filter(username=admin_username).exists():
             self.stdout.write(self.style.WARNING(f'Admin account "{admin_username}" already exists'))
