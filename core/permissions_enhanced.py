@@ -38,6 +38,7 @@ class BasePermissionMixin:
         - Login/logout
         - Email verification endpoints
         - Public read access (if applicable)
+        - Staff, superusers, and admin role users
         """
         # Allow unauthenticated users to pass through (handled by other permissions)
         if not request.user.is_authenticated:
@@ -45,6 +46,10 @@ class BasePermissionMixin:
 
         # Staff and superusers are exempt from email verification requirement
         if self.is_staff_or_superuser(request):
+            return True
+
+        # Admin role users are exempt from email verification requirement
+        if hasattr(request.user, "role") and request.user.role == "admin":
             return True
 
         # Check if user is active (email verified and status is active)
@@ -479,6 +484,7 @@ class IsActiveUser(permissions.BasePermission, BasePermissionMixin):
     """
     Custom permission that requires user to be active (status=active).
     This replaces the old email verification checks.
+    Admin role users are exempt from status requirements.
     """
 
     def has_permission(self, request, view):
@@ -487,6 +493,10 @@ class IsActiveUser(permissions.BasePermission, BasePermissionMixin):
 
         # Staff and superusers are exempt
         if self.is_staff_or_superuser(request):
+            return True
+
+        # Admin role users are exempt from status requirements
+        if hasattr(request.user, "role") and request.user.role == "admin":
             return True
 
         # Check if user is active
