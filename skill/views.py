@@ -17,8 +17,13 @@ from rest_framework.response import Response
 from rest_framework.throttling import UserRateThrottle
 
 from core.pagination import DefaultPagination
-from core.permissions import IsOwnerOrStaffForList, PublicReadAuthenticatedWrite
-from core.permissions_enhanced import IsAdminOrReadOnly, IsOwnerOrJobOwnerOrStaff, IsOwnerOrJobOwnerOrStaffForCreate
+from core.permissions_enhanced import (
+    IsAdminOrReadOnly,
+    IsOwnerOrJobOwnerOrStaff,
+    IsOwnerOrJobOwnerOrStaffForCreate,
+    IsOwnerOrStaffForList,
+    PublicReadAuthenticatedWrite,
+)
 
 # from core.permissions_enhanced import IsOwnerOrJobOwnerOrStaff, IsOwnerOrJobOwnerOrStaffForCreate
 from core.response import APIResponse

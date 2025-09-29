@@ -18,13 +18,18 @@ def drf_exception_handler(exc, context):
         error_data = response.data
         status_code = response.status_code
 
+        # Get request and user context
+        request = context.get("request")
+        user = getattr(request, "user", None) if request else None
+
         # Determine error message based on status code
         if status_code == status.HTTP_400_BAD_REQUEST:
             message = "Validation failed"
         elif status_code == status.HTTP_401_UNAUTHORIZED:
             message = "Authentication required"
         elif status_code == status.HTTP_403_FORBIDDEN:
-            message = "Permission denied"
+            # Provide specific error messages for permission denied
+            message = get_permission_denied_message(user, context)
         elif status_code == status.HTTP_404_NOT_FOUND:
             message = "Resource not found"
         elif status_code == status.HTTP_405_METHOD_NOT_ALLOWED:
@@ -42,3 +47,27 @@ def drf_exception_handler(exc, context):
         return error_response
 
     return response
+
+
+def get_permission_denied_message(user, context):
+    """
+    Generate specific error messages for permission denied scenarios
+    """
+    if not user or not user.is_authenticated:
+        return "Authentication required to access this resource"
+
+    # Check user status for specific error messages
+    if hasattr(user, "status"):
+        if user.status == "pending":
+            return "Email verification required. Please verify your email address to access this feature."
+        elif user.status == "inactive":
+            return "Account is inactive. Please contact support for assistance."
+        elif user.status == "suspended":
+            return "Account is suspended. Please contact support for assistance."
+
+    # Check email verification status
+    if hasattr(user, "is_email_verified") and not user.is_email_verified:
+        return "Email verification required. Please verify your email address to access this feature."
+
+    # Default permission denied message
+    return "You don't have permission to perform this action"

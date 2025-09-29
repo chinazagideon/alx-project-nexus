@@ -120,14 +120,16 @@ class EmailVerificationView(StandardAPIViewMixin, APIView):
                         status_code=400,
                     )
 
-            # Verify the email
+            # Verify the email and activate user
             user.is_email_verified = True
-            user.save(update_fields=["is_email_verified"])
+            user.status = "active"  # Set status to active
+            user.save(update_fields=["is_email_verified", "status"])
 
-            logger.info(f"Email verified for user {user.id} ({user.email})")
+            logger.info(f"Email verified and user activated for user {user.id} ({user.email})")
 
             return self.success_response(
-                data={"user_id": user.id, "email": user.email, "is_verified": True}, message="Email verified successfully"
+                data={"user_id": user.id, "email": user.email, "is_verified": True, "status": user.status},
+                message="Email verified successfully",
             )
 
         except User.DoesNotExist:

@@ -27,11 +27,41 @@ class BasePermissionMixin:
         """Check if user is staff or superuser"""
         return request.user.is_staff or request.user.is_superuser
 
+    def is_email_verified(self, request):
+        """Check if user's email is verified"""
+        return request.user.is_authenticated and request.user.is_email_verified
+
+    def requires_email_verification(self, request):
+        """
+        Check if email verification is required for the current request.
+        Email verification is required for all actions except:
+        - Login/logout
+        - Email verification endpoints
+        - Public read access (if applicable)
+        """
+        # Allow unauthenticated users to pass through (handled by other permissions)
+        if not request.user.is_authenticated:
+            return True
+
+        # Staff and superusers are exempt from email verification requirement
+        if self.is_staff_or_superuser(request):
+            return True
+
+        # Check if user is active (email verified and status is active)
+        return request.user.status == "active"
+
 
 class IsOwnerOrReadOnly(permissions.BasePermission, BasePermissionMixin):
     """
     Custom permission to only allow owners of an object to edit it.
+    Requires email verification for write operations.
     """
+
+    def has_permission(self, request, view):
+        # Check email verification requirement first
+        if not self.requires_email_verification(request):
+            return False
+        return True
 
     def has_object_permission(self, request, view, obj):
         # Read permissions are allowed to any request,
@@ -46,7 +76,14 @@ class IsOwnerOrReadOnly(permissions.BasePermission, BasePermissionMixin):
 class IsOwnerOrStaff(permissions.BasePermission, BasePermissionMixin):
     """
     Custom permission to only allow owners or staff to access the object.
+    Requires email verification for non-staff users.
     """
+
+    def has_permission(self, request, view):
+        # Check email verification requirement first
+        if not self.requires_email_verification(request):
+            return False
+        return True
 
     def has_object_permission(self, request, view, obj):
         # Staff can access everything
@@ -60,7 +97,14 @@ class IsOwnerOrStaff(permissions.BasePermission, BasePermissionMixin):
 class IsOwnerOrStaffOrReadOnly(permissions.BasePermission, BasePermissionMixin):
     """
     Custom permission to allow owners/staff to edit, others to read.
+    Requires email verification for write operations.
     """
+
+    def has_permission(self, request, view):
+        # Check email verification requirement first
+        if not self.requires_email_verification(request):
+            return False
+        return True
 
     def has_object_permission(self, request, view, obj):
         # Read permissions are allowed to any request
@@ -78,10 +122,14 @@ class IsOwnerOrStaffOrReadOnly(permissions.BasePermission, BasePermissionMixin):
 class IsOwnerOrStaffForList(permissions.BasePermission, BasePermissionMixin):
     """
     Custom permission for list views - staff see all, others see only their own.
+    Requires email verification for non-staff users.
     """
 
     def has_permission(self, request, view):
-        return request.user.is_authenticated
+        # Check email verification requirement first
+        if not self.requires_email_verification(request):
+            return False
+        return True
 
     def has_object_permission(self, request, view, obj):
         # Staff can see everything
@@ -92,9 +140,9 @@ class IsOwnerOrStaffForList(permissions.BasePermission, BasePermissionMixin):
         return self.is_owner(request, obj)
 
 
-class PublicReadAuthenticatedWrite(permissions.BasePermission):
+class PublicReadAuthenticatedWrite(permissions.BasePermission, BasePermissionMixin):
     """
-    Custom permission that allows public read access but requires authentication for write operations.
+    Custom permission that allows public read access but requires authentication and email verification for write operations.
     """
 
     def has_permission(self, request, view):
@@ -102,11 +150,11 @@ class PublicReadAuthenticatedWrite(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        # Require authentication for write operations
-        return request.user.is_authenticated
+        # Require authentication and email verification for write operations
+        return request.user.is_authenticated and self.requires_email_verification(request)
 
 
-class IsAdminOrReadOnly(permissions.BasePermission):
+class IsAdminOrReadOnly(permissions.BasePermission, BasePermissionMixin):
     """
     Custom permission that allows read access to everyone but write access only to admin users.
     """
@@ -116,11 +164,11 @@ class IsAdminOrReadOnly(permissions.BasePermission):
         if request.method in permissions.SAFE_METHODS:
             return True
 
-        # Require admin access for write operations
+        # Require admin access for write operations (staff are exempt from email verification)
         return request.user.is_authenticated and request.user.is_staff
 
 
-class IsAdminOnly(permissions.BasePermission):
+class IsAdminOnly(permissions.BasePermission, BasePermissionMixin):
     """
     Custom permission that allows access only to admin users.
     """
@@ -129,25 +177,35 @@ class IsAdminOnly(permissions.BasePermission):
         return request.user.is_authenticated and request.user.is_staff
 
 
-class IsRecruiterOrAdmin(permissions.BasePermission):
+class IsRecruiterOrAdmin(permissions.BasePermission, BasePermissionMixin):
     """
     Custom permission for recruiter or admin access.
+    Requires email verification for non-staff users.
     """
 
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
             return False
 
+        # Check email verification requirement first
+        if not self.requires_email_verification(request):
+            return False
+
         return request.user.role in ["recruiter", "admin"] or request.user.is_staff
 
 
-class IsTalentOrAdmin(permissions.BasePermission):
+class IsTalentOrAdmin(permissions.BasePermission, BasePermissionMixin):
     """
     Custom permission for talent or admin access.
+    Requires email verification for non-staff users.
     """
 
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
+            return False
+
+        # Check email verification requirement first
+        if not self.requires_email_verification(request):
             return False
 
         return request.user.role in ["talent", "admin"] or request.user.is_staff
@@ -157,7 +215,14 @@ class IsJobOwnerOrStaff(permissions.BasePermission, BasePermissionMixin):
     """
     Custom permission for job-related operations.
     Checks if user owns the job (through company) or is staff.
+    Requires email verification for non-staff users.
     """
+
+    def has_permission(self, request, view):
+        # Check email verification requirement first
+        if not self.requires_email_verification(request):
+            return False
+        return True
 
     def has_object_permission(self, request, view, obj):
         # Staff can access everything
@@ -175,7 +240,14 @@ class IsJobOwnerOrStaff(permissions.BasePermission, BasePermissionMixin):
 class IsCompanyOwnerOrStaff(permissions.BasePermission, BasePermissionMixin):
     """
     Custom permission for company-related operations.
+    Requires email verification for non-staff users.
     """
+
+    def has_permission(self, request, view):
+        # Check email verification requirement first
+        if not self.requires_email_verification(request):
+            return False
+        return True
 
     def has_object_permission(self, request, view, obj):
         # Staff can access everything
@@ -193,7 +265,14 @@ class IsApplicationOwnerOrJobOwnerOrStaff(permissions.BasePermission, BasePermis
     - Application owner (talent who applied)
     - Job owner (recruiter who posted the job)
     - Staff/Admin
+    Requires email verification for non-staff users.
     """
+
+    def has_permission(self, request, view):
+        # Check email verification requirement first
+        if not self.requires_email_verification(request):
+            return False
+        return True
 
     def has_object_permission(self, request, view, obj):
         # Staff can access everything
@@ -215,7 +294,14 @@ class IsApplicationOwnerOrJobOwnerOrStaff(permissions.BasePermission, BasePermis
 class IsUploadOwnerOrStaff(permissions.BasePermission, BasePermissionMixin):
     """
     Custom permission for upload-related operations.
+    Requires email verification for non-staff users.
     """
+
+    def has_permission(self, request, view):
+        # Check email verification requirement first
+        if not self.requires_email_verification(request):
+            return False
+        return True
 
     def has_object_permission(self, request, view, obj):
         # Staff can access everything
@@ -232,7 +318,14 @@ class IsUploadOwnerOrStaff(permissions.BasePermission, BasePermissionMixin):
 class IsAddressOwnerOrStaff(permissions.BasePermission, BasePermissionMixin):
     """
     Custom permission for address-related operations.
+    Requires email verification for non-staff users.
     """
+
+    def has_permission(self, request, view):
+        # Check email verification requirement first
+        if not self.requires_email_verification(request):
+            return False
+        return True
 
     def has_object_permission(self, request, view, obj):
         # Staff can access everything
@@ -243,9 +336,10 @@ class IsAddressOwnerOrStaff(permissions.BasePermission, BasePermissionMixin):
         return self.is_owner(request, obj)
 
 
-class RoleBasedPermission(permissions.BasePermission):
+class RoleBasedPermission(permissions.BasePermission, BasePermissionMixin):
     """
     Generic role-based permission class.
+    Requires email verification for non-staff users.
     """
 
     def __init__(self, allowed_roles=None, allow_staff=True):
@@ -254,6 +348,10 @@ class RoleBasedPermission(permissions.BasePermission):
 
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
+            return False
+
+        # Check email verification requirement first
+        if not self.requires_email_verification(request):
             return False
 
         # Staff can access if allowed
@@ -270,7 +368,14 @@ class IsOwnerOrJobOwnerOrStaff(permissions.BasePermission, BasePermissionMixin):
     Allows access to:
     - Job owner (through company)
     - Staff/Admin
+    Requires email verification for non-staff users.
     """
+
+    def has_permission(self, request, view):
+        # Check email verification requirement first
+        if not self.requires_email_verification(request):
+            return False
+        return True
 
     def has_object_permission(self, request, view, obj):
         # Staff can access everything
@@ -288,10 +393,15 @@ class IsOwnerOrJobOwnerOrStaff(permissions.BasePermission, BasePermissionMixin):
 class IsOwnerOrJobOwnerOrStaffForCreate(permissions.BasePermission, BasePermissionMixin):
     """
     Custom permission for creating job-skill associations.
+    Requires email verification for non-staff users.
     """
 
     def has_permission(self, request, view):
         if not request.user.is_authenticated:
+            return False
+
+        # Check email verification requirement first
+        if not self.requires_email_verification(request):
             return False
 
         # Staff can create anything
@@ -314,10 +424,70 @@ class IsOwnerOrJobOwnerOrStaffForCreate(permissions.BasePermission, BasePermissi
         return True
 
 
-class IsAccountActive(permissions.BasePermission):
+class IsAccountActive(permissions.BasePermission, BasePermissionMixin):
     """
     Custom permission for account active.
+    Requires user to be active (status=active) for non-staff users.
     """
 
     def has_permission(self, request, view):
-        return request.user.is_authenticated and request.user.is_active
+        if not request.user.is_authenticated:
+            return False
+
+        # Check email verification requirement first (now checks status)
+        if not self.requires_email_verification(request):
+            return False
+
+        return request.user.is_active
+
+
+class IsAuthenticatedNoEmailVerification(permissions.BasePermission):
+    """
+    Custom permission that only requires authentication, no email verification.
+    Used for login, logout, and email verification endpoints.
+    """
+
+    def has_permission(self, request, view):
+        return request.user.is_authenticated
+
+
+class AllowAnyNoEmailVerification(permissions.BasePermission):
+    """
+    Custom permission that allows any access, no authentication or email verification required.
+    Used for public endpoints like registration, email verification, etc.
+    """
+
+    def has_permission(self, request, view):
+        return True
+
+
+class IsAuthenticatedWithEmailVerification(permissions.BasePermission, BasePermissionMixin):
+    """
+    Custom permission that requires both authentication and email verification.
+    This is the default for most authenticated endpoints.
+    """
+
+    def has_permission(self, request, view):
+        if not request.user.is_authenticated:
+            return False
+
+        # Check email verification requirement
+        return self.requires_email_verification(request)
+
+
+class IsActiveUser(permissions.BasePermission, BasePermissionMixin):
+    """
+    Custom permission that requires user to be active (status=active).
+    This replaces the old email verification checks.
+    """
+
+    def has_permission(self, request, view):
+        if not request.user.is_authenticated:
+            return False
+
+        # Staff and superusers are exempt
+        if self.is_staff_or_superuser(request):
+            return True
+
+        # Check if user is active
+        return request.user.status == "active"

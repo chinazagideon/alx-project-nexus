@@ -9,7 +9,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 
 from core.mixins import StandardResponseMixin
 from core.pagination import DefaultPagination
-from core.permissions import IsAdminOnly, IsOwnerOrStaffForList
+from core.permissions_enhanced import IsAdminOnly, IsOwnerOrStaffForList
 from core.response import APIResponse, ErrorResponseSerializer, SuccessResponseSerializer, ValidationErrorResponseSerializer
 
 from .models.models import User
