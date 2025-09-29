@@ -112,35 +112,6 @@ class ApplicationsViewSet(viewsets.ModelViewSet):
             )
 
     @extend_schema(
-        operation_id="application_update",
-        summary="Update Application Status",
-        description="Update application status (admin/recruiter only)",
-        request=ApplicationUpdateSerializer,
-        responses={
-            200: ApplicationUpdateSerializer,
-            400: OpenApiTypes.OBJECT,
-        },
-    )
-    def update(self, request, *args, **kwargs):
-        """
-        Update application (admin/recruiter only)
-        """
-        instance = self.get_object()
-        serializer = self.get_serializer(instance, data=request.data, partial=kwargs.get("partial", False))
-
-        if serializer.is_valid():
-            application = serializer.save()
-            return APIResponse.success(
-                data=ApplicationUpdateSerializer(application).data,
-                message="Application updated successfully",
-                status_code=status.HTTP_200_OK,
-            )
-        else:
-            return APIResponse.error(
-                message="Failed to update application", errors=serializer.errors, status_code=status.HTTP_400_BAD_REQUEST
-            )
-
-    @extend_schema(
         operation_id="application_update_status",
         summary="Update Application Status",
         description="Update application status (recruiter/admin only). This endpoint allows recruiters and admins to update the status of job applications.",
