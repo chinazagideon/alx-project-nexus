@@ -26,7 +26,7 @@ class CompanySerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         )
-        read_only_fields = ("created_at", "updated_at", "status")
+        read_only_fields = ("created_at", "updated_at", "status", "user")
 
 
 class CompanyCreateSerializer(serializers.ModelSerializer):
