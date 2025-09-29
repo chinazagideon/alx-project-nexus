@@ -105,6 +105,14 @@ class UserSkillsDeleteSerializer(serializers.Serializer):
         return unique_ids
 
 
+class UserSkillsDeleteRequestSerializer(serializers.Serializer):
+    """
+    Request serializer specifically for delete endpoint documentation
+    """
+
+    skills = serializers.ListField(child=serializers.IntegerField(min_value=1), help_text="List of skill IDs to delete")
+
+
 class UserSkillsResponseSerializer(serializers.Serializer):
     """
     Response serializer for user skills operations
@@ -113,6 +121,17 @@ class UserSkillsResponseSerializer(serializers.Serializer):
     added = serializers.IntegerField(required=False, help_text="Number of skills added")
     removed = serializers.IntegerField(required=False, help_text="Number of skills removed")
     deleted = serializers.IntegerField(required=False, help_text="Number of skills deleted")
+
+
+class UserSkillsCreateResponseSerializer(serializers.Serializer):
+    """
+    Response serializer for user skills create operation (matches APIResponse format)
+    """
+
+    success = serializers.BooleanField(help_text="Indicates if the operation was successful")
+    message = serializers.CharField(help_text="Success or error message")
+    data = UserSkillsResponseSerializer(help_text="Response data containing operation results")
+    status_code = serializers.IntegerField(help_text="HTTP status code")
 
 
 class UserSkillsListResponseSerializer(serializers.Serializer):

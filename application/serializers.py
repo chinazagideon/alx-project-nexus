@@ -5,7 +5,7 @@ Application  Serializers
 from django.contrib.contenttypes.models import ContentType
 from rest_framework import serializers
 
-from application.models import Application
+from application.models import Application, ApplicationStatus
 from job.serializers import JobSerializer
 from upload.models import Upload, UploadType
 from upload.serializers import UploadSerializer
@@ -176,21 +176,56 @@ class ApplicationUpdateSerializer(serializers.ModelSerializer):
         model = Application
         fields = (
             "id",
-            "job",
             "job_details",
-            "user",
             "user_details",
             "status",
             "date_applied",
             "cover_letter",
             "updated_at",
-            "resume",
             "resume_details",
         )
-        read_only_fields = ("updated_at", "date_applied", "id", "job", "user", "resume")
+        read_only_fields = ("updated_at", "date_applied", "id")
 
     def get_resume_details(self, obj):
         """Get the resume details for the application"""
         if obj.resume:
             return UploadSerializer(obj.resume).data
         return None
+
+
+class ApplicationStatusUpdateSerializer(serializers.ModelSerializer):
+    """
+    Serializer specifically for updating application status (recruiter/admin use)
+    """
+
+    job_details = JobSerializer(source="job", read_only=True)
+    user_details = UserSerializer(source="user", read_only=True)
+    resume_details = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Application
+        fields = (
+            "id",
+            "job_details",
+            "user_details",
+            "status",
+            "date_applied",
+            "cover_letter",
+            "updated_at",
+            "resume_details",
+        )
+        read_only_fields = ("updated_at", "date_applied", "id", "cover_letter")
+
+    def get_resume_details(self, obj):
+        """Get the resume details for the application"""
+        if obj.resume:
+            return UploadSerializer(obj.resume).data
+        return None
+
+
+class ApplicationStatusUpdateRequestSerializer(serializers.Serializer):
+    """
+    Request serializer for updating application status
+    """
+
+    status = serializers.ChoiceField(choices=ApplicationStatus.choices, help_text="New status for the application")

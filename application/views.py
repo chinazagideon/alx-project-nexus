@@ -2,11 +2,18 @@ from django.shortcuts import render
 from drf_spectacular.types import OpenApiTypes
 from drf_spectacular.utils import extend_schema
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
-from application.models import Application
-from application.serializers import ApplicationCreateSerializer, ApplicationSerializer, ApplicationUpdateSerializer
+from application.models import Application, ApplicationStatus
+from application.serializers import (
+    ApplicationCreateSerializer,
+    ApplicationSerializer,
+    ApplicationStatusUpdateRequestSerializer,
+    ApplicationStatusUpdateSerializer,
+    ApplicationUpdateSerializer,
+)
 from core.permissions_enhanced import IsAccountActive
 from core.response import APIResponse
 
@@ -22,18 +29,16 @@ class ApplicationsViewSet(viewsets.ModelViewSet):
 
     def get_serializer_class(self):
         """
-        Return appropriate serializer based on action
-        Maintains backward compatibility by defaulting to ApplicationSerializer
-        Enhanced serializers are used only when explicitly needed
+        Get the appropriate serializer based on the action
         """
         # Check if enhanced resume handling is requested via query parameter
         use_enhanced = self.request.query_params.get("enhanced_resume", "false").lower() == "true"
 
         if self.action == "create" and use_enhanced:
             return ApplicationCreateSerializer
-        elif self.action in ["update", "partial_update"] and use_enhanced:
+        elif self.action in ["update", "partial_update"]:
             return ApplicationUpdateSerializer
-        return ApplicationSerializer  # Default for all actions - backward compatible
+        return ApplicationSerializer  # Default for all actions
 
     # hide the endpoints from docs
     @extend_schema(exclude=True)
@@ -66,7 +71,6 @@ class ApplicationsViewSet(viewsets.ModelViewSet):
     def create(self, request, *args, **kwargs):
         """
         Create a new job application
-        Backward compatible - enhanced resume handling is optional
         """
 
         serializer = self.get_serializer(data=request.data)
@@ -88,7 +92,7 @@ class ApplicationsViewSet(viewsets.ModelViewSet):
 
             application = serializer.save()
 
-            # Enhanced response for resume attachment (backward compatible)
+            # Enhanced response for resume attachment
             use_enhanced = request.query_params.get("enhanced_resume", "false").lower() == "true"
             if use_enhanced:
                 resume_attached = application.resume is not None
@@ -134,6 +138,76 @@ class ApplicationsViewSet(viewsets.ModelViewSet):
         else:
             return APIResponse.error(
                 message="Failed to update application", errors=serializer.errors, status_code=status.HTTP_400_BAD_REQUEST
+            )
+
+    @extend_schema(
+        operation_id="application_update_status",
+        summary="Update Application Status",
+        description="Update application status (recruiter/admin only). This endpoint allows recruiters and admins to update the status of job applications.",
+        request=ApplicationStatusUpdateRequestSerializer,
+        responses={
+            200: ApplicationStatusUpdateSerializer,
+            400: OpenApiTypes.OBJECT,
+            403: OpenApiTypes.OBJECT,
+            404: OpenApiTypes.OBJECT,
+        },
+    )
+    @action(detail=True, methods=["patch"], url_path="status")
+    def update_status(self, request, pk=None):
+        """
+        Update application status (recruiter/admin only)
+        """
+        try:
+            application = self.get_object()
+
+            # Check if user has permission to update this application
+            user = request.user
+            if user.role == "recruiter":
+                # Recruiters can only update applications for their company's jobs
+                if application.job.company.user != user:
+                    return APIResponse.error(
+                        message="You don't have permission to update this application", status_code=status.HTTP_403_FORBIDDEN
+                    )
+            elif user.role not in ["admin", "recruiter"]:
+                return APIResponse.error(
+                    message="Only recruiters and admins can update application status", status_code=status.HTTP_403_FORBIDDEN
+                )
+
+            # Validate status
+            new_status = request.data.get("status")
+            if not new_status:
+                return APIResponse.error(
+                    message="Status is required",
+                    errors={"status": ["This field is required."]},
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Validate status choice
+            valid_statuses = [choice[0] for choice in ApplicationStatus.choices]
+            if new_status not in valid_statuses:
+                return APIResponse.error(
+                    message="Invalid status",
+                    errors={"status": [f"Must be one of: {', '.join(valid_statuses)}"]},
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                )
+
+            # Update the application status
+            application.status = new_status
+            application.save()
+
+            # Return updated application data
+            serializer = ApplicationStatusUpdateSerializer(application)
+            return APIResponse.success(
+                data=serializer.data, message=f"Application status updated to {new_status}", status_code=status.HTTP_200_OK
+            )
+
+        except Application.DoesNotExist:
+            return APIResponse.error(message="Application not found", status_code=status.HTTP_404_NOT_FOUND)
+        except Exception as e:
+            return APIResponse.error(
+                message="Failed to update application status",
+                errors={"detail": [str(e)]},
+                status_code=status.HTTP_400_BAD_REQUEST,
             )
 
     def get_queryset(self):

@@ -31,6 +31,8 @@ from .serializers import (
     JobSkillSerializer,
     SkillSerializer,
     UserSkillProfileSerializer,
+    UserSkillsCreateResponseSerializer,
+    UserSkillsDeleteRequestSerializer,
     UserSkillsDeleteSerializer,
     UserSkillSerializer,
     UserSkillsListResponseSerializer,
@@ -282,6 +284,14 @@ class UserSkillViewSet(viewsets.ModelViewSet):
             return UserSkill.objects.all()
         return UserSkill.objects.filter(user=self.request.user)
 
+    def get_serializer_class(self):
+        """
+        Return the appropriate serializer class based on the action
+        """
+        if self.action == "delete_skills":
+            return UserSkillsDeleteRequestSerializer
+        return super().get_serializer_class()
+
     @extend_schema(
         operation_id="user_skills_list",
         summary="List current user's skills",
@@ -304,23 +314,33 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         )
 
     @extend_schema(
-        operation_id="user_skills_add",
-        summary="Add skills to current user",
-        description="Adds provided skills to the current user (no removal).",
+        operation_id="user_skills_create",
+        summary="Create skills for current user",
+        description="Creates new skill associations for the current user. Only adds skills that don't already exist.",
         tags=[SkillApiEnum.user_skill_tag.value],
         request=UserSkillsUpdateSerializer,
-        responses={200: UserSkillsResponseSerializer, 400: OpenApiTypes.OBJECT},
+        responses={200: UserSkillsCreateResponseSerializer, 400: OpenApiTypes.OBJECT},
         examples=[
             OpenApiExample(
-                "Add skills example",
+                "Create skills example",
                 value={"skills": [1, 2, 3]},
                 request_only=True,
+            ),
+            OpenApiExample(
+                "Create skills response example",
+                value={
+                    "success": True,
+                    "message": "User skills created successfully",
+                    "data": {"added": 3},
+                    "status_code": 200,
+                },
+                response_only=True,
             ),
         ],
     )
     def create(self, request, *args, **kwargs):
         """
-        Add skills to current user
+        Create skills for current user
         """
         ser = UserSkillsUpdateSerializer(data=request.data)
         ser.is_valid(raise_exception=True)
@@ -331,7 +351,7 @@ class UserSkillViewSet(viewsets.ModelViewSet):
         to_create = [sid for sid in skills if sid not in existing]
         UserSkill.objects.bulk_create([UserSkill(user=request.user, skill_id=sid) for sid in to_create], ignore_conflicts=True)
         created = len(to_create)
-        return APIResponse.success(data={"added": created}, message="User skills added successfully")
+        return APIResponse.success(data={"added": created}, message="User skills created successfully")
 
     @extend_schema(
         operation_id="user_skills_replace",
@@ -370,11 +390,11 @@ class UserSkillViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["post"], url_path="delete")
     @extend_schema(
-        operation_id="user_skills_delete",
+        operation_id="user_skills_deleteify",
         summary="Delete skills from current user",
         description="Deletes the provided skills from the current user.",
         tags=[SkillApiEnum.user_skill_tag.value],
-        request=UserSkillsDeleteSerializer,
+        request=UserSkillsDeleteRequestSerializer,
         responses={200: UserSkillsResponseSerializer, 400: OpenApiTypes.OBJECT},
         examples=[
             OpenApiExample(

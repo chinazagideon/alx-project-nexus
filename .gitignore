@@ -4,3 +4,6 @@ __pycache__
 .DS_Store
 *.sqlite3
 .env.prod
+
+*/__pycache__
+schema_*.yaml
