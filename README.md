@@ -13,8 +13,7 @@
 - **Company Profiles:** Detailed company management with promotion capabilities and job posting rights
 
 ### Advanced Features
-- **AI-Powered Skill Matching:** Sophisticated algorithm that analyzes user skills against job requirements with compatibility scoring
-- **Personalized Job Recommendations:** Machine learning-driven suggestions based on user profiles, skills, and interaction history
+- **Skill Matching:** Sophisticated algorithm that analyzes user skills against job requirements with compatibility scoring
 - **Real-Time Notifications:** Multi-channel notification system (in-app, email, push) with user preference management
 - **Dynamic Activity Feed:** Personalized feed showing relevant job postings, company updates, and promotional content
 - **File Upload System:** Secure file handling for resumes, cover letters, certificates, and profile images with validation
