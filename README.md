@@ -1,4 +1,4 @@
-# Project Nexus: Advanced Job Portal Backend ConnectHire
+#ConnectHire
 
 ## Overview
 
