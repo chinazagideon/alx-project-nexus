@@ -2,7 +2,7 @@
 
 ## Overview
 
-**Connect Hire** is a sophisticated, enterprise-grade job portal backend that revolutionizes career development through intelligent matching, real-time features, and comprehensive user management. Built with modern Django architecture, this platform goes beyond traditional job boards by providing efficient skill matching, personalized recommendations, and seamless user experiences for both job seekers and recruiters.
+**Connect Hire** backend that revolutionizes career development through intelligent matching, real-time features, and comprehensive user management. Built with modern Django architecture, this platform goes beyond traditional job boards by providing efficient skill matching, personalized recommendations, and seamless user experiences for both job seekers and recruiters.
 
 ## Key Features
 
